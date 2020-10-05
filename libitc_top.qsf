@@ -1,0 +1,152 @@
+# -------------------------------------------------------------------------- #
+#
+# Copyright (C) 1991-2014 Altera Corporation
+# Your use of Altera Corporation's design tools, logic functions 
+# and other software and tools, and its AMPP partner logic 
+# functions, and any output files from any of the foregoing 
+# (including device programming or simulation files), and any 
+# associated documentation or information are expressly subject 
+# to the terms and conditions of the Altera Program License 
+# Subscription Agreement, Altera MegaCore Function License 
+# Agreement, or other applicable license agreement, including, 
+# without limitation, that your use is for the sole purpose of 
+# programming logic devices manufactured by Altera and sold by 
+# Altera or its authorized distributors.  Please refer to the 
+# applicable agreement for further details.
+#
+# -------------------------------------------------------------------------- #
+#
+# Quartus II 64-Bit
+# Version 13.1.4 Build 182 03/12/2014 SJ Web Edition
+# Date created = 11:04:35  September 12, 2020
+#
+# -------------------------------------------------------------------------- #
+#
+# Notes:
+#
+# 1) The default values for assignments are stored in the file:
+#		libitc_top_assignment_defaults.qdf
+#    If this file doesn't exist, see file:
+#		assignment_defaults.qdf
+#
+# 2) Altera recommends that you do not modify this file. This
+#    file is updated automatically by the Quartus II software
+#    and any changes you make may be lost or overwritten.
+#
+# -------------------------------------------------------------------------- #
+
+
+set_global_assignment -name FAMILY "Cyclone III"
+set_global_assignment -name DEVICE EP3C16Q240C8
+set_global_assignment -name TOP_LEVEL_ENTITY dot_test
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION 13.1
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "11:04:35  SEPTEMBER 12, 2020"
+set_global_assignment -name LAST_QUARTUS_VERSION 13.1
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name ERROR_CHECK_FREQUENCY_DIVISOR 1
+set_global_assignment -name EDA_SIMULATION_TOOL "ModelSim-Altera (Verilog)"
+set_global_assignment -name EDA_OUTPUT_DATA_FORMAT "VERILOG HDL" -section_id eda_simulation
+set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
+set_global_assignment -name VHDL_SHOW_LMF_MAPPING_MESSAGES OFF
+set_global_assignment -name SEARCH_PATH src\\util
+set_global_assignment -name SEARCH_PATH src
+set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "2.5 V"
+set_global_assignment -name ENABLE_CONFIGURATION_PINS OFF
+set_global_assignment -name ENABLE_NCE_PIN OFF
+set_global_assignment -name ENABLE_BOOT_SEL_PIN OFF
+set_global_assignment -name USE_CONFIGURATION_DEVICE OFF
+set_global_assignment -name CRC_ERROR_OPEN_DRAIN OFF
+set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -rise
+set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -fall
+set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -rise
+set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -fall
+set_location_assignment PIN_149 -to sys_clk
+set_location_assignment PIN_231 -to seg_1[7]
+set_location_assignment PIN_233 -to seg_1[6]
+set_location_assignment PIN_235 -to seg_1[5]
+set_location_assignment PIN_237 -to seg_1[4]
+set_location_assignment PIN_239 -to seg_1[3]
+set_location_assignment PIN_4 -to seg_1[2]
+set_location_assignment PIN_6 -to seg_1[1]
+set_location_assignment PIN_13 -to seg_1[0]
+set_location_assignment PIN_232 -to seg_2[7]
+set_location_assignment PIN_234 -to seg_2[6]
+set_location_assignment PIN_236 -to seg_2[5]
+set_location_assignment PIN_238 -to seg_2[4]
+set_location_assignment PIN_240 -to seg_2[3]
+set_location_assignment PIN_5 -to seg_2[2]
+set_location_assignment PIN_9 -to seg_2[1]
+set_location_assignment PIN_18 -to seg_2[0]
+set_location_assignment PIN_20 -to seg_s[7]
+set_location_assignment PIN_22 -to seg_s[6]
+set_location_assignment PIN_38 -to seg_s[5]
+set_location_assignment PIN_41 -to seg_s[4]
+set_location_assignment PIN_19 -to seg_s[3]
+set_location_assignment PIN_21 -to seg_s[2]
+set_location_assignment PIN_37 -to seg_s[1]
+set_location_assignment PIN_39 -to seg_s[0]
+set_location_assignment PIN_145 -to sys_rst
+set_global_assignment -name OPTIMIZE_HOLD_TIMING "ALL PATHS"
+set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING ON
+set_global_assignment -name FITTER_EFFORT "FAST FIT"
+set_global_assignment -name EDA_NETLIST_WRITER_OUTPUT_DIR "C:/Users/Cheng/Nextcloud/itc/libitc/simulation/qsim/" -section_id eda_simulation
+set_global_assignment -name EDA_GENERATE_FUNCTIONAL_NETLIST ON -section_id eda_simulation
+set_location_assignment PIN_43 -to key_col[3]
+set_location_assignment PIN_45 -to key_col[2]
+set_location_assignment PIN_49 -to key_col[1]
+set_location_assignment PIN_51 -to key_col[0]
+set_location_assignment PIN_55 -to key_row[3]
+set_location_assignment PIN_57 -to key_row[2]
+set_location_assignment PIN_64 -to key_row[1]
+set_location_assignment PIN_68 -to key_row[0]
+set_location_assignment PIN_70 -to dbg_key_int
+set_location_assignment PIN_72 -to dbg_clk_1k
+set_global_assignment -name VHDL_FILE tests/dot_test.vhd
+set_global_assignment -name VHDL_FILE tests/key_seg_test.vhd
+set_global_assignment -name VHDL_FILE tests/pwm_test.vhd
+set_global_assignment -name VHDL_FILE tests/bcd_seg_test.vhd
+set_global_assignment -name VHDL_FILE src/util/pwm.vhd
+set_global_assignment -name VHDL_FILE src/util/bcd.vhd
+set_global_assignment -name VHDL_FILE src/dot.vhd
+set_global_assignment -name VHDL_FILE src/seg.vhd
+set_global_assignment -name VHDL_FILE src/key.vhd
+set_global_assignment -name VHDL_FILE src/clk.vhd
+set_global_assignment -name VECTOR_WAVEFORM_FILE simulation/bcd_seg_test.vwf
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_location_assignment PIN_99 -to dot_g[7]
+set_location_assignment PIN_107 -to dot_g[6]
+set_location_assignment PIN_113 -to dot_g[5]
+set_location_assignment PIN_126 -to dot_g[4]
+set_location_assignment PIN_120 -to dot_g[3]
+set_location_assignment PIN_112 -to dot_g[2]
+set_location_assignment PIN_106 -to dot_g[1]
+set_location_assignment PIN_98 -to dot_g[0]
+set_location_assignment PIN_101 -to dot_r[7]
+set_location_assignment PIN_109 -to dot_r[6]
+set_location_assignment PIN_117 -to dot_r[5]
+set_location_assignment PIN_128 -to dot_r[4]
+set_location_assignment PIN_127 -to dot_r[3]
+set_location_assignment PIN_114 -to dot_r[2]
+set_location_assignment PIN_108 -to dot_r[1]
+set_location_assignment PIN_100 -to dot_r[0]
+set_location_assignment PIN_95 -to dot_s[7]
+set_location_assignment PIN_103 -to dot_s[6]
+set_location_assignment PIN_111 -to dot_s[5]
+set_location_assignment PIN_119 -to dot_s[4]
+set_location_assignment PIN_118 -to dot_s[3]
+set_location_assignment PIN_110 -to dot_s[2]
+set_location_assignment PIN_102 -to dot_s[1]
+set_location_assignment PIN_94 -to dot_s[0]
+set_location_assignment PIN_69 -to sw[7]
+set_location_assignment PIN_65 -to sw[6]
+set_location_assignment PIN_63 -to sw[5]
+set_location_assignment PIN_56 -to sw[4]
+set_location_assignment PIN_52 -to sw[3]
+set_location_assignment PIN_50 -to sw[2]
+set_location_assignment PIN_46 -to sw[1]
+set_location_assignment PIN_44 -to sw[0]
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

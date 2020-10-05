@@ -1,0 +1,4 @@
+Libraries:
+  - name: work
+    paths:
+      - ./**/*.vhd
