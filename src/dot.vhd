@@ -4,6 +4,10 @@ use ieee.numeric_std.all;
 
 package dot_p is
 	type dot_data_t is array (0 to 7) of unsigned(0 to 7);
+	type dot_anim_t is array(integer range <>) of dot_data_t;
+
+	constant dot_zeros : dot_data_t := (others => (others => '0'));
+	constant dot_ones : dot_data_t := (others => (others => '1'));
 
 	component dot
 

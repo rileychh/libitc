@@ -3,6 +3,9 @@
 ## v2
 
 * Add enable pins to `dot` and `seg` drivers
+* Some new features for `dot`
+  * `dot_zeros` and `dot_ones` constants which are just `dot_data_t` type with full of '0's and '1's
+  * `dot_anim_t` type: array of `dot_data_t` dor creating animations
 
 ## v1
 
