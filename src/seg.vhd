@@ -22,6 +22,7 @@ package seg_p is
 			seg_1, seg_2, seg_s : out unsigned(7 downto 0); -- abcdefgp * 2, seg2_s1 ~ seg1_s4
 			-- internal
 			seg_clk  : in std_logic; -- 1kHz
+			seg_ena  : in std_logic; -- '1' active, '0' blanks all leds
 			seg_data : in seg_data_t
 		);
 	end component;
@@ -39,6 +40,7 @@ entity seg is
 		seg_1, seg_2, seg_s : out unsigned(7 downto 0); -- abcdefgp * 2, seg2_s1 ~ seg1_s4
 		-- internal
 		seg_clk  : in std_logic; -- 1kHz
+		seg_ena  : in std_logic; -- '1' active, '0' blanks all leds
 		seg_data : in seg_data_t
 	);
 end seg;
@@ -66,7 +68,7 @@ architecture arch of seg is
 	);
 
 	signal scan_cnt : integer range 0 to 7; -- segment scan count, for shifting seg_s
-	signal led      : unsigned(7 downto 0); -- splits into seg_1 and seg_2
+	signal led : unsigned(7 downto 0); -- splits into seg_1 and seg_2
 
 begin
 
@@ -77,9 +79,9 @@ begin
 
 	begin
 
-		if rising_edge(seg_clk) then
-			seg_s    <= "01111111" ror scan_cnt;     -- rotates '0' because common cathode
-			led      <= seg_lut(seg_data(scan_cnt)); -- get the digit, then filter though LUT
+		if rising_edge(seg_clk) and seg_ena = '1' then
+			seg_s <= "01111111" ror scan_cnt; -- rotates '0' because common cathode
+			led <= seg_lut(seg_data(scan_cnt)); -- get the digit, then filter though LUT
 			scan_cnt <= scan_cnt + 1;
 		end if;
 

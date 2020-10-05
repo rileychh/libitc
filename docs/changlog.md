@@ -2,6 +2,8 @@
 
 ## v2
 
+* Add enable pins to `dot` and `seg` drivers
+
 ## v1
 
 ### seg_v2
