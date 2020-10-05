@@ -1,6 +1,6 @@
 # Progress of Making
 
-| package / component | written | compiles | tested |
+| package / component | written | compiled | tested |
 | ------------------- | ------- | -------- | ------ |
 | clk                 | Y       | Y        | Y      |
 | key                 | Y       | Y        | Fail   |

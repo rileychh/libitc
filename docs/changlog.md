@@ -1,8 +1,10 @@
 # Changelog
 
-## seg
+## v2
 
-### v2
+## v1
+
+### seg_v2
 
 * Add more glyphs to the `seg_lut`
 * Increased `seg_data_t` range
