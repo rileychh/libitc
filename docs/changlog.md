@@ -6,6 +6,7 @@
 * Some new features for `dot`
   * `dot_zeros` and `dot_ones` constants which are just `dot_data_t` type with full of '0's and '1's
   * `dot_anim_t` type: array of `dot_data_t` dor creating animations
+* Fixed `seg_data_t` type to `integer range 0 to seg_lut_len - 1`
 
 ## v1
 

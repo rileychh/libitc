@@ -14,7 +14,7 @@ package seg_p is
 	constant seg_lb : integer := 35; -- [
 	constant seg_rb : integer := 36; -- ]
 
-	type seg_data_t is array(0 to 7) of integer range 0 to 15;
+	type seg_data_t is array(0 to 7) of integer range 0 to seg_lut_len - 1;
 
 	component seg
 		port (
