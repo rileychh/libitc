@@ -21,14 +21,14 @@ end dot_test;
 architecture arch of dot_test is
 
 	constant zeros : dot_data_t := (others => (others => '0'));
-	constant ones  : dot_data_t := (others => (others => '1'));
+	constant ones : dot_data_t := (others => (others => '1'));
 	-- test buffer for dot
 	constant test_buf_r : dot_data_t := ("01111111", "11111111", "11111111", "11111111", "00011000", "00011000", "00000000", "00000001");
 	constant test_buf_g : dot_data_t := ("10000000", "00000000", "00011000", "00011000", "11111111", "11111111", "11111111", "11111110");
 
-	signal clk_1k                 : std_logic;
+	signal clk_1k : std_logic;
 	signal dot_data_r, dot_data_g : dot_data_t;
-	signal frame_cnt              : integer range 0 to 3;
+	signal frame_cnt : integer range 0 to 3;
 
 begin
 
@@ -48,6 +48,7 @@ begin
 			dot_g      => dot_g,
 			dot_s      => dot_s,
 			dot_clk    => clk_1k,
+			dot_ena    => '1',
 			dot_data_r => dot_data_r,
 			dot_data_g => dot_data_g
 		);

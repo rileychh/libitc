@@ -25,10 +25,10 @@ end key_seg_test;
 
 architecture arch of key_seg_test is
 
-	signal clk_1k      : std_logic;
-	signal key_int     : std_logic;
+	signal clk_1k : std_logic;
+	signal key_int : std_logic;
 	signal key_pressed : integer range 0 to 15;
-	signal in_buf      : seg_data_t := (others => 0); -- keyboard input buffer (stores text)
+	signal in_buf : seg_data_t := (others => 0); -- keyboard input buffer (stores text)
 
 begin
 
@@ -51,6 +51,7 @@ begin
 			seg_2    => seg_2,
 			seg_s    => seg_s,
 			seg_clk  => clk_1k,
+			seg_ena  => '1',
 			seg_data => in_buf
 		);
 

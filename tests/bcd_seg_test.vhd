@@ -58,11 +58,12 @@ begin
 			sys_rst => sys_rst,
 			clk_in  => clk_1k,
 			clk_out => clk_100
-		);
+		); -- compatible
 
 	seg_inst : entity work.seg(arch)
 		port map(
 			seg_clk  => clk_10k,
+			seg_ena  => '1',
 			seg_1    => seg_1,
 			seg_2    => seg_2,
 			seg_s    => seg_s,
