@@ -57,9 +57,7 @@ architecture arch of dbnce is
 
 begin
 
-	process (dbnce_clk)
-
-	begin
+	process (dbnce_clk) begin
 
 		if rising_edge(dbnce_clk) then
 			if dbnce_in = '1' then
@@ -110,10 +108,7 @@ begin
 	dbnce_inst : dbnce generic map(40) port map(key_clk, int, key_int);
 	-- key_int <= int;
 
-	process (key_clk)
-
-	begin
-
+	process (key_clk) begin 
 		if rising_edge(key_clk) then
 			if key_row = "1111" then -- if nothing is pressed
 				-- cycle '0' between columns
@@ -137,8 +132,7 @@ begin
 			end case;
 
 			col_cnt <= col_cnt + 1;
-		end if;
-
+		end if; 
 	end process;
 
 end arch;

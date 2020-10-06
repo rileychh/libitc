@@ -52,10 +52,7 @@ architecture arch of pwm is
 
 begin
 
-	process (sys_clk)
-
-	begin
-
+	process (sys_clk) begin 
 		if rising_edge(sys_clk) then                     -- rising system clock edge
 			half_duty <= pwm_duty * period / (duty_res - 1); -- determine clocks in 1/2 duty cycle
 
@@ -68,8 +65,7 @@ begin
 				pwm_out <= '1';                     -- assert the pwm output
 			end if;
 
-		end if;
-
+		end if; 
 	end process;
 
 end arch;

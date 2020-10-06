@@ -48,17 +48,13 @@ architecture arch of dot is
 
 begin
 
-	process (dot_clk)
-
-	begin
-
+	process (dot_clk) begin 
 		if rising_edge(dot_clk) and dot_ena = '1' then
 			dot_s <= "01111111" ror scan_cnt; -- rotates '0' because common cathode
 			dot_r <= dot_data_r(scan_cnt);
 			dot_g <= dot_data_g(scan_cnt);
 			scan_cnt <= scan_cnt + 1;
-		end if;
-
+		end if; 
 	end process;
 
 end arch;
