@@ -1,6 +1,6 @@
 # libitc
 
-VHDL library for 108th and 109th ITC hardware. Current version is v2.
+VHDL library for 108th and 109th ITC hardware. Current version is v3.
 
 ## Supported hardwares
 
