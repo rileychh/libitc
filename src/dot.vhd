@@ -15,9 +15,9 @@ package dot_p is
 			-- dot
 			dot_r, dot_g, dot_s : out unsigned(0 to 7);
 			-- internal
-			dot_clk                : in std_logic; -- 1kHz
-			dot_ena                : in std_logic; -- '1' active, '0' blanks all leds
-			dot_data_r, dot_data_g : in dot_data_t
+			clk            : in std_logic; -- 1kHz
+			ena            : in std_logic; -- high active, low blanks all LEDs
+			data_r, data_g : in dot_data_t
 		);
 
 	end component;
@@ -35,9 +35,9 @@ entity dot is
 		-- dot
 		dot_r, dot_g, dot_s : out unsigned(0 to 7);
 		-- internal
-		dot_clk                : in std_logic; -- 1kHz
-		dot_ena                : in std_logic; -- '1' active, '0' blanks all leds
-		dot_data_r, dot_data_g : in dot_data_t
+		clk            : in std_logic; -- 1kHz
+		ena            : in std_logic; -- '1' active, '0' blanks all leds
+		data_r, data_g : in dot_data_t
 	);
 
 end dot;
@@ -48,13 +48,13 @@ architecture arch of dot is
 
 begin
 
-	process (dot_clk) begin 
-		if rising_edge(dot_clk) and dot_ena = '1' then
+	process (clk) begin
+		if rising_edge(clk) and ena = '1' then
 			dot_s <= "01111111" ror scan_cnt; -- rotates '0' because common cathode
-			dot_r <= dot_data_r(scan_cnt);
-			dot_g <= dot_data_g(scan_cnt);
+			dot_r <= data_r(scan_cnt);
+			dot_g <= data_g(scan_cnt);
 			scan_cnt <= scan_cnt + 1;
-		end if; 
+		end if;
 	end process;
 
 end arch;

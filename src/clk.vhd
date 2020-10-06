@@ -108,7 +108,7 @@ architecture arch of clk_div is
 
 begin
 
-	process (sys_rst, clk_in) begin 
+	process (sys_rst, clk_in) begin
 		if sys_rst = '0' then
 			cnt <= 0;
 		elsif rising_edge(clk_in) then
@@ -117,7 +117,7 @@ begin
 			end if;
 
 			cnt <= cnt + 1;
-		end if; 
+		end if;
 	end process;
 
 end arch;

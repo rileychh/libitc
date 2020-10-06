@@ -10,27 +10,26 @@ use work.clk_p.all;
 
 entity i2c is
 	port (
-		-- system
-		sys_rst : in std_logic;
 		-- internal
-		i2c_clk  : in std_logic; -- 400kHz
-		i2c_addr : in unsigned(6 downto 0); -- slave address
-		i2c_rw   : in std_logic; -- high read, low write
-		i2c_data_tx : in unsigned(7 downto 0); -- byte to write to slave
-		i2c_data_rx : out unsigned(7 downto 0); -- byte read from slave
-		i2c_busy : out std_logic; -- if high; addr, rw and data_tx will be ignored
+		clk     : in std_logic;             -- 400kHz
+		rst     : in std_logic;             -- low active
+		addr    : in unsigned(6 downto 0);  -- slave address
+		rw      : in std_logic;             -- high read, low write
+		data_tx : in unsigned(7 downto 0);  -- byte to write to slave
+		data_rx : out unsigned(7 downto 0); -- byte read from slave
+		busy    : out std_logic;            -- if high; addr, rw and data_tx will be ignored
 		-- I2C slave
 		scl : out std_logic;
 		sda : inout std_logic
 	);
 end i2c;
 
-architecture arch of i2c is 
+architecture arch of i2c is
 
 begin
 
 	-- main state machine
-	process (i2c_clk, sys_rst)
+	process (clk, rst)
 
 		type state_t is (idle, start, addr, rw, ack1, data, ack2, stop);
 		variable state : state_t;
@@ -39,10 +38,10 @@ begin
 
 	begin
 
-		if sys_rst = '0' then
+		if rst = '0' then
 			scl <= '1';
 			state <= idle;
-		elsif rising_edge(i2c_clk) then
+		elsif rising_edge(clk) then
 			case state is
 				when idle =>
 					sda <= '1';
@@ -52,21 +51,21 @@ begin
 					cnt := 6; -- prepare cnt for address state
 					state <= addr;
 				when addr => -- send 7-bit address, MSB first 
-					sda <= i2c_addr(cnt);
+					sda <= addr(cnt);
 					if cnt = 0 then
 						state <= rw;
 					else
 						cnt := cnt - 1;
 					end if;
 				when rw => -- send read / write bit
-					sda <= i2c_rw;
+					sda <= rw;
 					state <= ack1;
 				when ack1 => -- receive acknowledgment bit
 					-- TODO handle no acknowledgment, currently ignored
 					cnt := 7 -- prepare cnt for data state	
 						state <= data;
 				when data =>
-					sda <= i2c_data(cnt);
+					sda <= data(cnt);
 					if cnt = 0 then
 						state <= ack2;
 					else

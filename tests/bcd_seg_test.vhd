@@ -24,9 +24,9 @@ end bcd_seg_test;
 architecture arch of bcd_seg_test is
 
 	signal clk_100, clk_1k, clk_10k, clk_cnt : std_logic;
-	signal cnt                              : integer range 0 to 99_999_999 := 0;
-	signal cnt_bcd                          : unsigned(31 downto 0);
-	signal seg_data                         : seg_data_t;
+	signal cnt : integer range 0 to 99_999_999 := 0;
+	signal cnt_bcd : unsigned(31 downto 0);
+	signal seg_data : seg_data_t;
 
 begin
 
@@ -62,18 +62,18 @@ begin
 
 	seg_inst : entity work.seg(arch)
 		port map(
-			seg_clk  => clk_10k,
-			seg_ena  => '1',
+			clk  => clk_10k,
+			ena  => '1',
 			seg_1    => seg_1,
 			seg_2    => seg_2,
 			seg_s    => seg_s,
-			seg_data => seg_data
+			data => seg_data
 		);
 
-	bin_to_bcd_inst : entity work.bin_to_bcd(arch)
+	to_bcd_inst : entity work.to_bcd(arch)
 		generic map(
 			bin_width  => 27,
-			digits_len => 8
+			digit_len => 8
 		)
 		port map(
 			bin => to_unsigned(cnt, 27),

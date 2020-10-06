@@ -20,7 +20,7 @@ end pwm_test;
 
 architecture arch of pwm_test is
 
-	signal clk      : std_logic;
+	signal clk : std_logic;
 	signal duty_cnt : integer range 0 to 99;
 
 begin

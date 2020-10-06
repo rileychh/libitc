@@ -47,10 +47,10 @@ begin
 			dot_r      => dot_r,
 			dot_g      => dot_g,
 			dot_s      => dot_s,
-			dot_clk    => clk_1k,
-			dot_ena    => '1',
-			dot_data_r => dot_data_r,
-			dot_data_g => dot_data_g
+			clk    => clk_1k,
+			ena    => '1',
+			data_r => dot_data_r,
+			data_g => dot_data_g
 		);
 
 	dot_data_r <= test_buf_r;

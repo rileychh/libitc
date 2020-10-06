@@ -50,18 +50,18 @@ begin
 			seg_1    => seg_1,
 			seg_2    => seg_2,
 			seg_s    => seg_s,
-			seg_clk  => clk_1k,
-			seg_ena  => '1',
-			seg_data => in_buf
+			clk  => clk_1k,
+			ena  => '1',
+			data => in_buf
 		);
 
 	key_inst : entity work.key(arch)
 		port map(
 			key_col     => key_col,
 			key_row     => key_row,
-			key_clk     => clk_1k,
-			key_int     => key_int,
-			key_pressed => key_pressed
+			clk     => clk_1k,
+			int     => key_int,
+			pressed => key_pressed
 		);
 
 	process (sys_rst, key_int)
