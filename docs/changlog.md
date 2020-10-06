@@ -8,6 +8,7 @@
   * `dot_anim_t` type: array of `dot_data_t` dor creating animations
 * Fixed `seg_data_t` type to `integer range 0 to seg_lut_len - 1`
 * Fixed `clk_sys` component "divide by zero error"
+* Update documentations
 
 ## v1
 
