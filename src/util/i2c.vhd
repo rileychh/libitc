@@ -10,6 +10,9 @@ use work.clk_p.all;
 
 entity i2c is
 	port (
+		-- I2C slave
+		scl : out std_logic;
+		sda : inout std_logic;
 		-- internal
 		clk     : in std_logic;             -- 400kHz
 		rst     : in std_logic;             -- low active
@@ -17,18 +20,33 @@ entity i2c is
 		rw      : in std_logic;             -- high read, low write
 		data_tx : in unsigned(7 downto 0);  -- byte to write to slave
 		data_rx : out unsigned(7 downto 0); -- byte read from slave
-		busy    : out std_logic;            -- if high; addr, rw and data_tx will be ignored
-		-- I2C slave
-		scl : out std_logic;
-		sda : inout std_logic
+		busy    : out std_logic             -- if high; addr, rw and data_tx will be ignored
 	);
 end i2c;
 
 architecture arch of i2c is
 
+	signal scl_ena : std_logic;
+
 begin
 
-	-- main state machine
+	-- SCL control
+	-- falling edge and inverting the clock is used to make scl and sda out of
+	-- phase, thus complying to I2C protocol
+	process (clk, rst) begin
+		if rst = '0' then
+			scl_ena <= '0';
+		elsif falling_edge(clk) then
+			case state is
+				when idle | start | stop => scl_ena <= '0';
+				when others => scl_ena <= '1';
+			end case;
+		end if;
+	end process;
+
+	scl <= not clk when scl_ena = '1' else '1';
+
+	-- SDA and state control (main state machine)
 	process (clk, rst)
 
 		type state_t is (idle, start, addr, rw, ack1, data, ack2, stop);
@@ -39,7 +57,6 @@ begin
 	begin
 
 		if rst = '0' then
-			scl <= '1';
 			state <= idle;
 		elsif rising_edge(clk) then
 			case state is
@@ -48,9 +65,10 @@ begin
 					state <= start;
 				when start =>
 					sda <= '0'; -- scl = '1' and falling_edge(sda) == start
-					cnt := 6; -- prepare cnt for address state
 					state <= addr;
-				when addr => -- send 7-bit address, MSB first 
+					busy <= '1';
+					cnt := 6; -- prepare cnt for address state
+				when addr => -- send 7-bit address, MSB first
 					sda <= addr(cnt);
 					if cnt = 0 then
 						state <= rw;
@@ -62,8 +80,8 @@ begin
 					state <= ack1;
 				when ack1 => -- receive acknowledgment bit
 					-- TODO handle no acknowledgment, currently ignored
-					cnt := 7 -- prepare cnt for data state	
-						state <= data;
+					state <= data;
+					cnt := 7; -- prepare cnt for data state	
 				when data =>
 					sda <= data(cnt);
 					if cnt = 0 then
