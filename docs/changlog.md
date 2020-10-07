@@ -1,8 +1,10 @@
 # Changelog
 
+No version is backwards compatible!
+
 ## v3
 
-
+* Simplified port names
 
 ## v2
 
