@@ -4,7 +4,7 @@ VHDL library for 108th and 109th ITC hardware. Current version is v3 (under deve
 
 ## Supported hardwares
 
-Under `/src`, every hardware have its own `.vhd` file, consists of one package, which can have one or more constants and components.
+Under `src/`, every hardware have its own `.vhd` file, consists of one package, which can have one or more constants and components.
 
 | Name  |                         For                          | Status  |
 | :---: | :--------------------------------------------------: | :-----: |
@@ -15,7 +15,7 @@ Under `/src`, every hardware have its own `.vhd` file, consists of one package, 
 |  dot  | 8 x 8 bicolor (red/green) dot matrix display scanner | stable  |
 |  lcd  |         ST7735 128x160 RGB TFT LCD interface         |   N/A   |
 |  dht  |   DHT11 humidity and temperature sensor interface    |   N/A   |
-|  tsl  |         TSL2561 luminosity sensor interface          |   N/A   |
+|  tsl  |         TSL2561 luminosity sensor interface          | testing |
 |  tts  |           SD178B Big5 TTS module interface           |   N/A   |
 
 ## Utilities
