@@ -75,16 +75,12 @@ begin
 	seg_1 <= led;
 	seg_2 <= led;
 
-	process (clk)
-
-	begin
-
+	process (clk) begin 
 		if rising_edge(clk) and ena = '1' then
 			seg_s <= "01111111" ror scan_cnt; -- rotates '0' because common cathode
 			led <= lut(data(scan_cnt)); -- get the digit, then filter though look-up table
 			scan_cnt <= scan_cnt + 1;
-		end if;
-
+		end if; 
 	end process;
 
 end arch;
