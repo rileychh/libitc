@@ -103,17 +103,6 @@ set_location_assignment PIN_64 -to key_row[1]
 set_location_assignment PIN_68 -to key_row[0]
 set_location_assignment PIN_70 -to dbg_key_int
 set_location_assignment PIN_72 -to dbg_clk_1k
-set_global_assignment -name VHDL_FILE tests/dot_test.vhd
-set_global_assignment -name VHDL_FILE tests/key_seg_test.vhd
-set_global_assignment -name VHDL_FILE tests/pwm_test.vhd
-set_global_assignment -name VHDL_FILE tests/bcd_seg_test.vhd
-set_global_assignment -name VHDL_FILE src/util/pwm.vhd
-set_global_assignment -name VHDL_FILE src/util/bcd.vhd
-set_global_assignment -name VHDL_FILE src/dot.vhd
-set_global_assignment -name VHDL_FILE src/seg.vhd
-set_global_assignment -name VHDL_FILE src/key.vhd
-set_global_assignment -name VHDL_FILE src/clk.vhd
-set_global_assignment -name VECTOR_WAVEFORM_FILE simulation/bcd_seg_test.vwf
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
@@ -149,4 +138,15 @@ set_location_assignment PIN_52 -to sw[3]
 set_location_assignment PIN_50 -to sw[2]
 set_location_assignment PIN_46 -to sw[1]
 set_location_assignment PIN_44 -to sw[0]
+set_global_assignment -name VHDL_FILE tests/dot_test.vhd
+set_global_assignment -name VHDL_FILE tests/key_seg_test.vhd
+set_global_assignment -name VHDL_FILE tests/pwm_test.vhd
+set_global_assignment -name VHDL_FILE tests/bcd_seg_test.vhd
+set_global_assignment -name VHDL_FILE src/util/bcd.vhd
+set_global_assignment -name VHDL_FILE src/util/i2c.vhd
+set_global_assignment -name VHDL_FILE src/util/pwm.vhd
+set_global_assignment -name VHDL_FILE src/clk.vhd
+set_global_assignment -name VHDL_FILE src/dot.vhd
+set_global_assignment -name VHDL_FILE src/key.vhd
+set_global_assignment -name VHDL_FILE src/seg.vhd
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
