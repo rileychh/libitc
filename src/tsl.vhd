@@ -1,6 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use ieee.math_real.all;
 
 use work.i2c_p.all;
 
@@ -43,6 +44,29 @@ architecture arch of tsl is
 	-- sensor values
 	signal data_0 : unsigned(15 downto 0);
 	signal data_1 : unsigned(15 downto 0);
+
+	-- convert sensor values to lux reading
+	function to_lux(data_0, data_1 : unsigned(15 downto 0)) return integer is
+
+		constant d0 : real := real(to_integer(data_0));
+		constant d1 : real := real(to_integer(data_1));
+		constant ratio : real := d1 / d0;
+
+	begin
+
+		if ratio < 0.5 then
+			return 0.0304 * d0 - 0.0602 * d0 * ratio ** 1.4;
+		elsif ratio < 0.61 then
+			return 0.0224 * d0 - 0.031 * d1;
+		elsif ratio < 0.80 then
+			return 0.0128 * d0 - 0.0153 * d1;
+		elsif ratio < 1.30 then
+			return 0.0146 * d0 - 0.0112 * d1;
+		else -- ratio > 1.30
+			return 0;
+		end if;
+
+	end function;
 
 begin
 
@@ -103,6 +127,10 @@ begin
 							when 0 => data_0 <= i2c_rx(1) & i2c_rx(0); -- concatenate higher byte (second byte) and lower byte (first byte)
 							when 1 => data_1 <= i2c_rx(1) & i2c_rx(0);
 						end case;
+						if cnt = 1 then -- reset cnt and update lux
+							lux <= to_lux(data_0, data_1);
+							cnt <= 0;
+						end if;
 						cnt := cnt + 1; -- swap register address
 						state <= read; -- loop back to reading state
 					end if;
