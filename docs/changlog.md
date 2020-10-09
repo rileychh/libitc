@@ -4,7 +4,8 @@ No version is backwards compatible!
 
 ## v3
 
-* Simplified port names
+* Changed some ports to simpler names
+* Add support for TSL2561 light sensor (`tsl.vhd`)
 
 ## v2
 
