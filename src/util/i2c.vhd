@@ -8,7 +8,7 @@
 -- 1. to write a byte: 
 --    addr = slave address
 --    rw = '0'
---    data_tx = byte to write
+--    tx = byte to write
 --    ena = high pulse
 --    wait for falling edge of busy
 --
@@ -17,29 +17,29 @@
 --    rw = '1'
 --    ena = high pulse
 --    wait for falling edge of busy
---    your data = data_rx
+--    byte read = rx
 --
 -- 3. to write to a register: 
 --    addr = slave address
 --    rw = '0'
---    data_tx = register address
+--    tx = register address
 --    ena = '1'
 --    wait for falling edge of busy
---    data_tx = 1st byte to write
+--    tx = 1st byte to write
 --    wait for falling edge of busy
---    data_tx = 2nd byte to write
+--    tx = 2nd byte to write
 --    ...
 --    ena = '0'
 --
 -- 4. to read a register: 
 --    addr = slave address
 --    rw = '0'
---    data_tx = register address
+--    tx = register address
 --    ena = '1'
 --    wait for falling edge of busy
---    1st byte read = data_rx
+--    1st byte read = rx
 --    wait for falling edge of busy
---    2nd byte read = data_rx
+--    2nd byte read = rx
 --    ...
 --    ena = '0'
 --
@@ -49,7 +49,22 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 package i2c_p is
-
+	component i2c
+		port (
+			-- I2C slave
+			scl : out std_logic;
+			sda : inout std_logic;
+			-- internal
+			clk     : in std_logic;             -- 400kHz
+			rst     : in std_logic;             -- low active
+			ena     : in std_logic;             -- if high, latch in new input
+			busy    : out std_logic;            -- if high, addr, rw and tx will be ignored
+			addr    : in unsigned(6 downto 0);  -- slave address
+			rw      : in std_logic;             -- high read, low write
+			rx : out unsigned(7 downto 0); -- byte read from slave
+			tx : in unsigned(7 downto 0)   -- byte to write to slave
+		);
+	end component;
 end package;
 
 library ieee;
@@ -67,11 +82,11 @@ entity i2c is
 		clk     : in std_logic;             -- 400kHz
 		rst     : in std_logic;             -- low active
 		ena     : in std_logic;             -- if high, latch in new input
-		busy    : out std_logic;            -- if high, addr, rw and data_tx will be ignored
+		busy    : out std_logic;            -- if high, addr, rw and tx will be ignored
 		addr    : in unsigned(6 downto 0);  -- slave address
 		rw      : in std_logic;             -- high read, low write
-		data_rx : out unsigned(7 downto 0); -- byte read from slave
-		data_tx : in unsigned(7 downto 0)   -- byte to write to slave
+		rx : out unsigned(7 downto 0); -- byte read from slave
+		tx : in unsigned(7 downto 0)   -- byte to write to slave
 	);
 end i2c;
 
@@ -95,18 +110,18 @@ architecture arch of i2c is
 
 	-- input latches: save input on rising edge of start
 	signal cmd_reg : unsigned(7 downto 0); -- command = addr + rw
-	signal data_tx_reg : unsigned(7 downto 0);
+	signal tx_reg : unsigned(7 downto 0);
 
 	-- procedure to latch in new input value
 	procedure update(
 		addr        : in unsigned(6 downto 0);
 		rw          : in std_logic;
-		data_tx     : in unsigned(7 downto 0);
+		tx     : in unsigned(7 downto 0);
 		cmd_reg     : out unsigned(7 downto 0);
-		data_tx_reg : out unsigned(7 downto 0)
+		tx_reg : out unsigned(7 downto 0)
 	) is begin
 		cmd_reg <= addr & rw;
-		data_tx_reg <= data_tx;
+		tx_reg <= tx;
 	end procedure;
 
 	-- SCL enable: release SCL when resetting, idling, starting or stopping
@@ -127,7 +142,7 @@ begin
 			case state is
 				when idle =>
 					if ena = '1' then
-						update(addr, rw, data_tx, cmd_reg, data_tx_reg);
+						update(addr, rw, tx, cmd_reg, tx_reg);
 						state <= start;
 					end if;
 				when start =>
@@ -148,7 +163,7 @@ begin
 					cnt <= cnt - 1;
 				when ack2 =>
 					if ena = '1' then -- continuous mode
-						update(addr, rw, data_tx, cmd_reg, data_tx_reg);
+						update(addr, rw, tx, cmd_reg, tx_reg);
 						if cmd_reg = addr & rw then
 							state <= data; -- keep sending/receiving bytes
 						else
@@ -187,7 +202,7 @@ begin
 					sda_wire <= cmd_reg(cnt);
 				when data =>
 					if cmd_reg(0) = '0' then -- r/w bit is write
-						sda_wire <= data_tx_reg(cnt);
+						sda_wire <= tx_reg(cnt);
 					end if;
 				when ack2 =>
 					if cmd_reg(0) = '1' then -- r/w bit is read
@@ -210,7 +225,7 @@ begin
 					-- TODO handle no acknowledgment, currently ignored
 				when data =>
 					if cmd_reg(0) = '1' then -- r/w bit is read
-						data_rx_reg(cnt) <= sda_wire; -- cnt is controlled by write process
+						rx_reg(cnt) <= sda_wire; -- cnt is controlled by write process
 					end if;
 				when ack2 =>
 					-- TODO handle no acknowledgment, currently ignored
