@@ -1,4 +1,55 @@
 -- I2C (IIC) master interface
+
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+package i2c_p is
+	type byte_arr is array(integer range <>) of unsigned(7 downto 0);
+
+	component i2c
+		port (
+			-- I2C slave
+			scl : out std_logic;
+			sda : inout std_logic;
+			-- internal
+			clk  : in std_logic;             -- 400kHz
+			rst  : in std_logic;             -- low active
+			ena  : in std_logic;             -- if high, latch in new input
+			busy : out std_logic;            -- if high, addr, rw and tx will be ignored
+			addr : in unsigned(6 downto 0);  -- slave address
+			rw   : in std_logic;             -- high read, low write
+			rx   : out unsigned(7 downto 0); -- byte read from slave
+			tx   : in unsigned(7 downto 0)   -- byte to write to slave
+		);
+	end component;
+
+	component i2c_reg
+		generic (
+			data_len_max : integer := 8
+		);
+
+		port (
+			-- I2C slave
+			scl : out std_logic;
+			sda : inout std_logic;
+			-- internal
+			clk      : in std_logic;                          -- 400kHz
+			rst      : in std_logic;                          -- low active
+			ena      : in std_logic;                          -- start on rising edge
+			busy     : out std_logic;                         -- only
+			dev_addr : in unsigned(7 downto 0);               -- I2C slave address
+			rw       : in std_logic;                          -- read/write to register. high read, low write
+			reg_addr : in unsigned(7 downto 0);               -- I2C register address
+			rx       : out byte_arr(0 to data_len_max - 1);       -- register values read from slave
+			tx       : in byte_arr(0 to data_len_max - 1);        -- register values to write to slave
+			data_len : in integer range 0 to data_len_max - 1 -- register value length
+		);
+	end component;
+end package;
+
+--
+-- I2C master generic interface
 --
 -- reference:
 -- https://www.digikey.com/eewiki/pages/viewpage.action?pageId=10125324
@@ -37,35 +88,13 @@
 --    tx = register address
 --    ena = '1'
 --    wait for falling edge of busy
+--    rw = '1'
 --    1st byte read = rx
 --    wait for falling edge of busy
 --    2nd byte read = rx
 --    ...
 --    ena = '0'
 --
-
-library ieee;
-use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
-
-package i2c_p is
-	component i2c
-		port (
-			-- I2C slave
-			scl : out std_logic;
-			sda : inout std_logic;
-			-- internal
-			clk     : in std_logic;             -- 400kHz
-			rst     : in std_logic;             -- low active
-			ena     : in std_logic;             -- if high, latch in new input
-			busy    : out std_logic;            -- if high, addr, rw and tx will be ignored
-			addr    : in unsigned(6 downto 0);  -- slave address
-			rw      : in std_logic;             -- high read, low write
-			rx : out unsigned(7 downto 0); -- byte read from slave
-			tx : in unsigned(7 downto 0)   -- byte to write to slave
-		);
-	end component;
-end package;
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -79,14 +108,14 @@ entity i2c is
 		scl : out std_logic;
 		sda : inout std_logic;
 		-- internal
-		clk     : in std_logic;             -- 400kHz
-		rst     : in std_logic;             -- low active
-		ena     : in std_logic;             -- if high, latch in new input
-		busy    : out std_logic;            -- if high, addr, rw and tx will be ignored
-		addr    : in unsigned(6 downto 0);  -- slave address
-		rw      : in std_logic;             -- high read, low write
-		rx : out unsigned(7 downto 0); -- byte read from slave
-		tx : in unsigned(7 downto 0)   -- byte to write to slave
+		clk  : in std_logic;             -- 400kHz
+		rst  : in std_logic;             -- low active
+		ena  : in std_logic;             -- if high, latch in new input
+		busy : out std_logic;            -- if high, addr, rw and tx will be ignored
+		addr : in unsigned(6 downto 0);  -- slave address
+		rw   : in std_logic;             -- high read, low write
+		rx   : out unsigned(7 downto 0); -- byte read from slave
+		tx   : in unsigned(7 downto 0)   -- byte to write to slave
 	);
 end i2c;
 
@@ -113,13 +142,7 @@ architecture arch of i2c is
 	signal tx_reg : unsigned(7 downto 0);
 
 	-- procedure to latch in new input value
-	procedure update(
-		addr        : in unsigned(6 downto 0);
-		rw          : in std_logic;
-		tx     : in unsigned(7 downto 0);
-		cmd_reg     : out unsigned(7 downto 0);
-		tx_reg : out unsigned(7 downto 0)
-	) is begin
+	procedure update is begin
 		cmd_reg <= addr & rw;
 		tx_reg <= tx;
 	end procedure;
@@ -142,7 +165,7 @@ begin
 			case state is
 				when idle =>
 					if ena = '1' then
-						update(addr, rw, tx, cmd_reg, tx_reg);
+						update;
 						state <= start;
 					end if;
 				when start =>
@@ -163,7 +186,7 @@ begin
 					cnt <= cnt - 1;
 				when ack2 =>
 					if ena = '1' then -- continuous mode
-						update(addr, rw, tx, cmd_reg, tx_reg);
+						update;
 						if cmd_reg = addr & rw then
 							state <= data; -- keep sending/receiving bytes
 						else
@@ -225,7 +248,7 @@ begin
 					-- TODO handle no acknowledgment, currently ignored
 				when data =>
 					if cmd_reg(0) = '1' then -- r/w bit is read
-						rx_reg(cnt) <= sda_wire; -- cnt is controlled by write process
+						rx(cnt) <= sda_wire; -- cnt is controlled by write process
 					end if;
 				when ack2 =>
 					-- TODO handle no acknowledgment, currently ignored
@@ -242,5 +265,106 @@ begin
 	-- TODO should it include a pull-up ('H') or just high-z ('Z')?
 	scl <= 'H' when scl_wire = '1' else '0';
 	sda <= 'H' when sda_wire = '1' else '0';
+
+end arch;
+
+--
+-- i2c_reg: i2c register read/write interface
+--
+
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+use work.i2c_p.all;
+
+entity i2c_reg is
+	generic (
+		data_len_max : integer := 8
+	);
+
+	port (
+		-- I2C slave
+		scl : out std_logic;
+		sda : inout std_logic;
+		-- internal
+		clk      : in std_logic;                          -- 400kHz
+		rst      : in std_logic;                          -- low active
+		ena      : in std_logic;                          -- start on rising edge
+		busy     : out std_logic;                         -- only
+		dev_addr : in unsigned(7 downto 0);               -- I2C slave address
+		rw       : in std_logic;                          -- read/write to register. high read, low write
+		reg_addr : in unsigned(7 downto 0);               -- I2C register address
+		rx       : out byte_arr(0 to data_len_max - 1);       -- register values read from slave
+		tx       : in byte_arr(0 to data_len_max - 1);        -- register values to write to slave
+		data_len : in integer range 0 to data_len_max - 1 -- register value length
+	);
+end i2c_reg;
+
+architecture arch of i2c_reg is
+
+	signal i2c_ena : std_logic;
+	signal i2c_busy : std_logic;
+	signal i2c_addr : unsigned(7 downto 0);
+	signal i2c_rw : std_logic;
+	signal i2c_rx : unsigned(7 downto 0);
+	signal i2c_tx : unsigned(7 downto 0);
+
+	type state_t is (idle, set_reg_addr, data);
+	signal state : state_t;
+
+begin
+
+	i2c_inst : entity work.i2c(arch)
+		port map(
+			scl  => scl,
+			sda  => sda,
+			clk  => clk,
+			rst  => rst,
+			ena  => i2c_ena,
+			busy => i2c_busy,
+			addr => i2c_addr,
+			rw   => i2c_rw,
+			rx   => i2c_rx,
+			tx   => i2c_tx
+		);
+
+	process (clk)
+
+		variable byte_cnt : integer range 0 to data_len_max - 1;
+
+	begin
+		if rising_edge(clk) then
+			case state is
+				when idle =>
+					if ena = '1' then
+						busy <= '1';
+						state <= set_reg_addr;
+					end if;
+				when set_reg_addr =>
+					i2c_addr <= dev_addr;
+					i2c_rw <= '0'; -- write
+					i2c_tx <= reg_addr;
+					i2c_ena <= '1';
+					byte_cnt := 0;
+					state <= data;
+				when data =>
+					if i2c_busy = '0' then
+						if rw = '1' then -- read
+							rx(byte_cnt) <= i2c_rx;
+						else -- write
+							i2c_tx <= tx(byte_cnt);
+						end if;
+
+						if byte_cnt = data_len - 1 then
+							i2c_ena <= '0';
+							busy <= '0';
+							state <= idle;
+						end if;
+						byte_cnt := byte_cnt + 1;
+					end if;
+			end case;
+		end if;
+	end process;
 
 end arch;
