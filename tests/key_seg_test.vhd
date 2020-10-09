@@ -47,18 +47,18 @@ begin
 
 	seg_inst : entity work.seg(arch)
 		port map(
-			seg_1    => seg_1,
-			seg_2    => seg_2,
-			seg_s    => seg_s,
-			clk  => clk_1k,
-			ena  => '1',
-			data => in_buf
+			seg_1 => seg_1,
+			seg_2 => seg_2,
+			seg_s => seg_s,
+			clk   => clk_1k,
+			ena   => '1',
+			data  => in_buf
 		);
 
 	key_inst : entity work.key(arch)
 		port map(
-			key_col     => key_col,
-			key_row     => key_row,
+			key_col => key_col,
+			key_row => key_row,
 			clk     => clk_1k,
 			int     => key_int,
 			pressed => key_pressed

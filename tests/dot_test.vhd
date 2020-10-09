@@ -44,9 +44,9 @@ begin
 
 	dot_inst : entity work.dot(arch)
 		port map(
-			dot_r      => dot_r,
-			dot_g      => dot_g,
-			dot_s      => dot_s,
+			dot_r  => dot_r,
+			dot_g  => dot_g,
+			dot_s  => dot_s,
 			clk    => clk_1k,
 			ena    => '1',
 			data_r => dot_data_r,

@@ -62,17 +62,17 @@ begin
 
 	seg_inst : entity work.seg(arch)
 		port map(
-			clk  => clk_10k,
-			ena  => '1',
-			seg_1    => seg_1,
-			seg_2    => seg_2,
-			seg_s    => seg_s,
-			data => seg_data
+			clk   => clk_10k,
+			ena   => '1',
+			seg_1 => seg_1,
+			seg_2 => seg_2,
+			seg_s => seg_s,
+			data  => seg_data
 		);
 
 	to_bcd_inst : entity work.to_bcd(arch)
 		generic map(
-			bin_width  => 27,
+			bin_width => 27,
 			digit_len => 8
 		)
 		port map(
