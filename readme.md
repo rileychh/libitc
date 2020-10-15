@@ -9,7 +9,7 @@ Under `src/`, every hardware have its own `.vhd` file, consists of one package, 
 | Name  |                         For                          | Status  |
 | :---: | :--------------------------------------------------: | :-----: |
 |  clk  |                System clock dividers                 | stable  |
-|  seg  |   2x4 digit seven segment display decoder/scanner    | testing |
+|  seg  |   2x4 digit seven segment display decoder/scanner    | stable  |
 |  key  |                  4x4 keypad scanner                  | stable  |
 |  mot  |       L293D H-Bridge for 2 DC motors interface       |   N/A   |
 |  dot  | 8 x 8 bicolor (red/green) dot matrix display scanner | stable  |
@@ -26,11 +26,15 @@ Under `src/util`, there are optional utilities for converting types, generating 
 | :---: | :------------------------------------------------------: | :-------: |
 |  bcd  | Converting unsigned integer into BCD vectors (for `seg`) | v1 stable |
 |  pwm  |            Single phase PWM signal generator             | v1 stable |
-|  i2c  |                I2C (IIC) master interface                |    N/A    |
+|  i2c  |                I2C (IIC) master interface                |  testing  |
 
 ## Tests
 
 There are no actual complete VHDL testbench, but there some .vhd files located under `tests/` you can `Set as top level entity` in Quartus to test some of the packages.
+
+## Tools
+
+Under `tools/` there are references or converters to help with the writing of the code.
 
 ## My last words
 

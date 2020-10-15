@@ -6,6 +6,11 @@ No version is backwards compatible!
 
 * Changed some ports to simpler names
 * Add support for TSL2561 light sensor (`tsl.vhd`)
+* Add I2C interface (`i2c.vhd`)
+* Seven segment display now uses string type as data input
+  * You can use `to_character()` function to convert integer or unsigned into hexadecimal format
+* `seg.vhd` now reversed `seg_s` port, you'll need to update pin assignment
+* Removed simulation files
 
 ## v2
 
@@ -18,8 +23,6 @@ No version is backwards compatible!
 * Update documentations
 
 ## v1
-
-### seg_v2
 
 * Add more glyphs to the `seg_lut`
 * Increased `seg_data_t` range
