@@ -3,84 +3,93 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 package seg_p is
-	-- length of seg_lut_len
-	constant seg_lut_len : integer := 74;
-	-- add seg_dot to any element of seg_data to turn on the dot
-	-- e.g.:
-	-- "123.456 °C" would be (1, 2, 3 + seg_dot, 4, 5, 6, seg_spc, 35, 12)
-	constant seg_dot : integer := seg_lut_len / 2;
-	constant seg_spc : integer := 33; -- space
-	constant seg_deg : integer := 34; -- degree symbol
-	constant seg_lb : integer := 35; -- [
-	constant seg_rb : integer := 36; -- ]
-
-	type seg_data_t is array(0 to 7) of integer range 0 to seg_lut_len - 1;
-
 	component seg
 		port (
 			-- seg
-			seg_1, seg_2, seg_s : out unsigned(7 downto 0); -- abcdefgp * 2, seg2_s1 ~ seg1_s4
+			seg_1, seg_2 : out unsigned(7 downto 0); -- abcdefgp * 2
+			seg_s        : out unsigned(0 to 7);     -- seg2_s1 ~ seg1_s4
 			-- internal
-			clk  : in std_logic; -- 1kHz
-			ena  : in std_logic; -- '1' active, '0' blanks all leds
-			data : in seg_data_t
+			clk  : in std_logic;       -- 1kHz
+			data : in string(1 to 8);  -- string type only allow positive range
+			dot  : in unsigned(0 to 7) -- dots are individually controlled
 		);
 	end component;
+
+	function to_character(n : integer range 0 to 9) return character;
+	function to_character(n : unsigned(3 downto 0)) return character;
 end package;
+
+package body seg_p is
+	function to_character(n : integer range 0 to 15) return character is begin
+		if n < 10 then -- n is decimal
+			return character'val(n + character'pos('0'));
+		else -- n is hexadecimal
+			return character'val(n - 10 + character'pos('A'));
+		end if;
+	end function;
+
+	function to_character(n : unsigned(3 downto 0)) return character is begin
+		if n < 10 then -- n is decimal
+			return character'val(to_integer(n) + character'pos('0'));
+		else -- n is hexadecimal
+			return character'val(to_integer(n - 10) + character'pos('A'));
+		end if;
+	end function;
+end package body;
 
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-use work.seg_p.all;
-
 entity seg is
 	port (
 		-- seg
-		seg_1, seg_2, seg_s : out unsigned(7 downto 0); -- abcdefgp * 2, seg2_s1 ~ seg1_s4
+		seg_1, seg_2 : out unsigned(7 downto 0); -- abcdefgp * 2
+		seg_s        : out unsigned(0 to 7);     -- seg2_s1 ~ seg1_s4
 		-- internal
-		clk  : in std_logic; -- 1kHz
-		ena  : in std_logic; -- '1' active, '0' blanks all leds
-		data : in seg_data_t
+		clk  : in std_logic;       -- 1kHz
+		data : in string(1 to 8);  -- string type only allow positive range
+		dot  : in unsigned(0 to 7) -- dots are individually controlled
 	);
 end seg;
 
 architecture arch of seg is
 
-	-- look up table (decoder)
-	type seg_lut_t is array(0 to seg_lut_len - 1) of unsigned(7 downto 0);
-	constant lut : seg_lut_t := ( -- look-up table for decoding
-	-- 0 to 15: 0123456789AbCdEF
-	x"fc", x"60", x"da", x"f2", x"66", x"b6", x"be", x"e0",
-	x"fe", x"f6", x"ee", x"3e", x"9c", x"7a", x"9e", x"8e",
-	-- 16 to 32: GHhiJLnOoPqrStUuy
-	x"bc", x"6e", x"2e", x"0c", x"78", x"1c", x"2a", x"fc",
-	x"3a", x"ce", x"e6", x"0a", x"b6", x"1e", x"7c", x"38",
-	x"76",
-	-- 33 to 36: space, degree symbol, [, ]
-	x"00", x"c6", x"9c", x"f0",
-	-- same as all above but with dot
-	x"fd", x"61", x"db", x"f3", x"67", x"b7", x"bf", x"e1",
-	x"ff", x"f7", x"ef", x"3f", x"9d", x"7b", x"9f", x"8f",
-	x"bd", x"6f", x"2f", x"0d", x"79", x"1d", x"2b", x"fd",
-	x"3b", x"cf", x"e7", x"0b", x"b7", x"1f", x"7d", x"39",
-	x"77", x"01", x"c7", x"9d", x"f1"
+	type lut_t is array(0 to 127) of unsigned(7 downto 0);
+	constant lut : lut_t := (
+	-- HACK add additional characters between 0 to 31
+	x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00",
+	x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00",
+	-- ASCII printable characters (SPC to DEL)
+	x"00", x"61", x"44", x"7e", x"b6", x"4b", x"62", x"04", x"94", x"d0", x"84", x"0e", x"08", x"02", x"01", x"4a",
+	x"fc", x"60", x"da", x"f2", x"66", x"b6", x"be", x"e0", x"fe", x"f6", x"90", x"b0", x"86", x"12", x"c2", x"cb",
+	x"fa", x"ee", x"3e", x"9c", x"7a", x"9e", x"8e", x"bc", x"6e", x"0c", x"78", x"ae", x"1c", x"a8", x"ec", x"fc",
+	x"ce", x"d6", x"cc", x"b6", x"1e", x"7c", x"7c", x"54", x"6e", x"76", x"da", x"9c", x"26", x"f0", x"c4", x"10",
+	x"40", x"fa", x"3e", x"1a", x"7a", x"de", x"8e", x"f6", x"2e", x"08", x"30", x"ae", x"0c", x"28", x"2a", x"3a",
+	x"ce", x"e6", x"0a", x"b6", x"1e", x"38", x"38", x"28", x"6e", x"76", x"da", x"62", x"0c", x"0e", x"80", x"00"
 	);
 
-	signal scan_cnt : integer range 0 to 7; -- segment scan count, for shifting seg_s
-	signal led : unsigned(7 downto 0); -- splits into seg_1 and seg_2
+	-- output wire
+	signal led : unsigned(7 downto 0);
+
+	-- scan count
+	signal scan_cnt : integer range 0 to 7;
 
 begin
 
+	-- both outputs are the same
 	seg_1 <= led;
 	seg_2 <= led;
 
-	process (clk) begin 
-		if rising_edge(clk) and ena = '1' then
+	process (clk) begin
+		if rising_edge(clk) then
 			seg_s <= "01111111" ror scan_cnt; -- rotates '0' because common cathode
-			led <= lut(data(scan_cnt)); -- get the digit, then filter though look-up table
+			led <= lut(character'pos(data(scan_cnt + 1))); -- get the digit, then filter though look-up table
+			if dot(scan_cnt) = '1' then -- current segment should light up dot
+				led(0) <= '1'; -- led(0) is the dot segment
+			end if;
 			scan_cnt <= scan_cnt + 1;
-		end if; 
+		end if;
 	end process;
 
 end arch;

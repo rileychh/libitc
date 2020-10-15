@@ -12,7 +12,8 @@ entity tsl_seg_test is
 		-- sys
 		sys_clk, sys_rst : in std_logic; -- rising edge clock, low reset
 		-- seg
-		seg_1, seg_2, seg_s : out unsigned(7 downto 0); -- abcdefgp * 2, seg2_s1 ~ seg1_s4
+		seg_1, seg_2 : out unsigned(7 downto 0); -- abcdefgp * 2
+		seg_s        : out unsigned(0 to 7);     -- seg2_s1 ~ seg1_s4
 		-- tsl
 		tsl_scl : out std_logic;
 		tsl_sda : inout std_logic
@@ -24,7 +25,7 @@ architecture arch of tsl_seg_test is
 	signal clk_800k, clk_1k : std_logic;
 	signal tsl_lux : integer;
 	signal tsl_lux_bcd : unsigned(15 downto 0); -- 4 digits
-	signal seg_data : seg_data_t;
+	signal seg_data : string(1 to 8);
 
 begin
 
@@ -63,8 +64,8 @@ begin
 			seg_2 => seg_2,
 			seg_s => seg_s,
 			clk   => clk_1k,
-			ena   => '1',
-			data  => seg_data
+			data  => seg_data,
+			dot => (others => '0')
 		);
 
 	to_bcd_inst : entity work.to_bcd(arch)
@@ -78,8 +79,14 @@ begin
 		);
 
 	-- map bcd version of tsl_lux to seven segment display data input
-	seg_bcd : for i in 0 to 3 generate
-		seg_data(3 - i) <= to_integer(tsl_lux_bcd(i * 4 + 3 downto i * 4));
-	end generate seg_bcd;
+	seg_map : for i in 0 to 7 generate
+		left : if i >= 0 and i < 4 generate -- 0 to 3
+			seg_data(4 - i) <= to_character(tsl_lux_bcd(i * 4 + 3 downto i * 4)); -- tsl_lux
+		end generate left;
+
+		right : if i >= 4 and i < 8 generate -- 4 to 7
+			seg_data(i + 1) <= ' '; -- spaces (blank)
+		end generate right;
+	end generate seg_map;
 
 end arch;

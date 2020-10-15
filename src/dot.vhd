@@ -16,7 +16,6 @@ package dot_p is
 			dot_r, dot_g, dot_s : out unsigned(0 to 7);
 			-- internal
 			clk            : in std_logic; -- 1kHz
-			ena            : in std_logic; -- high active, low blanks all LEDs
 			data_r, data_g : in dot_data_t
 		);
 
@@ -49,7 +48,7 @@ architecture arch of dot is
 begin
 
 	process (clk) begin
-		if rising_edge(clk) and ena = '1' then
+		if rising_edge(clk) then
 			dot_s <= "01111111" ror scan_cnt; -- rotates '0' because common cathode
 			dot_r <= data_r(scan_cnt);
 			dot_g <= data_g(scan_cnt);

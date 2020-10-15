@@ -16,7 +16,8 @@ entity bcd_seg_test is
 		-- sw
 		sw : in unsigned(7 downto 0);
 		-- seg
-		seg_1, seg_2, seg_s : out unsigned(7 downto 0) -- abcdefgp * 2, seg2_s1 ~ seg1_s4
+		seg_1, seg_2 : out unsigned(7 downto 0); -- abcdefgp * 2
+		seg_s        : out unsigned(0 to 7)      -- seg2_s1 ~ seg1_s4
 	);
 
 end bcd_seg_test;
@@ -26,7 +27,7 @@ architecture arch of bcd_seg_test is
 	signal clk_100, clk_1k, clk_10k, clk_cnt : std_logic;
 	signal cnt : integer range 0 to 99_999_999 := 0;
 	signal cnt_bcd : unsigned(31 downto 0);
-	signal seg_data : seg_data_t;
+	signal seg_data : string(1 to 8);
 
 begin
 
@@ -62,12 +63,12 @@ begin
 
 	seg_inst : entity work.seg(arch)
 		port map(
-			clk   => clk_10k,
-			ena   => '1',
 			seg_1 => seg_1,
 			seg_2 => seg_2,
 			seg_s => seg_s,
-			data  => seg_data
+			clk   => clk_1k,
+			data  => seg_data,
+			dot => (others => '0')
 		);
 
 	to_bcd_inst : entity work.to_bcd(arch)
@@ -80,14 +81,9 @@ begin
 			bcd => cnt_bcd
 		);
 
-	-- map cnt_bcd to seg_data. will generate:
-	-- seg_data(7) <= to_integer(cnt_bcd(3 downto 0));
-	-- seg_data(6) <= to_integer(cnt_bcd(7 downto 4));
-	-- ...
-	-- seg_data(0) <= to_integer(cnt_bcd(31 downto 28));
-	map_seg : for i in 0 to 7 generate
-		seg_data(7 - i) <= to_integer(cnt_bcd(i * 4 + 3 downto i * 4));
-	end generate map_seg;
+	seg_map : for i in 0 to 7 generate
+		seg_data(8 - i) <= to_character(cnt_bcd(i * 4 + 3 downto i * 4));
+	end generate seg_map;
 
 	with sw(1 downto 0) select clk_cnt <=
 	'0' when "00",
