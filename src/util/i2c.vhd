@@ -240,7 +240,7 @@ begin
 
 	-- convert internal wire to open drain
 	-- TODO should it include a pull-up ('H') or just high-z ('Z')?
-	scl <= 'H' when scl_wire = '1' else '0';
-	sda <= 'H' when sda_wire = '1' else '0';
+	scl <= 'Z' when scl_wire = '1' else '0';
+	sda <= 'Z' when sda_wire = '1' else '0';
 
 end arch;
