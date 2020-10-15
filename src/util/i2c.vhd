@@ -203,11 +203,11 @@ begin
 					when cmd => -- send 7-bit address plus 1-bit read/write, MSB first
 						sda_wire <= cmd_reg(cnt);
 					when data =>
-						if cmd_reg(0) = '0' then -- r/w bit is write
+						if cmd_reg(0) = write then -- r/w bit is write
 							sda_wire <= tx_reg(cnt);
 						end if;
 					when ack2 =>
-						if cmd_reg(0) = '1' then -- r/w bit is read
+						if cmd_reg(0) = read then -- r/w bit is read
 							sda_wire <= '0'; -- send acknowledgment bit
 						end if;
 					when stop =>
@@ -223,12 +223,12 @@ begin
 					when ack1 =>
 						-- TODO handle no acknowledgment, currently ignored
 					when data =>
-						if cmd_reg(0) = '1' then -- r/w bit is read
+						if cmd_reg(0) = read then -- r/w bit is read
 							rx(cnt) <= sda_wire; -- cnt is controlled by write process
 						end if;
 					when ack2 =>
 						-- TODO handle no acknowledgment, currently ignored
-						if cmd_reg(0) = '0' then -- r/w bit is write
+						if cmd_reg(0) = write then -- r/w bit is write
 						end if;
 					when stop =>
 						sda_wire <= '1'; -- scl = '1' and rising_edge(sda) == stop
@@ -239,7 +239,6 @@ begin
 	end process;
 
 	-- convert internal wire to open drain
-	-- TODO should it include a pull-up ('H') or just high-z ('Z')?
 	scl <= 'Z' when scl_wire = '1' else '0';
 	sda <= 'Z' when sda_wire = '1' else '0';
 
