@@ -7,8 +7,7 @@ use ieee.numeric_std.all;
 use work.clk_p.all;
 use work.seg_p.all;
 
-entity bcd_seg_test is
-
+entity bcd_seg_test is 
 	port (
 		-- sys
 		sys_clk, sys_rst : in std_logic;
@@ -17,8 +16,7 @@ entity bcd_seg_test is
 		-- seg
 		seg_1, seg_2 : out unsigned(7 downto 0); -- abcdefgp * 2
 		seg_s        : out unsigned(0 to 7)      -- seg2_s1 ~ seg1_s4
-	);
-
+	); 
 end bcd_seg_test;
 
 architecture arch of bcd_seg_test is

@@ -21,12 +21,10 @@ end package;
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-use ieee.math_real.all;
 
 use work.i2c_p.all;
 
-entity tsl is
-
+entity tsl is 
 	port (
 		-- tsl
 		tsl_scl : out std_logic;
@@ -37,8 +35,7 @@ entity tsl is
 		lux : out integer; -- calculated illuminance from sensors
 		-- debug
 		dbg_i2c_state : out unsigned(2 downto 0)
-	);
-
+	); 
 end tsl;
 
 architecture arch of tsl is
@@ -77,7 +74,6 @@ architecture arch of tsl is
 	signal data_1 : unsigned(15 downto 0);
 
 	-- convert sensor values to lux reading
-	-- FIXME VHDL real type math has problems
 	function to_lux(data_0, data_1 : unsigned(15 downto 0)) return integer is
 
 		constant lux_scale : integer := 14; -- scale by 2^14

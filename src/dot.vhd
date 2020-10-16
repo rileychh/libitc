@@ -9,16 +9,14 @@ package dot_p is
 	constant dot_zeros : dot_data_t := (others => (others => '0'));
 	constant dot_ones : dot_data_t := (others => (others => '1'));
 
-	component dot
-
+	component dot 
 		port (
 			-- dot
 			dot_r, dot_g, dot_s : out unsigned(0 to 7);
 			-- internal
 			clk            : in std_logic; -- 1kHz
 			data_r, data_g : in dot_data_t
-		);
-
+		); 
 	end component;
 end package;
 
@@ -28,16 +26,14 @@ use ieee.numeric_std.all;
 
 use work.dot_p.all;
 
-entity dot is
-
+entity dot is 
 	port (
 		-- dot
 		dot_r, dot_g, dot_s : out unsigned(0 to 7);
 		-- internal
 		clk            : in std_logic; -- 1kHz
 		data_r, data_g : in dot_data_t
-	);
-
+	); 
 end dot;
 
 architecture arch of dot is

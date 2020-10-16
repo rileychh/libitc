@@ -5,8 +5,7 @@ use ieee.numeric_std.all;
 use work.clk_p.all;
 use work.dot_p.all;
 
-entity dot_test is
-
+entity dot_test is 
 	port (
 		-- sys
 		sys_clk, sys_rst : in std_logic;
@@ -14,8 +13,7 @@ entity dot_test is
 		dot_r, dot_g, dot_s : out unsigned(0 to 7);
 		-- sw 
 		sw : in unsigned(7 downto 0)
-	);
-
+	); 
 end dot_test;
 
 architecture arch of dot_test is

@@ -57,8 +57,7 @@ architecture arch of dbnce is
 
 begin
 
-	process (clk) begin
-
+	process (clk) begin 
 		if rising_edge(clk) then
 			if dbnce_in = '1' then
 				if cnt = cnt'high then
@@ -70,8 +69,7 @@ begin
 				dbnce_out <= '0';
 				cnt <= 0;
 			end if;
-		end if;
-
+		end if; 
 	end process;
 
 end arch;
