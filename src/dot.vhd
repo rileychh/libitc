@@ -35,7 +35,6 @@ entity dot is
 		dot_r, dot_g, dot_s : out unsigned(0 to 7);
 		-- internal
 		clk            : in std_logic; -- 1kHz
-		ena            : in std_logic; -- '1' active, '0' blanks all leds
 		data_r, data_g : in dot_data_t
 	);
 

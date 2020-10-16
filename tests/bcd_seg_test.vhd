@@ -6,7 +6,6 @@ use ieee.numeric_std.all;
 
 use work.clk_p.all;
 use work.seg_p.all;
-use work.bcd_p.all;
 
 entity bcd_seg_test is
 
@@ -26,7 +25,6 @@ architecture arch of bcd_seg_test is
 
 	signal clk_100, clk_1k, clk_10k, clk_cnt : std_logic;
 	signal cnt : integer range 0 to 99_999_999 := 0;
-	signal cnt_bcd : unsigned(31 downto 0);
 	signal seg_data : string(1 to 8);
 
 begin
@@ -71,18 +69,8 @@ begin
 			dot => (others => '0')
 		);
 
-	to_bcd_inst : entity work.to_bcd(arch)
-		generic map(
-			bin_width => 27,
-			digit_len => 8
-		)
-		port map(
-			bin => to_unsigned(cnt, 27),
-			bcd => cnt_bcd
-		);
-
 	seg_map : for i in 0 to 7 generate
-		seg_data(8 - i) <= to_character(cnt_bcd(i * 4 + 3 downto i * 4));
+		seg_data(8 - i) <= to_character(to_bcd(cnt, 27, 8)(i * 4 + 3 downto i * 4));
 	end generate seg_map;
 
 	with sw(1 downto 0) select clk_cnt <=
@@ -91,14 +79,10 @@ begin
 	clk_1k when "10",
 	clk_10k when "11";
 
-	process (clk_cnt)
-
-	begin
-
+	process (clk_cnt) begin 
 		if rising_edge(clk_cnt) then
 			cnt <= cnt + 1;
-		end if;
-
+		end if; 
 	end process;
 
 end arch;

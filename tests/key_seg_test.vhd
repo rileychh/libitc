@@ -65,18 +65,14 @@ begin
 			pressed => key_pressed
 		);
 
-	process (sys_rst, key_int)
-
-	begin
-
+	process (sys_rst, key_int) begin 
 		if sys_rst = '0' then
 			in_buf <= (others => ' ');
 		elsif rising_edge(key_int) then
 			-- shift key_pressed into in_buf from right
 			-- e.g. in_buf = "12345678", pressed 2 => in_buf := "23456782"
 			in_buf <= in_buf(2 to 8) & to_character(key_pressed);
-		end if;
-
+		end if; 
 	end process;
 
 end arch;

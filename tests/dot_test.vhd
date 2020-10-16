@@ -48,7 +48,6 @@ begin
 			dot_g  => dot_g,
 			dot_s  => dot_s,
 			clk    => clk_1k,
-			ena    => '1',
 			data_r => dot_data_r,
 			data_g => dot_data_g
 		);
