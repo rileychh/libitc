@@ -22,11 +22,11 @@ Under `src/`, every hardware have its own `.vhd` file, consists of one package, 
 
 Under `src/util`, there are optional utilities for converting types, generating waves, etc.
 
-| Name  |                           For                            |  Status   |
-| :---: | :------------------------------------------------------: | :-------: |
-|  bcd  | Converting unsigned integer into BCD vectors (for `seg`) | v1 stable |
-|  pwm  |            Single phase PWM signal generator             | v1 stable |
-|  i2c  |                I2C (IIC) master interface                |  testing  |
+| Name  |                           For                            | Status  |
+| :---: | :------------------------------------------------------: | :-----: |
+|  bcd  | Converting unsigned integer into BCD vectors (for `seg`) | stable  |
+|  pwm  |            Single phase PWM signal generator             | stable  |
+|  i2c  |                I2C (IIC) master interface                | testing |
 
 ## Tests
 
@@ -34,7 +34,7 @@ There are no actual complete VHDL testbench, but there some .vhd files located u
 
 ## Tools
 
-Under `tools/` there are references or converters to help with the writing of the code.
+Under `tools/` there are scripts to help with the writing of the code.
 
 ## My last words
 
