@@ -11,7 +11,9 @@ package tsl_p is
 			-- internal
 			clk : in std_logic; -- 800kHz
 			rst : in std_logic;
-			lux : out integer -- calculated illuminance from sensors
+			lux : out integer; -- calculated illuminance from sensors
+			-- debug
+			dbg_i2c_state : out unsigned(2 downto 0)
 		);
 	end component;
 end package;
@@ -32,7 +34,9 @@ entity tsl is
 		-- internal
 		clk : in std_logic; -- 800kHz
 		rst : in std_logic;
-		lux : out integer -- calculated illuminance from sensors
+		lux : out integer; -- calculated illuminance from sensors
+		-- debug
+		dbg_i2c_state : out unsigned(2 downto 0)
 	);
 
 end tsl;
@@ -43,14 +47,14 @@ architecture arch of tsl is
 	-- I2C writes to command register first: which is (cmd, clear, word, block, addr * 4)
 	-- cmd means select command register. must be '1'
 	-- clear is not used here. write '0'
-	-- word is not used as well. write '0'
+	-- word is not used here. write '0'
 	-- block means continuos reading/writing.
 	-- addr means register address. for example, control register is at 0x0, id register is at 0xa
 	constant tsl_addr : unsigned(6 downto 0) := "0111001"; -- device address (0x39)
-	constant reg_ctrl : unsigned(7 downto 0) := x"80"; -- select command, (write) byte to control register
+	constant reg_ctrl : unsigned(7 downto 0) := x"80"; -- (write) byte to control register
 	constant ctrl_power_on : unsigned(7 downto 0) := x"03"; -- power on command for control register
-	constant reg_data_0 : unsigned(7 downto 0) := x"ac"; -- select command, (read) word from data register 0
-	constant reg_data_1 : unsigned(7 downto 0) := x"ae"; -- select command, (read) word from data register 1
+	constant reg_data_0 : unsigned(7 downto 0) := x"ac"; -- (read) word from data register 0
+	constant reg_data_1 : unsigned(7 downto 0) := x"ae"; -- (read) word from data register 1
 
 	-- state machines
 	type tsl_state_t is (init, read_data_0, read_data_1);
@@ -184,16 +188,17 @@ begin
 
 	i2c_inst : entity work.i2c(arch)
 		port map(
-			scl  => tsl_scl,
-			sda  => tsl_sda,
-			clk  => clk,
-			rst  => rst,
-			ena  => i2c_ena,
-			busy => i2c_busy,
-			addr => tsl_addr,
-			rw   => i2c_rw,
-			rx   => i2c_rx,
-			tx   => i2c_tx
+			scl       => tsl_scl,
+			sda       => tsl_sda,
+			clk       => clk,
+			rst       => rst,
+			ena       => i2c_ena,
+			busy      => i2c_busy,
+			addr      => tsl_addr,
+			rw        => i2c_rw,
+			rx        => i2c_rx,
+			tx        => i2c_tx,
+			dbg_state => dbg_i2c_state
 		);
 
 	i2c_done <= i2c_busy_prev and not i2c_busy;

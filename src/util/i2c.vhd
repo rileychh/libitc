@@ -21,7 +21,9 @@ package i2c_p is
 			addr : in unsigned(6 downto 0);  -- slave address
 			rw   : in std_logic;             -- high read, low write
 			rx   : out unsigned(7 downto 0); -- byte read from slave
-			tx   : in unsigned(7 downto 0)   -- byte to write to slave
+			tx   : in unsigned(7 downto 0);  -- byte to write to slave
+			-- debug
+			dbg_state : out unsigned(2 downto 0)
 		);
 	end component;
 end package;
@@ -93,7 +95,9 @@ entity i2c is
 		addr : in unsigned(6 downto 0);  -- slave address
 		rw   : in std_logic;             -- high read, low write
 		rx   : out unsigned(7 downto 0); -- byte read from slave
-		tx   : in unsigned(7 downto 0)   -- byte to write to slave
+		tx   : in unsigned(7 downto 0);  -- byte to write to slave
+		-- debug
+		dbg_state : out unsigned(2 downto 0)
 	);
 end i2c;
 
@@ -132,6 +136,8 @@ architecture arch of i2c is
 	signal cnt : integer range 0 to 7;
 
 begin
+
+	dbg_state <= to_unsigned(state_t'pos(state), 3);
 
 	busy <= '1' when state /= idle or rst = '0' else '0';
 
@@ -194,8 +200,10 @@ begin
 	end process;
 
 	-- SDA control
-	process (clk) begin
-		if rising_edge(clk) then
+	process (clk, rst) begin
+		if rst = '0' then
+			sda_wire <= '1';
+		elsif rising_edge(clk) then
 			if scl_wire = '0' then -- write when SCL is low
 				case state is
 					when idle =>
