@@ -64,9 +64,9 @@ package body seg_p is
 				j := j + 4;
 			end loop;
 
-			--       shift
-			--      <------
-			-- bcd & bin_reg
+			--   shift
+			--  <------
+			-- bcd & bin
 			bcd := bcd sll 1;
 			bcd(bcd'right) := bin(bin'left);
 			bin := bin sll 1;
