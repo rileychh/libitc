@@ -80,7 +80,7 @@ begin
 		end generate right;
 
 		dbg : if i = 7 generate
-			seg_data(i + 1) <= to_character(to_bcd(to_integer(dbg_i2c_state), 3, 1));
+			seg_data(i + 1) <= to_character(to_bcd(dbg_i2c_state, 3, 1));
 		end generate dbg;
 	end generate seg_map;
 
