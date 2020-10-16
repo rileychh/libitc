@@ -35,7 +35,3 @@ There are no actual complete VHDL testbench, but there some .vhd files located u
 ## Tools
 
 Under `tools/` there are scripts to help with the writing of the code.
-
-## My last words
-
-Contributions are always welcome!
