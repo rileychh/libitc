@@ -17,6 +17,12 @@ package seg_p is
 
 	function to_character(n : integer range 0 to 9) return character;
 	function to_character(n : unsigned(3 downto 0)) return character;
+
+	-- converts an integer into bcd
+	-- n: the integer
+	-- n_width: number of bits needed to represent n
+	-- bcd_len: return length in nibbles (1 digit == 4 bits)
+	function to_bcd(n, n_width, bcd_len : integer) return unsigned;
 end package;
 
 package body seg_p is
@@ -34,6 +40,40 @@ package body seg_p is
 		else -- n is hexadecimal
 			return character'val(to_integer(n - 10) + character'pos('A'));
 		end if;
+	end function;
+
+	function to_bcd(n, n_width, bcd_len : integer) return unsigned is
+
+		variable bin : unsigned(n_width - 1 downto 0) := to_unsigned(n, n_width);
+		variable bcd : unsigned(bcd_len * 4 - 1 downto 0) := (others => '0');
+		variable j : integer;
+
+	begin
+
+		-- convert binary to BCD
+		for i in 0 to n_width - 1 loop
+			-- check if any nibble (bcd digit) is more then 4
+			-- for (j = 0; j < bcd_len - 4; j += 4)
+			-- j is the bit count, 
+			j := 0;
+			while j < (bcd_len - 1) * 4 loop
+				if bcd(j + 3 downto j) > 4 then
+					bcd(j + 3 downto j) := bcd(j + 3 downto j) + 3; -- add 3 to the nibble
+				end if;
+
+				j := j + 4;
+			end loop;
+
+			--       shift
+			--      <------
+			-- bcd & bin_reg
+			bcd := bcd sll 1;
+			bcd(bcd'right) := bin(bin'left);
+			bin := bin sll 1;
+		end loop;
+
+		return bcd;
+
 	end function;
 end package body;
 
