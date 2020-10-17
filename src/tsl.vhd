@@ -6,14 +6,19 @@ package tsl_p is
 	component tsl
 		port (
 			-- tsl
-			tsl_scl : out std_logic;
-			tsl_sda : inout std_logic;
+			tsl_scl, tsl_sda : inout std_logic;
 			-- internal
 			clk : in std_logic; -- 800kHz
 			rst : in std_logic;
 			lux : out integer; -- calculated illuminance from sensors
 			-- debug
-			dbg_i2c_state : out unsigned(2 downto 0)
+			dbg_i2c_state : out unsigned(3 downto 0);
+			dbg_i2c_busy  : out std_logic;
+			dbg_tsl_state : out unsigned(3 downto 0);
+			dbg_tsl_step  : out unsigned(3 downto 0);
+			dbg_data      : out unsigned(31 downto 0);
+			dbg_i2c_rx    : out unsigned(7 downto 0);
+			dbg_i2c_tx    : out unsigned(7 downto 0)
 		);
 	end component;
 end package;
@@ -24,18 +29,23 @@ use ieee.numeric_std.all;
 
 use work.i2c_p.all;
 
-entity tsl is 
+entity tsl is
 	port (
 		-- tsl
-		tsl_scl : out std_logic;
-		tsl_sda : inout std_logic;
+		tsl_scl, tsl_sda : inout std_logic;
 		-- internal
 		clk : in std_logic; -- 800kHz
 		rst : in std_logic;
 		lux : out integer; -- calculated illuminance from sensors
 		-- debug
-		dbg_i2c_state : out unsigned(2 downto 0)
-	); 
+		dbg_i2c_state : out unsigned(3 downto 0);
+		dbg_i2c_busy  : out std_logic;
+		dbg_tsl_state : out unsigned(3 downto 0);
+		dbg_tsl_step  : out unsigned(3 downto 0);
+		dbg_data      : out unsigned(31 downto 0);
+		dbg_i2c_rx    : out unsigned(7 downto 0);
+		dbg_i2c_tx    : out unsigned(7 downto 0)
+	);
 end tsl;
 
 architecture arch of tsl is
@@ -74,64 +84,35 @@ architecture arch of tsl is
 	signal data_1 : unsigned(15 downto 0);
 
 	-- convert sensor values to lux reading
+	-- see docs/lux.cpp
 	function to_lux(data_0, data_1 : unsigned(15 downto 0)) return integer is
 
-		constant lux_scale : integer := 14; -- scale by 2^14
-		constant ratio_scale : integer := 9; -- scale ratio by 2^9
-		--−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−
-		-- T, FN, and CL Package coefficients
-		--−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−
-		-- For Ch1/Ch0=0.00 to 0.50
-		-- Lux/Ch0=0.0304−0.062*((Ch1/Ch0)^1.4)
-		-- piecewise approximation
-		-- For Ch1/Ch0=0.00 to 0.125:
-		-- Lux/Ch0=0.0304−0.0272*(Ch1/Ch0)
-		--
-		-- For Ch1/Ch0=0.125 to 0.250:
-		-- Lux/Ch0=0.0325−0.0440*(Ch1/Ch0)
-		--
-		-- For Ch1/Ch0=0.250 to 0.375:
-		-- Lux/Ch0=0.0351−0.0544*(Ch1/Ch0)
-		--
-		-- For Ch1/Ch0=0.375 to 0.50:
-		-- Lux/Ch0=0.0381−0.0624*(Ch1/Ch0)
-		--
-		-- For Ch1/Ch0=0.50 to 0.61:
-		-- Lux/Ch0=0.0224−0.031*(Ch1/Ch0)
-		--
-		-- For Ch1/Ch0=0.61 to 0.80:
-		-- Lux/Ch0=0.0128−0.0153*(Ch1/Ch0)
-		--
-		-- For Ch1/Ch0=0.80 to 1.30:
-		-- Lux/Ch0=0.00146−0.00112*(Ch1/Ch0)
-		--
-		-- For Ch1/Ch0>1.3:
-		-- Lux/Ch0=0
-		--−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−
-		constant k1 : integer := 16#0040#; -- 0.125 * 2^RATIO_SCALE
-		constant b1 : integer := 16#01f2#; -- 0.0304 * 2^LUX_SCALE
-		constant m1 : integer := 16#01be#; -- 0.0272 * 2^LUX_SCALE
-		constant k2 : integer := 16#0080#; -- 0.250 * 2^RATIO_SCALE
-		constant b2 : integer := 16#0214#; -- 0.0325 * 2^LUX_SCALE
-		constant m2 : integer := 16#02d1#; -- 0.0440 * 2^LUX_SCALE
-		constant k3 : integer := 16#00c0#; -- 0.375 * 2^RATIO_SCALE
-		constant b3 : integer := 16#023f#; -- 0.0351 * 2^LUX_SCALE
-		constant m3 : integer := 16#037b#; -- 0.0544 * 2^LUX_SCALE
-		constant k4 : integer := 16#0100#; -- 0.50 * 2^RATIO_SCALE
-		constant b4 : integer := 16#0270#; -- 0.0381 * 2^LUX_SCALE
-		constant m4 : integer := 16#03fe#; -- 0.0624 * 2^LUX_SCALE
-		constant k5 : integer := 16#0138#; -- 0.61 * 2^RATIO_SCALE
-		constant b5 : integer := 16#016f#; -- 0.0224 * 2^LUX_SCALE
-		constant m5 : integer := 16#01fc#; -- 0.0310 * 2^LUX_SCALE
-		constant k6 : integer := 16#019a#; -- 0.80 * 2^RATIO_SCALE
-		constant b6 : integer := 16#00d2#; -- 0.0128 * 2^LUX_SCALE
-		constant m6 : integer := 16#00fb#; -- 0.0153 * 2^LUX_SCALE
-		constant k7 : integer := 16#029a#; -- 1.3 * 2^RATIO_SCALE
-		constant b7 : integer := 16#0018#; -- 0.00146 * 2^LUX_SCALE
-		constant m7 : integer := 16#0012#; -- 0.00112 * 2^LUX_SCALE
-		constant k8 : integer := 16#029a#; -- 1.3 * 2^RATIO_SCALE
-		constant b8 : integer := 16#0000#; -- 0.000 * 2^LUX_SCALE
-		constant m8 : integer := 16#0000#; -- 0.000 * 2^LUX_SCALE
+		constant lux_scale : integer := 14;
+		constant ratio_scale : integer := 9;
+		constant k1 : integer := 16#0040#;
+		constant b1 : integer := 16#01f2#;
+		constant m1 : integer := 16#01be#;
+		constant k2 : integer := 16#0080#;
+		constant b2 : integer := 16#0214#;
+		constant m2 : integer := 16#02d1#;
+		constant k3 : integer := 16#00c0#;
+		constant b3 : integer := 16#023f#;
+		constant m3 : integer := 16#037b#;
+		constant k4 : integer := 16#0100#;
+		constant b4 : integer := 16#0270#;
+		constant m4 : integer := 16#03fe#;
+		constant k5 : integer := 16#0138#;
+		constant b5 : integer := 16#016f#;
+		constant m5 : integer := 16#01fc#;
+		constant k6 : integer := 16#019a#;
+		constant b6 : integer := 16#00d2#;
+		constant m6 : integer := 16#00fb#;
+		constant k7 : integer := 16#029a#;
+		constant b7 : integer := 16#0018#;
+		constant m7 : integer := 16#0012#;
+		constant k8 : integer := 16#029a#;
+		constant b8 : integer := 16#0000#;
+		constant m8 : integer := 16#0000#;
 
 		constant ch_scale : integer := 2 ** 4; -- scale (multiply) CH0 (d0) and CH1 (d1)
 		constant ch0 : integer := to_integer(data_0 * ch_scale); -- scaled CH0 in integer
@@ -181,6 +162,13 @@ architecture arch of tsl is
 	end function;
 
 begin
+
+	dbg_i2c_busy <= i2c_busy;
+	dbg_data <= data_0 & data_1;
+	dbg_tsl_state <= to_unsigned(tsl_state_t'pos(state), 4);
+	dbg_tsl_step <= to_unsigned(i2c_step_t'pos(step), 4);
+	dbg_i2c_rx <= i2c_rx;
+	dbg_i2c_tx <= i2c_tx;
 
 	i2c_inst : entity work.i2c(arch)
 		port map(
@@ -283,6 +271,6 @@ begin
 		end if;
 	end process;
 
-	lux <= to_lux(data_0, data_1);
+	lux <= 0 when rst = '0' else to_lux(data_0, data_1);
 
 end arch;

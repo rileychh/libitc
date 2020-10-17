@@ -5,6 +5,7 @@ use ieee.numeric_std.all;
 use work.clk_p.all;
 use work.seg_p.all;
 use work.tsl_p.all;
+use work.dot_p.all;
 
 entity tsl_seg_test is
 	port (
@@ -13,9 +14,10 @@ entity tsl_seg_test is
 		-- seg
 		seg_1, seg_2 : out unsigned(7 downto 0); -- abcdefgp * 2
 		seg_s        : out unsigned(0 to 7);     -- seg2_s1 ~ seg1_s4
+		-- dot
+		dot_r, dot_g, dot_s : out unsigned(0 to 7);
 		-- tsl
-		tsl_scl : out std_logic;
-		tsl_sda : inout std_logic
+		tsl_scl, tsl_sda : inout std_logic
 	);
 end tsl_seg_test;
 
@@ -23,15 +25,21 @@ architecture arch of tsl_seg_test is
 
 	signal clk_800k, clk_1k : std_logic;
 	signal tsl_lux : integer;
-	signal tsl_lux_bcd : unsigned(15 downto 0); -- 4 digits
 	signal seg_data : string(1 to 8);
-	signal dbg_i2c_state : unsigned(2 downto 0);
+	signal dot_data : dot_data_t;
+	signal dbg_i2c_state : unsigned(3 downto 0);
+	signal dbg_i2c_busy : std_logic;
+	signal dbg_tsl_state : unsigned(3 downto 0);
+	signal dbg_tsl_step  : unsigned(3 downto 0);
+	signal dbg_tsl_data : unsigned(31 downto 0);
+	signal dbg_i2c_rx : unsigned(7 downto 0);
+	signal dbg_i2c_tx : unsigned(7 downto 0);
 
 begin
 
 	clk_sys_inst_800k : entity work.clk_sys(arch)
 		generic map(
-			clk_out_freq => 800_000
+			clk_out_freq => 200_000
 		)
 		port map(
 			sys_clk => sys_clk,
@@ -56,7 +64,13 @@ begin
 			clk           => clk_800k,
 			rst           => sys_rst,
 			lux           => tsl_lux,
-			dbg_i2c_state => dbg_i2c_state
+			dbg_i2c_state => dbg_i2c_state,
+			dbg_i2c_busy  => dbg_i2c_busy,
+			dbg_tsl_state => dbg_tsl_state,
+			dbg_tsl_step  => dbg_tsl_step,
+			dbg_data      => dbg_tsl_data,
+			dbg_i2c_rx    => dbg_i2c_rx,
+			dbg_i2c_tx    => dbg_i2c_tx
 		);
 
 	seg_inst : entity work.seg(arch)
@@ -66,22 +80,32 @@ begin
 			seg_s => seg_s,
 			clk   => clk_1k,
 			data  => seg_data,
-			dot => (others => '0')
+			dot => (7 => dbg_i2c_busy, others => '0')
 		);
 
 	-- map bcd version of tsl_lux to seven segment display data input
-	seg_map : for i in 0 to 7 generate
-		left : if i >= 0 and i < 4 generate -- 0 to 3
-			seg_data(4 - i) <= to_character(to_bcd(tsl_lux, 13, 4)(i * 4 + 3 downto i * 4)); -- tsl_lux
-		end generate left;
-
-		right : if i >= 4 and i < 7 generate -- 4 to 6
-			seg_data(i + 1) <= ' '; -- spaces (blank)
-		end generate right;
-
-		dbg : if i = 7 generate
-			seg_data(i + 1) <= to_character(to_bcd(dbg_i2c_state, 3, 1));
-		end generate dbg;
+	seg_map : for i in 0 to 3 generate
+		seg_data(3 - i + 1) <= to_character(to_bcd(tsl_lux, 13, 4)(i * 4 + 3 downto i * 4)); -- tsl_lux
 	end generate seg_map;
+	seg_data(5) <= ' ';
+	seg_data(6) <= to_character(dbg_tsl_state);
+	seg_data(7) <= to_character(dbg_tsl_step);
+	seg_data(8) <= to_character(dbg_i2c_state);
+
+	dot_inst : entity work.dot(arch)
+		port map(
+			dot_r  => dot_r,
+			dot_g  => dot_g,
+			dot_s  => dot_s,
+			clk    => clk_1k,
+			data_r => dot_data,
+			data_g => dot_zeros
+		);
+	dot_map : for i in 0 to 3 generate
+		dot_data(3 - i) <= dbg_tsl_data(i * 8 + 7 downto i * 8);
+	end generate dot_map;
+	dot_data(4) <= dbg_i2c_rx;
+	dot_data(5) <= dbg_i2c_tx;
+	dot_data(6 to 7) <= (others => (others => '0'));
 
 end arch;

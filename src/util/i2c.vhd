@@ -11,8 +11,7 @@ package i2c_p is
 	component i2c
 		port (
 			-- I2C slave
-			scl : out std_logic;
-			sda : inout std_logic;
+			scl, sda : inout std_logic;
 			-- internal
 			clk  : in std_logic;             -- 800kHz
 			rst  : in std_logic;             -- low active
@@ -23,7 +22,7 @@ package i2c_p is
 			rx   : out unsigned(7 downto 0); -- byte read from slave
 			tx   : in unsigned(7 downto 0);  -- byte to write to slave
 			-- debug
-			dbg_state : out unsigned(2 downto 0)
+			dbg_state : out unsigned(3 downto 0)
 		);
 	end component;
 end package;
@@ -85,8 +84,7 @@ use work.i2c_p.all;
 entity i2c is
 	port (
 		-- I2C slave
-		scl : out std_logic;
-		sda : inout std_logic;
+		scl, sda : inout std_logic;
 		-- internal
 		clk  : in std_logic;             -- 800kHz
 		rst  : in std_logic;             -- low active
@@ -97,7 +95,7 @@ entity i2c is
 		rx   : out unsigned(7 downto 0); -- byte read from slave
 		tx   : in unsigned(7 downto 0);  -- byte to write to slave
 		-- debug
-		dbg_state : out unsigned(2 downto 0)
+		dbg_state : out unsigned(3 downto 0)
 	);
 end i2c;
 
@@ -116,7 +114,7 @@ architecture arch of i2c is
 	type state_t is (idle, start, cmd, ack1, data, ack2, stop);
 	signal state : state_t;
 
-	-- SCL and SDA wire: to change final output from '0' and '1' to '0' and 'X';
+	-- SCL and SDA wire: to change final output from '0' and '1' to '0' and 'Z';
 	signal scl_wire, sda_wire : std_logic;
 
 	-- input latches: save input on rising edge of start
@@ -137,53 +135,7 @@ architecture arch of i2c is
 
 begin
 
-	dbg_state <= to_unsigned(state_t'pos(state), 3);
-
-	busy <= '1' when state /= idle or rst = '0' else '0';
-
-	-- state machine
-	process (clk, rst) begin
-		if rst = '0' then
-			state <= idle;
-		elsif rising_edge(clk) then
-			case state is
-				when idle =>
-					if ena = '1' then
-						update;
-						state <= start;
-					end if;
-				when start =>
-					state <= cmd;
-					cnt <= 7; -- prepare cnt for command state
-				when cmd =>
-					if cnt = 0 then
-						state <= ack1;
-					end if;
-					cnt <= cnt - 1;
-				when ack1 =>
-					state <= data;
-					cnt <= 7; -- prepare cnt for data state	
-				when data =>
-					if cnt = 0 then
-						state <= ack2;
-					end if;
-					cnt <= cnt - 1;
-				when ack2 =>
-					if ena = '1' then -- continuous mode
-						update;
-						if cmd_reg = addr & rw then
-							state <= data; -- keep sending/receiving bytes
-						else
-							state <= start; -- send a restart
-						end if;
-					else
-						state <= stop;
-					end if;
-				when stop =>
-					state <= idle;
-			end case;
-		end if;
-	end process;
+	dbg_state <= to_unsigned(state_t'pos(state), 4);
 
 	-- SCL control
 	process (clk, rst) begin
@@ -199,47 +151,105 @@ begin
 		end if;
 	end process;
 
-	-- SDA control
+	-- SDA control, busy control, state machine
 	process (clk, rst) begin
 		if rst = '0' then
 			sda_wire <= '1';
-		elsif rising_edge(clk) then
+			busy <= '1';
+			state <= idle;
+			cnt <= 7;
+		elsif falling_edge(clk) then
 			if scl_wire = '0' then -- write when SCL is low
 				case state is
 					when idle =>
-						sda_wire <= '1';
+						sda_wire <= '1'; -- release sda
+
 					when cmd => -- send 7-bit address plus 1-bit read/write, MSB first
-						sda_wire <= cmd_reg(cnt);
+						sda_wire <= cmd_reg(cnt); -- cnt is controlled by read process
+
+					when ack1 =>
+						if cmd_reg(0) = read then
+							sda_wire <= '1'; -- release sda for incoming data
+						end if;
+
 					when data =>
 						if cmd_reg(0) = write then -- r/w bit is write
-							sda_wire <= tx_reg(cnt);
+							sda_wire <= tx_reg(cnt); -- cnt is controlled by read process
 						end if;
+
 					when ack2 =>
 						if cmd_reg(0) = read then -- r/w bit is read
 							sda_wire <= '0'; -- send acknowledgment bit
 						end if;
-					when stop =>
-						-- TODO should sda be '0' first?
+
 					when others => null;
 				end case;
 
-				-- I2C start/stop and SDA read control
 			elsif scl_wire = '1' then -- write start/stop or read when SCL is high
 				case state is
+					when idle =>
+						busy <= '0';
+						if ena = '1' then
+							busy <= '1';
+							update;
+							state <= start;
+						end if;
+
 					when start =>
 						sda_wire <= '0'; -- scl = '1' and falling_edge(sda) == start
+
+						state <= cmd;
+						cnt <= 7; -- prepare cnt for command state
+
+					when cmd =>
+						if cnt = 0 then
+							cnt <= 7; -- reset bit counter
+							state <= ack1;
+						else
+							cnt <= cnt - 1;
+						end if;
+
 					when ack1 =>
 						-- TODO handle no acknowledgment, currently ignored
+						state <= data;
+
 					when data =>
 						if cmd_reg(0) = read then -- r/w bit is read
-							rx(cnt) <= sda_wire; -- cnt is controlled by write process
+							rx(cnt) <= sda_wire;
 						end if;
+
+						if cnt = 0 then
+							if ena = '1' then -- continuous mode 
+								busy <= '0'; -- ready to accept new data
+							end if;
+							cnt <= 7; -- reset bit counter
+							state <= ack2;
+						else
+							cnt <= cnt - 1;
+						end if;
+
 					when ack2 =>
-						-- TODO handle no acknowledgment, currently ignored
 						if cmd_reg(0) = write then -- r/w bit is write
+							-- TODO handle no acknowledgment, currently ignored
 						end if;
+
+						busy <= '1';
+						if ena = '1' then -- continuous mode
+							update;
+							if cmd_reg = addr & rw then
+								state <= data; -- keep sending/receiving bytes
+							else
+								state <= start; -- send a restart
+							end if;
+						else
+							state <= stop;
+						end if;
+
 					when stop =>
 						sda_wire <= '1'; -- scl = '1' and rising_edge(sda) == stop
+
+						state <= idle;
+
 					when others => null;
 				end case;
 			end if;
