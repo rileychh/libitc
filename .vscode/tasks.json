@@ -19,6 +19,20 @@
 				"kind": "build",
 				"isDefault": true
 			}
+		},
+		{
+			"label": "Program",
+			"type": "shell",
+			"command": [
+				"bash -c '",
+				"quartus_pgm -c \"USB-Blaster [USB-0]\" output_files/libitc.cdf",
+				"'"
+			],
+			"problemMatcher": [],
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			}
 		}
 	]
 }
