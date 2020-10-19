@@ -1,33 +1,3 @@
--- I2C (IIC) master interface
-
-library ieee;
-use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
-
-package i2c_p is
-	constant read : std_logic := '1';
-	constant write : std_logic := '0';
-
-	component i2c
-		port (
-			-- I2C slave
-			scl, sda : inout std_logic;
-			-- internal
-			clk  : in std_logic;             -- 800kHz
-			rst  : in std_logic;             -- low active
-			ena  : in std_logic;             -- if high, latch in new input
-			busy : out std_logic;            -- if high, addr, rw and tx will be ignored
-			addr : in unsigned(6 downto 0);  -- slave address
-			rw   : in std_logic;             -- high read, low write
-			rx   : out unsigned(7 downto 0); -- byte read from slave
-			tx   : in unsigned(7 downto 0);  -- byte to write to slave
-			-- debug
-			dbg_state : out unsigned(3 downto 0)
-		);
-	end component;
-end package;
-
---
 -- I2C master generic interface
 --
 -- reference:
@@ -79,6 +49,35 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+package i2c_p is
+	constant read : std_logic := '1';
+	constant write : std_logic := '0';
+	constant ack : std_logic := '0';
+	constant nack : std_logic := '1';
+
+	component i2c
+		port (
+			-- I2C slave
+			scl, sda : inout std_logic;
+			-- internal
+			clk  : in std_logic;             -- 800kHz or 200kHz
+			rst  : in std_logic;             -- low active
+			ena  : in std_logic;             -- if high, latch in new input
+			busy : out std_logic;            -- if high, addr, rw and tx will be ignored
+			addr : in unsigned(6 downto 0);  -- slave address
+			rw   : in std_logic;             -- high read, low write
+			rx   : out unsigned(7 downto 0); -- byte read from slave
+			tx   : in unsigned(7 downto 0);  -- byte to write to slave
+			-- debug
+			dbg_state : out unsigned(3 downto 0)
+		);
+	end component;
+end package;
+
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
 use work.i2c_p.all;
 
 entity i2c is
@@ -86,7 +85,7 @@ entity i2c is
 		-- I2C slave
 		scl, sda : inout std_logic;
 		-- internal
-		clk  : in std_logic;             -- 800kHz
+		clk  : in std_logic;             -- 800kHz or 200kHz
 		rst  : in std_logic;             -- low active
 		ena  : in std_logic;             -- if high, latch in new input
 		busy : out std_logic;            -- if high, addr, rw and tx will be ignored
@@ -114,24 +113,28 @@ architecture arch of i2c is
 	type state_t is (idle, start, cmd, ack1, data, ack2, stop);
 	signal state : state_t;
 
-	-- SCL and SDA wire: to change final output from '0' and '1' to '0' and 'Z';
+	-- converts final output from '0' and '1' to '0' and 'Z';
+	-- write at wire, read directly at port
 	signal scl_wire, sda_wire : std_logic;
 
-	-- input latches: save input on rising edge of start
+	-- indicates SCL is being stretched (held low) by slave, wait for slave to release
+	signal stretch : std_logic;
+
+	-- saves input when not busy
 	signal cmd_reg : unsigned(7 downto 0); -- command = addr + rw
 	signal tx_reg : unsigned(7 downto 0);
 
-	-- procedure to latch in new input value
+	-- latches in new input value
 	procedure update is begin
 		cmd_reg <= addr & rw;
 		tx_reg <= tx;
 	end procedure;
 
-	-- SCL enable: release SCL when resetting, idling, starting or stopping
+	-- releases SCL when resetting, idling, starting or stopping
 	signal scl_ena : std_logic;
 
 	-- bit count: loop inside state for a byte
-	signal cnt : integer range 0 to 7;
+	signal bit_cnt : integer range 0 to 7;
 
 begin
 
@@ -141,118 +144,116 @@ begin
 	process (clk, rst) begin
 		if rst = '0' then
 			scl_wire <= '1';
+			stretch <= '0';
 		elsif rising_edge(clk) then
 			case state is
 				when idle | start | stop =>
 					scl_wire <= '1';
 				when others =>
-					scl_wire <= not scl_wire; -- scl(400kHz) is half the frequency of clk(800kHz)
+					-- TODO test this
+					if scl_wire = '1' and scl = '0' then -- master can't pull SCL high
+						stretch <= '1'; -- slave is stretching clock
+					else -- pause when stretching
+						scl_wire <= not scl_wire; -- SCL is half the frequency of clk
+					end if;
 			end case;
 		end if;
 	end process;
 
-	-- SDA control, busy control, state machine
+	-- SDA control, state machine
+	-- write when SCL is '0', read or send start/stop when SCL is '1'
+	-- busy flag, state machine and bit counter are all changed when SCL is '1'
 	process (clk, rst) begin
 		if rst = '0' then
 			sda_wire <= '1';
 			busy <= '1';
 			state <= idle;
-			cnt <= 7;
-		elsif falling_edge(clk) then
-			if scl_wire = '0' then -- write when SCL is low
-				case state is
-					when idle =>
-						sda_wire <= '1'; -- release sda
+			bit_cnt <= 7;
+		elsif falling_edge(clk) and stretch = '0' then -- update SDA half a clock after SCL, pause when stretching
+			case state is
+				when idle =>
+					sda_wire <= '1'; -- release SDA
+					busy <= '0';
+					if ena = '1' then
+						update;
+						busy <= '1';
+						state <= start;
+					end if;
 
-					when cmd => -- send 7-bit address plus 1-bit read/write, MSB first
-						sda_wire <= cmd_reg(cnt); -- cnt is controlled by read process
+				when start =>
+					sda_wire <= '0'; -- SCL = '1' and falling_edge(SDA) == start
+					state <= cmd;
+					bit_cnt <= 7; -- prepare bit_cnt for command state
 
-					when ack1 =>
-						if cmd_reg(0) = read then
-							sda_wire <= '1'; -- release sda for incoming data
-						end if;
-
-					when data =>
-						if cmd_reg(0) = write then -- r/w bit is write
-							sda_wire <= tx_reg(cnt); -- cnt is controlled by read process
-						end if;
-
-					when ack2 =>
-						if cmd_reg(0) = read then -- r/w bit is read
-							sda_wire <= '0'; -- send acknowledgment bit
-						end if;
-
-					when others => null;
-				end case;
-
-			elsif scl_wire = '1' then -- write start/stop or read when SCL is high
-				case state is
-					when idle =>
-						busy <= '0';
-						if ena = '1' then
-							busy <= '1';
-							update;
-							state <= start;
-						end if;
-
-					when start =>
-						sda_wire <= '0'; -- scl = '1' and falling_edge(sda) == start
-
-						state <= cmd;
-						cnt <= 7; -- prepare cnt for command state
-
-					when cmd =>
-						if cnt = 0 then
-							cnt <= 7; -- reset bit counter
+				when cmd =>
+					if scl_wire = '0' then
+						sda_wire <= cmd_reg(bit_cnt); -- send current bit
+					elsif scl_wire = '1' then
+						if bit_cnt = 0 then
+							bit_cnt <= 7; -- reset bit counter
 							state <= ack1;
 						else
-							cnt <= cnt - 1;
+							bit_cnt <= bit_cnt - 1;
+						end if;
+					end if;
+
+				when ack1 =>
+					if scl_wire = '0' then
+						sda_wire <= '1'; -- release SDA for acknowledgment
+					elsif scl_wire = '1' then
+						if sda = ack then
+							state <= data;
+						elsif sda = nack then
+							state <= stop;
+						end if;
+					end if;
+
+				when data =>
+					if scl_wire = '0' then
+						if cmd_reg(0) = write then
+							sda_wire <= tx_reg(bit_cnt);
+						end if;
+					elsif scl_wire = '1' then
+						if cmd_reg(0) = read then
+							rx(bit_cnt) <= sda;
 						end if;
 
-					when ack1 =>
-						-- TODO handle no acknowledgment, currently ignored
-						state <= data;
-
-					when data =>
-						if cmd_reg(0) = read then -- r/w bit is read
-							rx(cnt) <= sda_wire;
-						end if;
-
-						if cnt = 0 then
-							if ena = '1' then -- continuous mode 
+						if bit_cnt = 0 then
+							bit_cnt <= 7; -- reset bit counter
+							state <= ack2;
+							if ena = '1' then -- continuous mode (block r/w)
 								busy <= '0'; -- ready to accept new data
 							end if;
-							cnt <= 7; -- reset bit counter
-							state <= ack2;
 						else
-							cnt <= cnt - 1;
+							bit_cnt <= bit_cnt - 1;
 						end if;
+					end if;
 
-					when ack2 =>
+				when ack2 =>
+					if scl_wire = '0' then
 						if cmd_reg(0) = write then -- r/w bit is write
-							-- TODO handle no acknowledgment, currently ignored
+							sda_wire <= '1'; -- release SDA for acknowledgment
+						elsif cmd_reg(0) = read then -- r/w bit is read
+							sda_wire <= '0'; -- send acknowledgment bit
 						end if;
-
-						busy <= '1';
-						if ena = '1' then -- continuous mode
-							update;
-							if cmd_reg = addr & rw then
+					elsif scl_wire = '1' then
+						if (cmd_reg(0) = write and sda = nack) or ena = '0' then -- receivied NACK or transmission complete
+							state <= stop;
+						elsif ena = '1' then -- continuous mode (block r/w)
+							if cmd_reg = addr & rw then -- command has not changed
 								state <= data; -- keep sending/receiving bytes
 							else
 								state <= start; -- send a restart
 							end if;
-						else
-							state <= stop;
+							update;
+							busy <= '1';
 						end if;
+					end if;
 
-					when stop =>
-						sda_wire <= '1'; -- scl = '1' and rising_edge(sda) == stop
-
-						state <= idle;
-
-					when others => null;
-				end case;
-			end if;
+				when stop =>
+					sda_wire <= '1'; -- SCL = '1' and rising_edge(SDA) == stop
+					state <= idle;
+			end case;
 		end if;
 	end process;
 
