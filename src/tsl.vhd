@@ -10,7 +10,7 @@ package tsl_p is
 			-- internal
 			clk : in std_logic; -- 800kHz
 			rst : in std_logic;
-			lux : out integer; -- calculated illuminance from sensors
+			lux : out integer range 0 to 40000; -- calculated illuminance from sensors
 			-- debug
 			dbg_i2c_state : out unsigned(3 downto 0);
 			dbg_i2c_busy  : out std_logic;
