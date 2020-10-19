@@ -11,16 +11,16 @@ Under `src/`, every hardware have its own `.vhd` file, consists of one package, 
 |  clk  |                System clock dividers                 | stable  |
 |  seg  |   2x4 digit seven segment display decoder/scanner    | stable  |
 |  key  |                  4x4 keypad scanner                  | stable  |
-|  mot  |       L293D H-Bridge for 2 DC motors interface       |   N/A   |
+|  mot  |      L293D H-Bridge for 2 DC motors' interface       |   N/A   |
 |  dot  | 8 x 8 bicolor (red/green) dot matrix display scanner | stable  |
-|  lcd  |         ST7735 128x160 RGB TFT LCD interface         |   N/A   |
-|  dht  |   DHT11 humidity and temperature sensor interface    |   N/A   |
-|  tsl  |         TSL2561 luminosity sensor interface          | testing |
-|  tts  |           SD178B Big5 TTS module interface           |   N/A   |
+|  lcd  |        ST7735 128x160 RGB TFT LCD's interface        |   N/A   |
+|  dht  |  DHT11 humidity and temperature sensor's interface   |   N/A   |
+|  tsl  |        TSL2561 luminosity sensor's interface         | testing |
+|  tts  |          SD178B Big5 TTS module's interface          |   N/A   |
 
 ## Utilities
 
-Under `src/util`, there are optional utilities for converting types, generating waves, etc.
+Under `src/util`, there are shared dependency used by multiple files for converting types, generating waves, etc.
 
 | Name  |                           For                            | Status  |
 | :---: | :------------------------------------------------------: | :-----: |
@@ -34,4 +34,4 @@ There are no actual complete VHDL testbench, but there some .vhd files located u
 
 ## Tools
 
-Under `tools/` there are scripts to help with the writing of the code.
+Under `tools/` there are scripts that help with the writing of the code.

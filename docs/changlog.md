@@ -9,8 +9,9 @@ No version is backwards compatible!
 * Add I2C interface (`i2c.vhd`)
 * Seven segment display now uses string type as data input
   * You can use `to_character()` function to convert integer or unsigned into hexadecimal format
-* `seg.vhd` now reversed `seg_s` port, you'll need to update pin assignment
+* `seg.vhd` now reversed `seg_s` port bit order, you'll need to update pin assignment
 * Removed simulation files
+* Removed `clk_div` component
 
 ## v2
 
