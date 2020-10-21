@@ -10,15 +10,7 @@ package tsl_p is
 			-- internal
 			clk : in std_logic; -- 800kHz
 			rst : in std_logic;
-			lux : out integer range 0 to 40000; -- calculated illuminance from sensors
-			-- debug
-			dbg_i2c_state : out unsigned(3 downto 0);
-			dbg_i2c_busy  : out std_logic;
-			dbg_tsl_state : out unsigned(3 downto 0);
-			dbg_tsl_step  : out unsigned(3 downto 0);
-			dbg_data      : out unsigned(31 downto 0);
-			dbg_i2c_rx    : out unsigned(7 downto 0);
-			dbg_i2c_tx    : out unsigned(7 downto 0)
+			lux : out integer range 0 to 40000 -- calculated illuminance from sensors
 		);
 	end component;
 end package;
@@ -27,7 +19,9 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+use work.clk_p.all;
 use work.i2c_p.all;
+use work.i2c_master_p.all;
 
 entity tsl is
 	port (
@@ -36,15 +30,7 @@ entity tsl is
 		-- internal
 		clk : in std_logic; -- 800kHz
 		rst : in std_logic;
-		lux : out integer; -- calculated illuminance from sensors
-		-- debug
-		dbg_i2c_state : out unsigned(3 downto 0);
-		dbg_i2c_busy  : out std_logic;
-		dbg_tsl_state : out unsigned(3 downto 0);
-		dbg_tsl_step  : out unsigned(3 downto 0);
-		dbg_data      : out unsigned(31 downto 0);
-		dbg_i2c_rx    : out unsigned(7 downto 0);
-		dbg_i2c_tx    : out unsigned(7 downto 0)
+		lux : out integer range 0 to 40000 -- calculated illuminance from sensors
 	);
 end tsl;
 
@@ -163,26 +149,18 @@ architecture arch of tsl is
 
 begin
 
-	dbg_i2c_busy <= i2c_busy;
-	dbg_data <= data_0 & data_1;
-	dbg_tsl_state <= to_unsigned(tsl_state_t'pos(state), 4);
-	dbg_tsl_step <= to_unsigned(i2c_step_t'pos(step), 4);
-	dbg_i2c_rx <= i2c_rx;
-	dbg_i2c_tx <= i2c_tx;
-
 	i2c_inst : entity work.i2c(arch)
 		port map(
-			scl       => tsl_scl,
-			sda       => tsl_sda,
-			clk       => clk,
-			rst       => rst,
-			ena       => i2c_ena,
-			busy      => i2c_busy,
-			addr      => tsl_addr,
-			rw        => i2c_rw,
-			rx        => i2c_rx,
-			tx        => i2c_tx,
-			dbg_state => dbg_i2c_state
+			scl  => tsl_scl,
+			sda  => tsl_sda,
+			clk  => clk,
+			rst  => rst,
+			ena  => i2c_ena,
+			busy => i2c_busy,
+			addr => tsl_addr,
+			rw   => i2c_rw,
+			rx   => i2c_rx,
+			tx   => i2c_tx
 		);
 
 	i2c_done <= i2c_busy_prev and not i2c_busy;
@@ -198,7 +176,7 @@ begin
 				when init => -- turn power on
 					case step is
 						when sel_reg => -- select control register
-							i2c_rw <= write;
+							i2c_rw <= '0'; -- write
 							i2c_tx <= reg_ctrl;
 							i2c_ena <= '1'; -- start transmission
 
@@ -219,7 +197,7 @@ begin
 				when read_data_0 => -- read the ADC channel 0 value
 					case step is
 						when sel_reg =>
-							i2c_rw <= write;
+							i2c_rw <= '0'; -- write
 							i2c_tx <= reg_data_0;
 							i2c_ena <= '1';
 
@@ -227,7 +205,7 @@ begin
 								step <= byte_0;
 							end if;
 						when byte_0 =>
-							i2c_rw <= read;
+							i2c_rw <= '1'; -- read
 
 							if i2c_done = '1' then
 								data_0(7 downto 0) <= i2c_rx; -- lower byte
@@ -245,7 +223,7 @@ begin
 				when read_data_1 => -- read the ADC channel 1 value
 					case step is
 						when sel_reg =>
-							i2c_rw <= write;
+							i2c_rw <= '0'; -- write
 							i2c_tx <= reg_data_1;
 							i2c_ena <= '1';
 
@@ -253,7 +231,7 @@ begin
 								step <= byte_0;
 							end if;
 						when byte_0 =>
-							i2c_rw <= read;
+							i2c_rw <= '0'; -- read
 
 							if i2c_done = '1' then
 								data_1(7 downto 0) <= i2c_rx; -- lower byte

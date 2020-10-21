@@ -7,7 +7,7 @@ use ieee.numeric_std.all;
 use work.clk_p.all;
 use work.seg_p.all;
 
-entity bcd_seg_test is 
+entity bcd_seg_test is
 	port (
 		-- sys
 		sys_clk, sys_rst : in std_logic;
@@ -16,7 +16,7 @@ entity bcd_seg_test is
 		-- seg
 		seg_1, seg_2 : out unsigned(7 downto 0); -- abcdefgp * 2
 		seg_s        : out unsigned(0 to 7)      -- seg2_s1 ~ seg1_s4
-	); 
+	);
 end bcd_seg_test;
 
 architecture arch of bcd_seg_test is
@@ -37,23 +37,23 @@ begin
 			clk_out => clk_10k
 		);
 
-	clk_div_inst_1k : entity work.clk_div(arch)
+	clk_sys_inst_1k : entity work.clk_sys(arch)
 		generic map(
-			divisor => 10
+			clk_out_freq => 1000
 		)
 		port map(
+			sys_clk => sys_clk,
 			sys_rst => sys_rst,
-			clk_in  => clk_10k,
 			clk_out => clk_1k
 		);
 
-	clk_div_inst_100 : entity work.clk_div(arch)
+	clk_sys_inst : entity work.clk_sys(arch)
 		generic map(
-			divisor => 10
+			clk_out_freq => 100
 		)
 		port map(
+			sys_clk => sys_clk,
 			sys_rst => sys_rst,
-			clk_in  => clk_1k,
 			clk_out => clk_100
 		);
 
@@ -77,10 +77,10 @@ begin
 	clk_1k when "10",
 	clk_10k when "11";
 
-	process (clk_cnt) begin 
+	process (clk_cnt) begin
 		if rising_edge(clk_cnt) then
 			cnt <= cnt + 1;
-		end if; 
+		end if;
 	end process;
 
 end arch;

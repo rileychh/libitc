@@ -15,7 +15,7 @@ package seg_p is
 		);
 	end component;
 
-	function to_character(n : integer range 0 to 9) return character;
+	function to_character(n : integer range 0 to 15) return character;
 	function to_character(n : unsigned(3 downto 0)) return character;
 
 	-- converts an number into bcd

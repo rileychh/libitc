@@ -40,7 +40,8 @@ end clk_sys;
 
 architecture arch of clk_sys is
 
-	signal cnt : integer range 0 to sys_clk_freq / clk_out_freq / 2 - 1;
+	constant cnt_high : integer := sys_clk_freq / clk_out_freq / 2 - 1;
+	signal cnt : integer range 0 to cnt_high;
 
 begin
 
@@ -49,7 +50,7 @@ begin
 			clk_out <= '0';
 			cnt <= 0;
 		elsif rising_edge(sys_clk) then
-			if cnt = cnt'high then
+			if cnt = cnt_high then
 				clk_out <= not clk_out;
 			end if;
 

@@ -60,7 +60,7 @@ begin
 	process (clk) begin 
 		if rising_edge(clk) then
 			if dbnce_in = '1' then
-				if cnt = cnt'high then
+				if cnt = clk_cnt - 1 then
 					dbnce_out <= '1';
 				else
 					cnt <= cnt + 1;
