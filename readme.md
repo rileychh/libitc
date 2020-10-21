@@ -8,7 +8,6 @@ Under `src/`, every hardware have its own `.vhd` file, consists of one package, 
 
 | Name  |                         For                          | Status  |
 | :---: | :--------------------------------------------------: | :-----: |
-|  clk  |                System clock dividers                 | stable  |
 |  seg  |   2x4 digit seven segment display decoder/scanner    | stable  |
 |  key  |                  4x4 keypad scanner                  | stable  |
 |  mot  |      L293D H-Bridge for 2 DC motors' interface       |   N/A   |
@@ -24,8 +23,9 @@ Under `src/util`, there are shared dependency used by multiple files for convert
 
 | Name  |                           For                            | Status  |
 | :---: | :------------------------------------------------------: | :-----: |
-|  bcd  | Converting unsigned integer into BCD vectors (for `seg`) | stable  |
+|  clk  |                  System clock dividers                   | stable  |
 |  pwm  |            Single phase PWM signal generator             | stable  |
+|  bcd  | Converting unsigned integer into BCD vectors (for `seg`) | stable  |
 |  i2c  |                I2C (IIC) master interface                | testing |
 
 ## Tests

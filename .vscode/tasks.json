@@ -7,7 +7,7 @@
 			"command": [
 				"bash -c '",
 				"quartus_sh -t tools/project.tcl;",
-				"quartus_sh -t tools/assign-cheng.tcl;",
+				"quartus_sh -t tools/assign.tcl;",
 				"read -p \"Press Ctrl-L in Quartus II, press ENTER when Assembler is done\";",
 				"quartus_pgm -c \"USB-Blaster [USB-0]\" output_files/libitc.cdf",
 				"'"

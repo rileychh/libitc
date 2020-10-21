@@ -41,7 +41,9 @@ if {$make_assignments} {
 	set_global_assignment -name VHDL_FILE src/seg.vhd
 	set_global_assignment -name VHDL_FILE src/key.vhd
 	set_global_assignment -name VHDL_FILE src/dot.vhd
-	set_global_assignment -name VHDL_FILE src/clk.vhd
+	set_global_assignment -name VHDL_FILE src/tts.vhd
+	set_global_assignment -name VHDL_FILE src/dht.vhd
+	set_global_assignment -name VHDL_FILE src/util/clk.vhd
 	set_global_assignment -name VHDL_FILE src/util/pwm.vhd
 	set_global_assignment -name VHDL_FILE src/util/i2c.vhd
 
