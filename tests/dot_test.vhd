@@ -30,9 +30,9 @@ architecture arch of dot_test is
 
 begin
 
-	clk_sys_inst : entity work.clk_sys(arch)
+	clk_inst : entity work.clk(arch)
 		generic map(
-			clk_out_freq => 1_000
+			freq => 1_000
 		)
 		port map(
 			sys_clk => sys_clk,

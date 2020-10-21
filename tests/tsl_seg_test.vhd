@@ -28,9 +28,9 @@ architecture arch of tsl_seg_test is
 	signal dot_data : dot_data_t;
 begin
 
-	clk_sys_inst_1k : entity work.clk_sys(arch)
+	clk_inst_1k : entity work.clk(arch)
 		generic map(
-			clk_out_freq => 1_000
+			freq => 1_000
 		)
 		port map(
 			sys_clk => sys_clk,

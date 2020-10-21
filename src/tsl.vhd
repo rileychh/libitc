@@ -8,7 +8,7 @@ package tsl_p is
 			-- tsl
 			tsl_scl, tsl_sda : inout std_logic;
 			-- internal
-			clk : in std_logic; -- 800kHz
+			clk : in std_logic;
 			rst : in std_logic;
 			lux : out integer range 0 to 40000 -- calculated illuminance from sensors
 		);
@@ -27,7 +27,7 @@ entity tsl is
 		-- tsl
 		tsl_scl, tsl_sda : inout std_logic;
 		-- internal
-		clk : in std_logic; -- 800kHz
+		clk : in std_logic;
 		rst : in std_logic;
 		lux : out integer range 0 to 40000 -- calculated illuminance from sensors
 	);
@@ -55,6 +55,7 @@ architecture arch of tsl is
 	signal step : i2c_step_t;
 
 	-- I2C wires/registers
+	signal i2c_clk : std_logic;
 	signal i2c_ena : std_logic;
 	signal i2c_busy : std_logic;
 	signal i2c_rw : std_logic;
@@ -148,11 +149,21 @@ architecture arch of tsl is
 
 begin
 
+	clk_inst: entity work.clk(arch)
+	generic map (
+		freq => 200_000
+	)
+	port map (
+		sys_clk => clk,
+		sys_rst => rst,
+		clk_out => i2c_clk
+	);
+
 	i2c_inst : entity work.i2c(arch)
 		port map(
 			scl  => tsl_scl,
 			sda  => tsl_sda,
-			clk  => clk,
+			clk  => i2c_clk,
 			rst  => rst,
 			ena  => i2c_ena,
 			busy => i2c_busy,

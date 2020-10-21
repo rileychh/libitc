@@ -4,9 +4,9 @@ use ieee.std_logic_1164.all;
 package clk_p is
 	constant sys_clk_freq : integer := 50_000_000; -- OSC1 = 50MHz
 
-	component clk_sys
+	component clk
 		generic (
-			clk_out_freq : integer := 1000
+			freq : integer := 1000
 		);
 
 		port (
@@ -24,9 +24,9 @@ use ieee.std_logic_1164.all;
 
 use work.clk_p.all;
 
-entity clk_sys is
+entity clk is
 	generic (
-		clk_out_freq : integer := 1000
+		freq : integer := 1000
 	);
 
 	port (
@@ -36,16 +36,16 @@ entity clk_sys is
 		-- internal
 		clk_out : buffer std_logic
 	);
-end clk_sys;
+end clk;
 
-architecture arch of clk_sys is
+architecture arch of clk is
 
-	constant cnt_high : integer := sys_clk_freq / clk_out_freq / 2 - 1;
+	constant cnt_high : integer := sys_clk_freq / freq / 2 - 1;
 	signal cnt : integer range 0 to cnt_high;
 
 begin
 
-	process (sys_clk, sys_rst) begin 
+	process (sys_clk, sys_rst) begin
 		if sys_rst = '0' then
 			clk_out <= '0';
 			cnt <= 0;
@@ -55,7 +55,7 @@ begin
 			end if;
 
 			cnt <= cnt + 1;
-		end if; 
+		end if;
 	end process;
 
 end arch;

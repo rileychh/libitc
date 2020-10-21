@@ -27,9 +27,9 @@ architecture arch of bcd_seg_test is
 
 begin
 
-	clk_sys_inst_10k : entity work.clk_sys(arch)
+	clk_inst_10k : entity work.clk(arch)
 		generic map(
-			clk_out_freq => 10000
+			freq => 10000
 		)
 		port map(
 			sys_clk => sys_clk,
@@ -37,9 +37,9 @@ begin
 			clk_out => clk_10k
 		);
 
-	clk_sys_inst_1k : entity work.clk_sys(arch)
+	clk_inst_1k : entity work.clk(arch)
 		generic map(
-			clk_out_freq => 1000
+			freq => 1000
 		)
 		port map(
 			sys_clk => sys_clk,
@@ -47,9 +47,9 @@ begin
 			clk_out => clk_1k
 		);
 
-	clk_sys_inst : entity work.clk_sys(arch)
+	clk_inst : entity work.clk(arch)
 		generic map(
-			clk_out_freq => 100
+			freq => 100
 		)
 		port map(
 			sys_clk => sys_clk,

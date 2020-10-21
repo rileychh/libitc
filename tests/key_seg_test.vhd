@@ -36,9 +36,9 @@ begin
 	dbg_key_int <= key_int;
 	dbg_clk_1k <= clk_1k;
 
-	clk_sys_inst : entity work.clk_sys(arch)
+	clk_inst : entity work.clk(arch)
 		generic map(
-			clk_out_freq => 1000
+			freq => 1000
 		)
 		port map(
 			sys_clk => sys_clk,

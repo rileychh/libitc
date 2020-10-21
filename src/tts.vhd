@@ -45,9 +45,9 @@ architecture arch of tts is
 
 begin
 
-	clk_sys_inst : entity work.clk_sys(arch)
+	clk_inst : entity work.clk(arch)
 		generic map(
-			clk_out_freq => 200_000
+			freq => 200_000
 		)
 		port map(
 			sys_clk => clk,
