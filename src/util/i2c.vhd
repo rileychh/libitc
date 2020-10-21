@@ -62,9 +62,7 @@ package i2c_p is
 			addr : in unsigned(6 downto 0);  -- slave address
 			rw   : in std_logic;             -- high read, low write
 			rx   : out unsigned(7 downto 0); -- byte read from slave
-			tx   : in unsigned(7 downto 0);  -- byte to write to slave
-			-- debug
-			dbg_state : out unsigned(3 downto 0)
+			tx   : in unsigned(7 downto 0)   -- byte to write to slave
 		);
 	end component;
 end package;
@@ -87,9 +85,7 @@ entity i2c is
 		addr : in unsigned(6 downto 0);  -- slave address
 		rw   : in std_logic;             -- high read, low write
 		rx   : out unsigned(7 downto 0); -- byte read from slave
-		tx   : in unsigned(7 downto 0);  -- byte to write to slave
-		-- debug
-		dbg_state : out unsigned(3 downto 0)
+		tx   : in unsigned(7 downto 0)   -- byte to write to slave
 	);
 end i2c;
 
@@ -126,8 +122,6 @@ architecture arch of i2c is
 	signal bit_cnt : integer range 0 to 7;
 
 begin
-
-	dbg_state <= to_unsigned(state_t'pos(state), 4);
 
 	stretch <= '1' when scl_wire = '1' and scl = '0' else '0'; -- master can't pull SCL high
 

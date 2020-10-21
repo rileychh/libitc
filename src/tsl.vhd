@@ -21,7 +21,6 @@ use ieee.numeric_std.all;
 
 use work.clk_p.all;
 use work.i2c_p.all;
-use work.i2c_master_p.all;
 
 entity tsl is
 	port (
