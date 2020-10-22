@@ -54,7 +54,7 @@ package i2c_p is
 		port (
 			-- I2C slave
 			scl, sda : inout std_logic;
-			-- internal
+			-- user logic
 			clk  : in std_logic;             -- 800kHz or 200kHz
 			rst  : in std_logic;             -- low active
 			ena  : in std_logic;             -- if high, latch in new input
@@ -77,15 +77,16 @@ entity i2c is
 	port (
 		-- I2C slave
 		scl, sda : inout std_logic;
-		-- internal
-		clk  : in std_logic;             -- 800kHz or 200kHz
-		rst  : in std_logic;             -- low active
-		ena  : in std_logic;             -- if high, latch in new input
-		busy : out std_logic;            -- if high, addr, rw and tx will be ignored
-		addr : in unsigned(6 downto 0);  -- slave address
-		rw   : in std_logic;             -- high read, low write
-		rx   : out unsigned(7 downto 0); -- byte read from slave
-		tx   : in unsigned(7 downto 0)   -- byte to write to slave
+		-- user logic
+		clk     : in std_logic;             -- 800kHz or 200kHz
+		rst     : in std_logic;             -- low active
+		ena     : in std_logic;             -- if high, latch in new input
+		busy    : out std_logic;            -- if high, addr, rw and tx will be ignored
+		ack_err : out std_logic;            -- acknowledgment error flag
+		addr    : in unsigned(6 downto 0);  -- slave address
+		rw      : in std_logic;             -- high read, low write
+		rx      : out unsigned(7 downto 0); -- byte read from slave
+		tx      : in unsigned(7 downto 0)   -- byte to write to slave
 	);
 end i2c;
 
@@ -129,8 +130,12 @@ begin
 	process (clk, rst) begin
 		if rst = '0' then
 			scl_wire <= '1';
-		elsif rising_edge(clk) and scl_ena = '1' and stretch = '0' then
-			scl_wire <= not scl_wire; -- SCL is half the frequency of clk
+		elsif rising_edge(clk) and stretch = '0'then
+			if scl_ena = '0' then
+				scl_wire <= '1'; -- release SCL
+			else
+				scl_wire <= not scl_wire; -- SCL is half the frequency of clk
+			end if;
 		end if;
 	end process;
 
@@ -141,6 +146,7 @@ begin
 		if rst = '0' then
 			sda_wire <= '1';
 			scl_ena <= '0';
+			ack_err <= '0';
 			busy <= '1';
 			state <= idle;
 			bit_cnt <= 7;
@@ -161,7 +167,7 @@ begin
 
 				when start => -- 1
 					if scl_wire = '0' then
-					elsif scl_wire = '1' then
+					else
 						sda_wire <= '0'; -- SCL = '1' and falling_edge(SDA) == start
 						state <= cmd;
 					end if;
@@ -169,7 +175,7 @@ begin
 				when cmd => -- 2
 					if scl_wire = '0' then
 						sda_wire <= cmd_reg(bit_cnt); -- send current bit
-					elsif scl_wire = '1' then
+					else
 						if bit_cnt = 0 then
 							bit_cnt <= 7; -- reset bit counter
 							state <= ack1;
@@ -181,7 +187,7 @@ begin
 				when ack1 => -- 3
 					if scl_wire = '0' then
 						sda_wire <= '1'; -- release SDA for acknowledgment
-					elsif scl_wire = '1' then
+					else
 						if sda = '0' then -- ACK
 							state <= data;
 						else -- NACK
@@ -194,7 +200,7 @@ begin
 						if cmd_reg(0) = '0' then -- r/w bit is write
 							sda_wire <= tx_reg(bit_cnt);
 						end if;
-					elsif scl_wire = '1' then
+					else
 						if cmd_reg(0) = '1' then
 							rx(bit_cnt) <= sda;
 						end if;
@@ -217,7 +223,7 @@ begin
 						elsif cmd_reg(0) = '1' then -- r/w bit is read
 							sda_wire <= '0'; -- send acknowledgment bit
 						end if;
-					elsif scl_wire = '1' then
+					else
 						if (cmd_reg(0) = '0' and sda = '1') or ena = '0' then -- receivied NACK or transmission complete
 							state <= stop;
 						elsif ena = '1' then -- continuous mode (block r/w)
@@ -234,7 +240,7 @@ begin
 
 				when stop => -- 6
 					if scl_wire = '0' then
-					elsif scl_wire = '1' then
+					else
 						sda_wire <= '1'; -- SCL = '1' and rising_edge(SDA) == stop
 						state <= idle;
 					end if;

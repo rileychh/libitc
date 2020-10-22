@@ -6,11 +6,12 @@ entity dht is
 	port (
 		-- dht
 		dht_data : inout std_logic;
-		-- internal
+		-- system
 		clk : in std_logic;
 		rst : in std_logic;
+		-- user logic
 		temp : out integer range 0 to 50;
-		hum : out integer range 20 to 80
+		hum : out integer range 0 to 80
 	);
 end dht;
 

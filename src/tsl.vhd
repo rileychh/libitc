@@ -7,9 +7,10 @@ package tsl_p is
 		port (
 			-- tsl
 			tsl_scl, tsl_sda : inout std_logic;
-			-- internal
+			-- system
 			clk : in std_logic;
 			rst : in std_logic;
+			-- user logic
 			lux : out integer range 0 to 40000 -- calculated illuminance from sensors
 		);
 	end component;
@@ -26,9 +27,10 @@ entity tsl is
 	port (
 		-- tsl
 		tsl_scl, tsl_sda : inout std_logic;
-		-- internal
+		-- system
 		clk : in std_logic;
 		rst : in std_logic;
+		-- user logic
 		lux : out integer range 0 to 40000 -- calculated illuminance from sensors
 	);
 end tsl;
@@ -75,89 +77,58 @@ architecture arch of tsl is
 
 		constant lux_scale : integer := 14;
 		constant ratio_scale : integer := 9;
-		constant k1 : integer := 16#0040#;
-		constant b1 : integer := 16#01f2#;
-		constant m1 : integer := 16#01be#;
-		constant k2 : integer := 16#0080#;
-		constant b2 : integer := 16#0214#;
-		constant m2 : integer := 16#02d1#;
-		constant k3 : integer := 16#00c0#;
-		constant b3 : integer := 16#023f#;
-		constant m3 : integer := 16#037b#;
-		constant k4 : integer := 16#0100#;
-		constant b4 : integer := 16#0270#;
-		constant m4 : integer := 16#03fe#;
-		constant k5 : integer := 16#0138#;
-		constant b5 : integer := 16#016f#;
-		constant m5 : integer := 16#01fc#;
-		constant k6 : integer := 16#019a#;
-		constant b6 : integer := 16#00d2#;
-		constant m6 : integer := 16#00fb#;
-		constant k7 : integer := 16#029a#;
-		constant b7 : integer := 16#0018#;
-		constant m7 : integer := 16#0012#;
-		constant k8 : integer := 16#029a#;
-		constant b8 : integer := 16#0000#;
-		constant m8 : integer := 16#0000#;
 
 		constant ch_scale : integer := 2 ** 4; -- scale (multiply) CH0 (d0) and CH1 (d1)
 		constant ch0 : integer := to_integer(data_0 * ch_scale); -- scaled CH0 in integer
 		constant ch1 : integer := to_integer(data_1 * ch_scale); -- scaled CH1 in integer
-		constant ratio : integer := (ch1 * ((2 ** (ratio_scale + 1) / ch0)) + 1) / 2; -- rounded ratio between ch1 and ch0
+		constant ratio : integer := ((ch1 * (2 ** (ratio_scale + 1)) / ch0) + 1) / 2; -- rounded ratio between ch1 and ch0
 
-		variable b : integer;
-		variable m : integer;
-		variable lux : integer;
+		variable b : integer range 0 to 2 ** 10 - 1;
+		variable m : integer range 0 to 2 ** 10 - 1;
 
 	begin
 
-		if ratio >= 0 and ratio <= k1 then
-			b := b1;
-			m := m1;
-		elsif ratio <= k2 then
-			b := b2;
-			m := m2;
-		elsif ratio <= k3 then
-			b := b3;
-			m := m3;
-		elsif ratio <= k4 then
-			b := b4;
-			m := m4;
-		elsif ratio <= k5 then
-			b := b5;
-			m := m5;
-		elsif ratio <= k6 then
-			b := b6;
-			m := m6;
-		elsif ratio <= k7 then
-			b := b7;
-			m := m7;
-		elsif ratio > k8 then
-			b := b8;
-			m := m8;
+		if ratio >= 0 and ratio <= 16#0040# then
+			b := 16#01f2#;
+			m := 16#01be#;
+		elsif ratio <= 16#0080# then
+			b := 16#0214#;
+			m := 16#02d1#;
+		elsif ratio <= 16#00c0# then
+			b := 16#023f#;
+			m := 16#037b#;
+		elsif ratio <= 16#0100# then
+			b := 16#0270#;
+			m := 16#03fe#;
+		elsif ratio <= 16#0138# then
+			b := 16#016f#;
+			m := 16#01fc#;
+		elsif ratio <= 16#019a# then
+			b := 16#00d2#;
+			m := 16#00fb#;
+		elsif ratio <= 16#029a# then
+			b := 16#0018#;
+			m := 16#0012#;
+		elsif ratio > 16#029a# then
+			b := 16#0000#;
+			m := 16#0000#;
 		end if;
 
-		lux := (ch0 * b) - (ch1 * m);
-		if lux < 0 then
-			lux := 0; -- don't allow negative values
-		end if;
-		-- round and strip off fractional portion
-		lux := lux + 2 ** (lux_scale - 1);
-		return lux / 2 ** lux_scale;
+		return ((ch0 * b - ch1 * m) + 2 ** (lux_scale - 1)) / 2 ** lux_scale;
 
 	end function;
 
 begin
 
-	clk_inst: entity work.clk(arch)
-	generic map (
-		freq => 200_000
-	)
-	port map (
-		sys_clk => clk,
-		sys_rst => rst,
-		clk_out => i2c_clk
-	);
+	clk_inst : entity work.clk(arch)
+		generic map(
+			freq => 10
+		)
+		port map(
+			clk_in => clk,
+			rst => rst,
+			clk_out => i2c_clk
+		);
 
 	i2c_inst : entity work.i2c(arch)
 		port map(
@@ -177,6 +148,7 @@ begin
 
 	process (clk, rst) begin
 		if rst = '0' then
+			lux <= 0;
 			state <= init;
 			step <= sel_reg;
 		elsif rising_edge(clk) then
@@ -253,12 +225,10 @@ begin
 								data_1(15 downto 8) <= i2c_rx; -- upper byte
 								step <= sel_reg;
 								state <= read_data_0; -- back to reading ADC channel 0
+								lux <= to_lux(data_0, data_1);
 							end if;
 					end case;
 			end case;
 		end if;
 	end process;
-
-	lux <= 0 when rst = '0' else to_lux(data_0, data_1);
-
 end arch;

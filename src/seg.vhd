@@ -8,8 +8,9 @@ package seg_p is
 			-- seg
 			seg_1, seg_2 : out unsigned(7 downto 0); -- abcdefgp * 2
 			seg_s        : out unsigned(0 to 7);     -- seg2_s1 ~ seg1_s4
-			-- internal
-			clk  : in std_logic;       -- 1kHz
+			-- system
+			clk : in std_logic;
+			-- use logic
 			data : in string(1 to 8);  -- string type only allow positive range
 			dot  : in unsigned(0 to 7) -- dots are individually controlled
 		);
@@ -116,13 +117,16 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+use work.clk_p.all;
+
 entity seg is
 	port (
 		-- seg
 		seg_1, seg_2 : out unsigned(7 downto 0); -- abcdefgp * 2
 		seg_s        : out unsigned(0 to 7);     -- seg2_s1 ~ seg1_s4
-		-- internal
-		clk  : in std_logic;       -- 1kHz
+		-- system
+		clk : in std_logic;
+		-- use logic
 		data : in string(1 to 8);  -- string type only allow positive range
 		dot  : in unsigned(0 to 7) -- dots are individually controlled
 	);
@@ -130,18 +134,22 @@ end seg;
 
 architecture arch of seg is
 
+	-- clock
+	signal scan_clk : std_logic;
+
+	-- decoder look up table
 	type lut_t is array(0 to 127) of unsigned(7 downto 0);
 	constant lut : lut_t := (
-	-- HACK add additional characters between 0 to 31
-	x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00",
-	x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00",
-	-- ASCII printable characters (SPC to DEL)
-	x"00", x"61", x"44", x"7e", x"b6", x"4b", x"62", x"04", x"94", x"d0", x"84", x"0e", x"08", x"02", x"01", x"4a",
-	x"fc", x"60", x"da", x"f2", x"66", x"b6", x"be", x"e0", x"fe", x"f6", x"90", x"b0", x"86", x"12", x"c2", x"cb",
-	x"fa", x"ee", x"3e", x"9c", x"7a", x"9e", x"8e", x"bc", x"6e", x"0c", x"78", x"ae", x"1c", x"a8", x"ec", x"fc",
-	x"ce", x"d6", x"cc", x"b6", x"1e", x"7c", x"7c", x"54", x"6e", x"76", x"da", x"9c", x"26", x"f0", x"c4", x"10",
-	x"40", x"fa", x"3e", x"1a", x"7a", x"de", x"8e", x"f6", x"2e", x"08", x"30", x"ae", x"0c", x"28", x"2a", x"3a",
-	x"ce", x"e6", x"0a", x"b6", x"1e", x"38", x"38", x"28", x"6e", x"76", x"da", x"62", x"0c", x"0e", x"80", x"00"
+		-- HACK add additional characters between 0 to 31
+		x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00",
+		x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00",
+		-- ASCII printable characters (SPC to DEL)
+		x"00", x"61", x"44", x"7e", x"b6", x"4b", x"62", x"04", x"94", x"d0", x"84", x"0e", x"08", x"02", x"01", x"4a",
+		x"fc", x"60", x"da", x"f2", x"66", x"b6", x"be", x"e0", x"fe", x"f6", x"90", x"b0", x"86", x"12", x"c2", x"cb",
+		x"fa", x"ee", x"3e", x"9c", x"7a", x"9e", x"8e", x"bc", x"6e", x"0c", x"78", x"ae", x"1c", x"a8", x"ec", x"fc",
+		x"ce", x"d6", x"cc", x"b6", x"1e", x"7c", x"7c", x"54", x"6e", x"76", x"da", x"9c", x"26", x"f0", x"c4", x"10",
+		x"40", x"fa", x"3e", x"1a", x"7a", x"de", x"8e", x"f6", x"2e", x"08", x"30", x"ae", x"0c", x"28", x"2a", x"3a",
+		x"ce", x"e6", x"0a", x"b6", x"1e", x"38", x"38", x"28", x"6e", x"76", x"da", x"62", x"0c", x"0e", x"80", x"00"
 	);
 
 	-- output wire
@@ -152,12 +160,22 @@ architecture arch of seg is
 
 begin
 
+	clk_inst : entity work.clk(arch)
+		generic map(
+			freq => 1_000
+		)
+		port map(
+			clk_in  => clk,
+			rst     => '1',
+			clk_out => scan_clk
+		);
+
 	-- both outputs are the same
 	seg_1 <= led;
 	seg_2 <= led;
 
-	process (clk) begin
-		if rising_edge(clk) then
+	process (scan_clk) begin
+		if rising_edge(scan_clk) then
 			seg_s <= "01111111" ror scan_cnt; -- rotates '0' because common cathode
 			led <= lut(character'pos(data(scan_cnt + 1))); -- get the digit, then filter though look-up table
 			if dot(scan_cnt) = '1' then -- current segment should light up dot

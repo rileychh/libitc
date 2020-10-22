@@ -50,8 +50,8 @@ begin
 			freq => 200_000
 		)
 		port map(
-			sys_clk => clk,
-			sys_rst => rst,
+			clk_in => clk,
+			rst => rst,
 			clk_out => i2c_clk
 		);
 

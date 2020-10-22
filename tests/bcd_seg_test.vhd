@@ -29,31 +29,31 @@ begin
 
 	clk_inst_10k : entity work.clk(arch)
 		generic map(
-			freq => 10000
+			freq => 10_000
 		)
 		port map(
-			sys_clk => sys_clk,
-			sys_rst => sys_rst,
+			clk_in  => sys_clk,
+			rst     => sys_rst,
 			clk_out => clk_10k
 		);
 
 	clk_inst_1k : entity work.clk(arch)
 		generic map(
-			freq => 1000
+			freq => 1_000
 		)
 		port map(
-			sys_clk => sys_clk,
-			sys_rst => sys_rst,
+			clk_in  => sys_clk,
+			rst     => sys_rst,
 			clk_out => clk_1k
 		);
 
-	clk_inst : entity work.clk(arch)
+	clk_inst_100 : entity work.clk(arch)
 		generic map(
 			freq => 100
 		)
 		port map(
-			sys_clk => sys_clk,
-			sys_rst => sys_rst,
+			clk_in  => sys_clk,
+			rst     => sys_rst,
 			clk_out => clk_100
 		);
 
@@ -62,7 +62,7 @@ begin
 			seg_1 => seg_1,
 			seg_2 => seg_2,
 			seg_s => seg_s,
-			clk   => clk_1k,
+			clk   => sys_clk,
 			data  => seg_data,
 			dot => (others => '0')
 		);

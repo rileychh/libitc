@@ -15,7 +15,7 @@ package pwm_p is
 
 		port (
 			-- system
-			sys_clk : in std_logic; -- system clock
+			clk : in std_logic; -- system clock
 			-- internal
 			duty    : in integer range 0 to duty_res - 1; -- duty cycle
 			pwm_out : out std_logic                       -- pwm output
@@ -36,7 +36,7 @@ entity pwm is
 	);
 
 	port (
-		sys_clk : in std_logic;                       -- system clock
+		clk : in std_logic;                       -- system clock
 		duty    : in integer range 0 to duty_res - 1; -- duty cycle
 		pwm_out : out std_logic                       -- pwm output
 	);
@@ -50,8 +50,8 @@ architecture arch of pwm is
 
 begin
 
-	process (sys_clk) begin
-		if rising_edge(sys_clk) then -- rising system clock edge
+	process (clk) begin
+		if rising_edge(clk) then -- rising system clock edge
 			half_duty <= duty * period / (duty_res - 1); -- determine clocks in 1/2 duty cycle
 
 			cnt <= cnt + 1; --increment counter

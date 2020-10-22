@@ -11,8 +11,8 @@ package clk_p is
 
 		port (
 			-- system
-			sys_clk : in std_logic;
-			sys_rst : in std_logic;
+			clk_in : in std_logic;
+			rst    : in std_logic;
 			-- internal
 			clk_out : out std_logic
 		);
@@ -31,9 +31,9 @@ entity clk is
 
 	port (
 		-- system
-		sys_clk : in std_logic;
-		sys_rst : in std_logic;
-		-- internal
+		clk_in : in std_logic;
+		rst    : in std_logic;
+		-- user logic
 		clk_out : buffer std_logic
 	);
 end clk;
@@ -45,11 +45,11 @@ architecture arch of clk is
 
 begin
 
-	process (sys_clk, sys_rst) begin
-		if sys_rst = '0' then
+	process (clk_in, rst) begin
+		if rst = '0' then
 			clk_out <= '0';
 			cnt <= 0;
-		elsif rising_edge(sys_clk) then
+		elsif rising_edge(clk_in) then
 			if cnt = cnt_high then
 				clk_out <= not clk_out;
 			end if;

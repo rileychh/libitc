@@ -2,10 +2,8 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-use work.clk_p.all;
 use work.seg_p.all;
 use work.tsl_p.all;
-use work.dot_p.all;
 
 entity tsl_seg_test is
 	port (
@@ -21,30 +19,18 @@ end tsl_seg_test;
 
 architecture arch of tsl_seg_test is
 
-	-- signal clk_i2c : std_logic;
-	signal clk_1k : std_logic;
 	signal tsl_lux : integer range 0 to 40000;
 	signal seg_data : string(1 to 8);
-	signal dot_data : dot_data_t;
-begin
 
-	clk_inst_1k : entity work.clk(arch)
-		generic map(
-			freq => 1_000
-		)
-		port map(
-			sys_clk => sys_clk,
-			sys_rst => sys_rst,
-			clk_out => clk_1k
-		);
+begin
 
 	tsl_inst : entity work.tsl(arch)
 		port map(
-			tsl_scl         => tsl_scl,
-			tsl_sda         => tsl_sda,
-			clk             => sys_clk,
-			rst             => sys_rst,
-			lux             => tsl_lux
+			tsl_scl => tsl_scl,
+			tsl_sda => tsl_sda,
+			clk     => sys_clk,
+			rst     => sys_rst,
+			lux     => tsl_lux
 		);
 
 	seg_inst : entity work.seg(arch)
@@ -52,7 +38,7 @@ begin
 			seg_1 => seg_1,
 			seg_2 => seg_2,
 			seg_s => seg_s,
-			clk   => clk_1k,
+			clk   => sys_clk,
 			data  => seg_data,
 			dot => (others => '0')
 		);
