@@ -13,7 +13,7 @@ Under `src/`, every hardware have its own `.vhd` file, consists of one package, 
 |  mot  |      L293D H-Bridge for 2 DC motors' interface       |   N/A   |
 |  dot  | 8 x 8 bicolor (red/green) dot matrix display scanner | stable  |
 |  lcd  |        ST7735 128x160 RGB TFT LCD's interface        |   N/A   |
-|  dht  |  DHT11 humidity and temperature sensor's interface   |   N/A   |
+|  dht  |  DHT11 humidity and temperature sensor's interface   | stable  |
 |  tsl  |        TSL2561 luminosity sensor's interface         | testing |
 |  tts  |          SD178B Big5 TTS module's interface          |   N/A   |
 

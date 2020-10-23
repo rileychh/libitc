@@ -2,11 +2,16 @@
 
 No version is backwards compatible!
 
+## To-dos
+
+* Add I2C interface (`i2c.vhd`)
+* Add support for TSL2561 light sensor (`tsl.vhd`)
+
 ## v3
 
 * Changed some ports to simpler names
-* Add support for TSL2561 light sensor (`tsl.vhd`)
-* Add I2C interface (`i2c.vhd`)
+* Added deploy and program script for VSCode
+* Added DHT11 interface (`dht.vhd`)
 * Seven segment display now uses string type as data input
   * You can use `to_character()` function to convert integer or unsigned into hexadecimal format
 * `seg.vhd` now reversed `seg_s` port bit order, you'll need to update pin assignment

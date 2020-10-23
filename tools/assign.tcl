@@ -94,6 +94,7 @@ if {$make_assignments} {
 	set_location_assignment PIN_44 -to sw[0]
 	set_location_assignment PIN_144 -to tsl_scl
 	set_location_assignment PIN_143 -to tsl_sda
+	set_location_assignment PIN_131 -to dht_data
 
 	# Commit assignments
 	export_assignments

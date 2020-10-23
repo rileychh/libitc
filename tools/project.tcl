@@ -24,19 +24,24 @@ if {[is_project_open]} {
 if {$make_assignments} {
 	# collect trash files
 	set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
+
 	# speed up compilation
 	set_global_assignment -name PHYSICAL_SYNTHESIS_EFFORT FAST
 	set_global_assignment -name FITTER_EFFORT FAST_FIT
-	set_global_assignment -name SYNTHESIS_EFFORT FAST
+	# may be faster, may be slower
+	# set_global_assignment -name SYNTHESIS_EFFORT FAST
+	set_global_assignment -name SYNTHESIS_EFFORT AUTO
+
 	# source files
 	set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
 	set_global_assignment -name SEARCH_PATH src\\util
 	set_global_assignment -name SEARCH_PATH src
-	set_global_assignment -name TOP_LEVEL_ENTITY tsl_seg_test
+	set_global_assignment -name TOP_LEVEL_ENTITY dht_seg_test
 	set_global_assignment -name VHDL_FILE tests/tsl_seg_test.vhd
 	set_global_assignment -name VHDL_FILE tests/key_seg_test.vhd
 	set_global_assignment -name VHDL_FILE tests/dot_test.vhd
 	set_global_assignment -name VHDL_FILE tests/bcd_seg_test.vhd
+	set_global_assignment -name VHDL_FILE tests/dht_seg_test.vhd
 	set_global_assignment -name VHDL_FILE src/tsl.vhd
 	set_global_assignment -name VHDL_FILE src/seg.vhd
 	set_global_assignment -name VHDL_FILE src/key.vhd
