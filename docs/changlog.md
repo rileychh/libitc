@@ -15,6 +15,8 @@ No version is backwards compatible!
 * Seven segment display now uses string type as data input
   * You can use `to_character()` function to convert integer or unsigned into hexadecimal format
 * `seg.vhd` now reversed `seg_s` port bit order, you'll need to update pin assignment
+* Changed `clk_sys`'s name to `clk`
+* Fixed `clk` overflow, now timing will be correct
 * Removed simulation files
 * Removed `clk_div` component
 

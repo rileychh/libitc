@@ -51,10 +51,11 @@ begin
 			cnt <= 0;
 		elsif rising_edge(clk_in) then
 			if cnt = cnt_high then
+				cnt <= 0;
 				clk_out <= not clk_out;
+			else
+				cnt <= cnt + 1;
 			end if;
-
-			cnt <= cnt + 1;
 		end if;
 	end process;
 
