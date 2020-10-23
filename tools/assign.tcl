@@ -25,6 +25,7 @@ if {$make_assignments} {
 	set_global_assignment -name FAMILY "Cyclone III"
 	set_global_assignment -name DEVICE EP3C16Q240C8
 	set_location_assignment PIN_149 -to sys_clk
+	set_location_assignment PIN_145 -to sys_rst
 	set_location_assignment PIN_231 -to seg_1[7]
 	set_location_assignment PIN_233 -to seg_1[6]
 	set_location_assignment PIN_235 -to seg_1[5]
@@ -49,7 +50,6 @@ if {$make_assignments} {
 	set_location_assignment PIN_38 -to seg_s[2]
 	set_location_assignment PIN_22 -to seg_s[1]
 	set_location_assignment PIN_20 -to seg_s[0]
-	set_location_assignment PIN_145 -to sys_rst
 	set_location_assignment PIN_43 -to key_col[3]
 	set_location_assignment PIN_45 -to key_col[2]
 	set_location_assignment PIN_49 -to key_col[1]
@@ -58,8 +58,6 @@ if {$make_assignments} {
 	set_location_assignment PIN_57 -to key_row[2]
 	set_location_assignment PIN_64 -to key_row[1]
 	set_location_assignment PIN_68 -to key_row[0]
-	set_location_assignment PIN_70 -to dbg_key_int
-	set_location_assignment PIN_72 -to dbg_clk_1k
 	set_location_assignment PIN_99 -to dot_g[7]
 	set_location_assignment PIN_107 -to dot_g[6]
 	set_location_assignment PIN_113 -to dot_g[5]

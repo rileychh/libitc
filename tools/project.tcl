@@ -31,13 +31,13 @@ if {$make_assignments} {
 	# may be faster, may be slower
 	# set_global_assignment -name SYNTHESIS_EFFORT FAST
 	set_global_assignment -name SYNTHESIS_EFFORT AUTO
+	set_global_assignment -name SMART_RECOMPILE ON
 
 	# source files
 	set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
 	set_global_assignment -name SEARCH_PATH src\\util
 	set_global_assignment -name SEARCH_PATH src
 	set_global_assignment -name TOP_LEVEL_ENTITY dht_seg_test
-	set_global_assignment -name VHDL_FILE tests/tsl_seg_test.vhd
 	set_global_assignment -name VHDL_FILE tests/key_seg_test.vhd
 	set_global_assignment -name VHDL_FILE tests/dot_test.vhd
 	set_global_assignment -name VHDL_FILE tests/bcd_seg_test.vhd
@@ -50,7 +50,6 @@ if {$make_assignments} {
 	set_global_assignment -name VHDL_FILE src/dht.vhd
 	set_global_assignment -name VHDL_FILE src/util/clk.vhd
 	set_global_assignment -name VHDL_FILE src/util/pwm.vhd
-	set_global_assignment -name VHDL_FILE src/util/i2c.vhd
 
 	# Commit assignments
 	export_assignments
