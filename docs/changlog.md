@@ -7,6 +7,10 @@ No version is backwards compatible!
 * Add I2C interface (`i2c.vhd`)
 * Add support for TSL2561 light sensor (`tsl.vhd`)
 
+## v4
+
+* Changed range of `temp` and `hum` in `dht` to prevent overflow
+
 ## v3
 
 * Changed some ports to simpler names
