@@ -21,8 +21,8 @@ end dht_seg_test;
 
 architecture arch of dht_seg_test is
 
-	signal dht_temp : integer range 0 to 50;
-	signal dht_hum : integer range 0 to 80;
+	signal dht_temp : integer range 0 to 2 ** 8 - 1;
+	signal dht_hum : integer range 0 to 2 ** 8 - 1;
 	signal seg_data : string(1 to 8);
 	signal dot_data_r : dot_data_t;
 
