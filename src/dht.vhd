@@ -11,8 +11,8 @@ package dht_p is
 			clk : in std_logic;
 			rst : in std_logic;
 			-- user logic
-			temp : out integer range 0 to 2 ** 8 - 1;
-			hum  : out integer range 0 to 2 ** 8 - 1
+			temp : out integer range 0 to 50;
+			hum  : out integer range 0 to 80
 		);
 	end component;
 end package;
@@ -29,8 +29,8 @@ entity dht is
 		clk : in std_logic;
 		rst : in std_logic;
 		-- user logic
-		temp : out integer range 0 to 2 ** 8 - 1;
-		hum  : out integer range 0 to 2 ** 8 - 1
+		temp : out integer range 0 to 50;
+		hum  : out integer range 0 to 80
 	);
 end dht;
 
