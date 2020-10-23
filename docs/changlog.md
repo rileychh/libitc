@@ -10,6 +10,7 @@ No version is backwards compatible!
 ## v4
 
 * Changed range of `temp` and `hum` in `dht` to prevent overflow
+* Added edge detector `edge` in `clk_p`
 
 ## v3
 

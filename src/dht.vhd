@@ -21,6 +21,8 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+use work.clk_p.all;
+
 entity dht is
 	port (
 		-- dht
@@ -37,8 +39,6 @@ end dht;
 architecture arch of dht is
 
 	-- rising and falling edge detector
-	signal dht_data_prev_1 : std_logic; -- state of dht_data 1 clock ago
-	signal dht_data_prev_2 : std_logic; -- state of dht_data 2 clocks ago
 	signal dht_rising : std_logic; -- dht_data changes from low to high
 	signal dht_falling : std_logic; -- dht_data changes from high to low
 
@@ -66,6 +66,16 @@ begin
 			clk_out => clk_1m
 		);
 
+	-- edge detector
+	edge_inst : entity work.edge(arch)
+		port map(
+			clk       => clk,
+			rst       => rst,
+			signal_in => dht_data,
+			rising    => dht_rising,
+			falling   => dht_falling
+		);
+
 	-- timer
 	process (clk_1m, rst, timer_clr) begin
 		if rst = '0' or timer_clr = '1' then
@@ -74,19 +84,6 @@ begin
 			timer_us <= timer_us + 1;
 		end if;
 	end process;
-
-	-- edge detector
-	process (clk, rst) begin
-		if rst = '0' then
-			dht_data_prev_1 <= '1';
-			dht_data_prev_2 <= '1';
-		elsif rising_edge(clk) then
-			dht_data_prev_1 <= dht_data;
-			dht_data_prev_2 <= dht_data_prev_1;
-		end if;
-	end process;
-	dht_rising <= not dht_data_prev_2 and dht_data_prev_1;
-	dht_falling <= dht_data_prev_2 and not dht_data_prev_1;
 
 	-- state machine
 	process (clk, rst) begin
