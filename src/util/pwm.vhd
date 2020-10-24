@@ -6,7 +6,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-package pwm_p is 
+package pwm_p is
 	component pwm
 		generic (
 			pwm_freq : integer := 100_000; -- PWM switching frequency in Hz
@@ -16,11 +16,11 @@ package pwm_p is
 		port (
 			-- system
 			clk : in std_logic; -- system clock
-			-- internal
+			-- user logic
 			duty    : in integer range 0 to duty_res - 1; -- duty cycle
 			pwm_out : out std_logic                       -- pwm output
 		);
-	end component; 
+	end component;
 end package;
 
 library ieee;
@@ -36,7 +36,9 @@ entity pwm is
 	);
 
 	port (
-		clk : in std_logic;                       -- system clock
+		-- system
+		clk : in std_logic; -- system clock
+		-- user logic
 		duty    : in integer range 0 to duty_res - 1; -- duty cycle
 		pwm_out : out std_logic                       -- pwm output
 	);
@@ -61,7 +63,7 @@ begin
 				pwm_out <= '0'; -- deassert the pwm output
 			elsif cnt = period - half_duty then -- phase's rising edge reached
 				pwm_out <= '1'; -- assert the pwm output
-			end if; 
+			end if;
 		end if;
 	end process;
 

@@ -235,8 +235,8 @@ begin
 	end process;
 
 	-- set sda output
-	with state select
-		sda_ena_n <= data_clk_prev when start, -- generate start condition
+	with state select sda_ena_n <=
+		data_clk_prev when start, -- generate start condition
 		not data_clk_prev when stop, -- generate stop condition
 		sda_int when others; -- set to internal sda signal    
 
