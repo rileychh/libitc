@@ -73,8 +73,7 @@ architecture arch of tsl is
 
 	-- convert sensor values to lux reading
 	-- see docs/lux.cpp
-	function to_lux(data_0, data_1 : unsigned(15 downto 0)) return integer is
-
+	function to_lux(data_0, data_1 : unsigned(15 downto 0)) return integer is 
 		constant lux_scale : integer := 14;
 		constant ratio_scale : integer := 9;
 
@@ -84,10 +83,8 @@ architecture arch of tsl is
 		constant ratio : integer := ((ch1 * (2 ** (ratio_scale + 1)) / ch0) + 1) / 2; -- rounded ratio between ch1 and ch0
 
 		variable b : integer range 0 to 2 ** 10 - 1;
-		variable m : integer range 0 to 2 ** 10 - 1;
-
-	begin
-
+		variable m : integer range 0 to 2 ** 10 - 1; 
+	begin 
 		if ratio >= 0 and ratio <= 16#0040# then
 			b := 16#01f2#;
 			m := 16#01be#;
@@ -114,8 +111,7 @@ architecture arch of tsl is
 			m := 16#0000#;
 		end if;
 
-		return ((ch0 * b - ch1 * m) + 2 ** (lux_scale - 1)) / 2 ** lux_scale;
-
+		return ((ch0 * b - ch1 * m) + 2 ** (lux_scale - 1)) / 2 ** lux_scale; 
 	end function;
 
 begin
