@@ -35,11 +35,7 @@ begin
 			tsl_sda   => tsl_sda,
 			clk       => sys_clk,
 			rst       => sys_rst,
-			lux       => tsl_lux,
-			dbg_state => dbg_state,
-			tsl_state => tsl_state,
-			dbg_reg   => dbg_reg,
-			dbg_cnt   => dbg_cnt
+			lux       => tsl_lux
 		);
 
 	seg_inst : entity work.seg(arch)
@@ -51,12 +47,9 @@ begin
 			data  => seg_data,
 			dot => (others => '0')
 		);
-	seg_map : for i in 0 to 3 generate
-		seg_data(3 - i + 1) <= to_character(to_bcd(tsl_lux, 16, 4)(i * 4 + 3 downto i * 4)); -- tsl_lux
+	seg_map : for i in 0 to 4 generate
+		seg_data(4 - i + 1) <= to_character(to_bcd(tsl_lux, 16, 5)(i * 4 + 3 downto i * 4)); -- tsl_lux
 	end generate seg_map;
-	seg_data(5) <= to_character(dbg_cnt);
-	seg_data(6) <= to_character(dbg_state);
-	seg_data(7) <= to_character(tsl_state);
-	seg_data(8) <= to_character(dbg_reg);
+	seg_data(6 to 8) <= "LUX";
 
 end arch;

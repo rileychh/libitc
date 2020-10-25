@@ -11,12 +11,7 @@ package tsl_p is
 			clk : in std_logic;
 			rst : in std_logic;
 			-- user logic
-			lux : out integer range 0 to 40000; -- calculated illuminance from sensors
-			-- debug
-			dbg_state : out integer range 0 to 8;
-			tsl_state : out integer range 0 to 3;
-			dbg_reg   : out integer range 0 to 3;
-			dbg_cnt   : out integer range 0 to 8
+			lux : out integer range 0 to 40000 -- calculated illuminance from sensors
 		);
 	end component;
 end package;
@@ -36,12 +31,7 @@ entity tsl is
 		clk : in std_logic;
 		rst : in std_logic;
 		-- user logic
-		lux : out integer range 0 to 40000; -- calculated illuminance from sensors
-		-- debug
-		dbg_state : out integer range 0 to 8;
-		tsl_state : out integer range 0 to 3;
-		dbg_reg   : out integer range 0 to 3;
-		dbg_cnt   : out integer range 0 to 8
+		lux : out integer range 0 to 40000 -- calculated illuminance from sensors
 	);
 end tsl;
 
@@ -130,12 +120,9 @@ architecture arch of tsl is
 
 begin
 
-	tsl_state <= i2c_state_t'pos(state) when init = '0' else i2c_state_t'pos(state) + 2;
-	dbg_reg <= reg_sel;
-
 	i2c_inst : entity work.i2c(arch)
 		generic map(
-			bus_freq => 100_000
+			bus_freq => 500_000
 		)
 		port map(
 			scl       => tsl_scl,
@@ -147,9 +134,7 @@ begin
 			addr      => tsl_addr,
 			rw        => i2c_rw,
 			data_in   => i2c_in,
-			data_out  => i2c_out,
-			dbg_state => dbg_state,
-			dbg_cnt   => dbg_cnt
+			data_out  => i2c_out
 		);
 
 	edge_inst : entity work.edge(arch) -- detect falling edge of i2c_busy

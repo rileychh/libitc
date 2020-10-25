@@ -15,15 +15,12 @@ package i2c_p is
 			clk : in std_logic; -- system clock
 			rst : in std_logic; -- low active
 			-- user logic
-			ena      : in std_logic;             -- if high, start the transmission
-			busy     : out std_logic;            -- if high, addr, rw and tx will be ignored
-			addr     : in unsigned(6 downto 0);  -- slave address
-			rw       : in std_logic;             -- high read, low write
-			data_in  : in unsigned(7 downto 0);  -- byte to write to slave
-			data_out : out unsigned(7 downto 0); -- byte read from slave
-			-- debug
-			dbg_state : out integer range 0 to 8;
-			dbg_cnt   : out integer range 0 to 8
+			ena      : in std_logic;            -- if high, start the transmission
+			busy     : out std_logic;           -- if high, addr, rw and tx will be ignored
+			addr     : in unsigned(6 downto 0); -- slave address
+			rw       : in std_logic;            -- high read, low write
+			data_in  : in unsigned(7 downto 0); -- byte to write to slave
+			data_out : out unsigned(7 downto 0) -- byte read from slave
 		);
 	end component;
 end package;
@@ -46,15 +43,12 @@ entity i2c is
 		clk : in std_logic; -- system clock
 		rst : in std_logic; -- low active
 		-- user logic
-		ena      : in std_logic;             -- if high, start the transmission
-		busy     : out std_logic;            -- if high, addr, rw and tx will be ignored
-		addr     : in unsigned(6 downto 0);  -- slave address
-		rw       : in std_logic;             -- high read, low write
-		data_in  : in unsigned(7 downto 0);  -- byte to write to slave
-		data_out : out unsigned(7 downto 0); -- byte read from slave
-		-- debug
-		dbg_state : out integer range 0 to 8;
-		dbg_cnt   : out integer range 0 to 8
+		ena      : in std_logic;            -- if high, start the transmission
+		busy     : out std_logic;           -- if high, addr, rw and tx will be ignored
+		addr     : in unsigned(6 downto 0); -- slave address
+		rw       : in std_logic;            -- high read, low write
+		data_in  : in unsigned(7 downto 0); -- byte to write to slave
+		data_out : out unsigned(7 downto 0) -- byte read from slave
 	);
 end i2c;
 
@@ -120,7 +114,6 @@ begin
 		);
 
 	main_b : block
-		--                   0     1      2    3        4          5           6         7          8
 		type i2c_state_t is (idle, start, cmd, ack_cmd, data_read, data_write, ack_read, ack_write, stop);
 		signal state : i2c_state_t;
 
@@ -130,9 +123,6 @@ begin
 		signal command : unsigned(7 downto 0); -- command byte (address + r/w)
 		signal err : std_logic; -- error flag, automatically retry
 	begin
-		dbg_state <= i2c_state_t'pos(state);
-		dbg_cnt <= cnt;
-
 		process (clk, rst) begin
 			if rst = '0' then
 				scl_ena <= '0';

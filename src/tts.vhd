@@ -83,9 +83,7 @@ begin
 			addr      => tts_addr,
 			rw        => i2c_rw,
 			data_in   => i2c_in,
-			data_out  => i2c_out,
-			dbg_state => open,
-			dbg_cnt   => open
+			data_out  => i2c_out
 		);
 
 	edge_inst : entity work.edge(arch)
