@@ -63,8 +63,8 @@ architecture arch of i2c is
 	signal scl_clk : std_logic; -- clock of SCL
 	signal sda_clk : std_logic; -- write to SDA on rising edge, read from SDA on falling edge
 
-	signal sda_write : std_logic; -- sda_clk changes from low to high
-	signal sda_read : std_logic; -- sda_clk changes from high to low
+	signal sda_write : std_logic; -- sda_clk changes from low to high (middle of SCL low)
+	signal sda_read : std_logic; -- sda_clk changes from high to low (middle of SCL high)
 
 begin
 
@@ -129,7 +129,6 @@ begin
 		signal cnt : integer range 0 to 8; -- generic loop counter
 		signal command : unsigned(7 downto 0); -- command byte (address + r/w)
 		signal err : std_logic; -- error flag, automatically retry
-		signal continue : std_logic; -- TODO comment on this
 	begin
 		dbg_state <= i2c_state_t'pos(state);
 		dbg_cnt <= cnt;
@@ -190,8 +189,15 @@ begin
 							end if;
 						end if;
 
-					when data_read =>
-						if sda_read = '1' then
+					when data_read => -- TODO refactor this and ack_read
+						if sda_write = '1' then -- first
+							sda_out <= '1'; -- TODO test this; make sure sda is released during read
+							if cnt /= 0 then
+								cnt <= cnt - 1;
+							end if;
+						end if;
+
+						if sda_read = '1' then -- second
 							data_out(cnt) <= sda;
 							if cnt = 0 then
 								state <= ack_read; -- write acknowledgement immediately
@@ -199,12 +205,6 @@ begin
 									busy <= '0'; -- ready for new data
 								end if;
 								cnt <= cnt'high;
-							end if;
-						end if;
-
-						if sda_write = '1' then
-							if cnt /= 0 then
-								cnt <= cnt - 1;
 							end if;
 						end if;
 
@@ -228,7 +228,7 @@ begin
 							if ena = '1' then -- continuous mode
 								sda_out <= '0'; -- send ACK
 							else -- last byte
-								sda_out <= '0'; -- send NACK to stop
+								sda_out <= '1'; -- send NACK to stop
 							end if;
 						end if;
 
