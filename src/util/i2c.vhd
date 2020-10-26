@@ -181,10 +181,8 @@ begin
 
 					when data_read => -- TODO refactor this and ack_read
 						if sda_write = '1' then -- first
-							sda_out <= '1'; -- TODO test this; make sure sda is released during read
-							if cnt /= 0 then
-								cnt <= cnt - 1;
-							end if;
+							sda_out <= '1';
+							cnt <= cnt - 1;
 						end if;
 
 						if sda_read = '1' then -- second
