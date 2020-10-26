@@ -1,6 +1,5 @@
 -- pwm.vhd
 -- component for generating single phase PWM signals
--- https://www.digikey.com/eewiki/pages/viewpage.action?pageId=20939345
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -48,23 +47,21 @@ architecture arch of pwm is
 
 	constant period : integer := sys_clk_freq / pwm_freq; -- number of clocks in one pwm period
 	signal cnt : integer range 0 to period - 1 := 0; -- period counter
-	signal half_duty : integer range 0 to period / 2 := 0; -- number of clocks in 1/2 duty cycle
+	signal high_period : integer range 0 to period - 1 := 0; -- number of clocks in 1/2 duty cycle
 
 begin
 
-	process (clk) begin
-		if rising_edge(clk) then -- rising system clock edge
-			half_duty <= duty * period / (duty_res - 1); -- determine clocks in 1/2 duty cycle
-
-			cnt <= cnt + 1; --increment counter
-
-			-- control outputs
-			if cnt = half_duty then -- phase's falling edge reached
-				pwm_out <= '0'; -- deassert the pwm output
-			elsif cnt = period - half_duty then -- phase's rising edge reached
-				pwm_out <= '1'; -- assert the pwm output
+	process (clk) begin -- counter
+		if rising_edge(clk) then
+			if cnt = cnt'high then
+				cnt <= 0;
+			else
+				cnt <= cnt + 1;
 			end if;
 		end if;
 	end process;
+
+	high_period <= period * duty / (duty_res - 1);
+	pwm_out <= '1' when cnt < high_period else '0';
 
 end arch;

@@ -13,6 +13,7 @@ No version is backwards compatible!
 * Added edge detector `edge` in `clk_p`
 * Added I2C interface (`i2c.vhd`)
 * Added support for TSL2561 light sensor (`tsl.vhd`)
+* Fixed `pwm` overflows when duty cycle is over 50%
 
 ## v3
 
