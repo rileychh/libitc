@@ -7,7 +7,7 @@ use work.tts_p.all;
 entity tts_test is
 	port (
 		-- sys
-		sys_clk, sys_rst : in std_logic;
+		clk, rst : in std_logic;
 		-- sw
 		sw : in unsigned(7 downto 0);
 		-- tts
@@ -42,16 +42,16 @@ begin
 	port map (
 		tts_scl => tts_scl,
 		tts_sda => tts_sda,
-		clk => sys_clk,
-		rst => sys_rst,
+		clk => clk,
+		rst => rst,
 		ena => tts_ena,
 		busy => tts_busy,
 		txt => tts_txt,
 		txt_len => tts_txt_len
 	);
 
-	process (sw(0)) begin
-		if rising_edge(sw(0)) and tts_busy = '0' then
+	process (clk) begin
+		if rising_edge(clk) then
 			tts_txt <= txt_sentence_1; -- "王正宏不會寫VHDL"
 			tts_txt_len <= 16;
 			tts_ena <= '1';

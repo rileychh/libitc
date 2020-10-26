@@ -9,8 +9,7 @@ use work.dot_p.all;
 entity dht_seg_test is
 	port (
 		-- sys
-		sys_clk : in std_logic;
-		sys_rst : in std_logic;
+		clk, rst : in std_logic;
 		-- dht
 		dht_data : inout std_logic;
 		-- seg
@@ -31,8 +30,8 @@ begin
 	dht_inst : entity work.dht(arch)
 		port map(
 			dht_data => dht_data,
-			clk      => sys_clk,
-			rst      => sys_rst,
+			clk      => clk,
+			rst      => rst,
 			temp     => dht_temp,
 			hum      => dht_hum
 		);
@@ -42,7 +41,7 @@ begin
 			seg_1 => seg_1,
 			seg_2 => seg_2,
 			seg_s => seg_s,
-			clk   => sys_clk,
+			clk   => clk,
 			data  => seg_data,
 			dot => (others => '0')
 		);

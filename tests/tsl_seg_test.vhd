@@ -8,7 +8,7 @@ use work.tsl_p.all;
 entity tsl_seg_test is
 	port (
 		-- sys
-		sys_clk, sys_rst : in std_logic; -- rising edge clock, low reset
+		clk, rst : in std_logic; -- rising edge clock, low reset
 		-- seg
 		seg_1, seg_2 : out unsigned(7 downto 0); -- abcdefgp * 2
 		seg_s        : out unsigned(0 to 7);     -- seg2_s1 ~ seg1_s4
@@ -33,8 +33,8 @@ begin
 		port map(
 			tsl_scl   => tsl_scl,
 			tsl_sda   => tsl_sda,
-			clk       => sys_clk,
-			rst       => sys_rst,
+			clk       => clk,
+			rst       => rst,
 			lux       => tsl_lux
 		);
 
@@ -43,7 +43,7 @@ begin
 			seg_1 => seg_1,
 			seg_2 => seg_2,
 			seg_s => seg_s,
-			clk   => sys_clk,
+			clk   => clk,
 			data  => seg_data,
 			dot => (others => '0')
 		);

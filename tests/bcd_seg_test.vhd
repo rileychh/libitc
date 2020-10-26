@@ -10,7 +10,7 @@ use work.seg_p.all;
 entity bcd_seg_test is
 	port (
 		-- sys
-		sys_clk, sys_rst : in std_logic;
+		clk, rst : in std_logic;
 		-- sw
 		sw : in unsigned(7 downto 0);
 		-- seg
@@ -32,8 +32,8 @@ begin
 			freq => 10_000
 		)
 		port map(
-			clk_in  => sys_clk,
-			rst     => sys_rst,
+			clk_in  => clk,
+			rst     => rst,
 			clk_out => clk_10k
 		);
 
@@ -42,8 +42,8 @@ begin
 			freq => 1_000
 		)
 		port map(
-			clk_in  => sys_clk,
-			rst     => sys_rst,
+			clk_in  => clk,
+			rst     => rst,
 			clk_out => clk_1k
 		);
 
@@ -52,8 +52,8 @@ begin
 			freq => 100
 		)
 		port map(
-			clk_in  => sys_clk,
-			rst     => sys_rst,
+			clk_in  => clk,
+			rst     => rst,
 			clk_out => clk_100
 		);
 
@@ -62,7 +62,7 @@ begin
 			seg_1 => seg_1,
 			seg_2 => seg_2,
 			seg_s => seg_s,
-			clk   => sys_clk,
+			clk   => clk,
 			data  => seg_data,
 			dot => (others => '0')
 		);

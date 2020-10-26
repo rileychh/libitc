@@ -10,7 +10,7 @@ entity key_seg_test is
 
 	port (
 		-- sys
-		sys_clk, sys_rst : in std_logic;
+		clk, rst : in std_logic;
 		-- key
 		key_col : out unsigned(0 to 3);
 		key_row : in unsigned(0 to 3);
@@ -34,7 +34,7 @@ begin
 			seg_1 => seg_1,
 			seg_2 => seg_2,
 			seg_s => seg_s,
-			clk   => sys_clk,
+			clk   => clk,
 			data  => in_buf,
 			dot => (others => '0')
 		);
@@ -43,13 +43,13 @@ begin
 		port map(
 			key_col => key_col,
 			key_row => key_row,
-			clk     => sys_clk,
+			clk     => clk,
 			int     => key_int,
 			pressed => key_pressed
 		);
 
-	process (key_int, sys_rst) begin
-		if sys_rst = '0' then
+	process (key_int, rst) begin
+		if rst = '0' then
 			in_buf <= (others => ' ');
 		elsif rising_edge(key_int) then
 			-- shift key_pressed into in_buf from right

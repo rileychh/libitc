@@ -7,7 +7,7 @@ use work.dot_p.all;
 entity dot_test is 
 	port (
 		-- sys
-		sys_clk, sys_rst : in std_logic;
+		clk, rst : in std_logic;
 		-- dot
 		dot_r, dot_g, dot_s : out unsigned(0 to 7);
 		-- sw 
@@ -30,7 +30,7 @@ begin
 			dot_r  => dot_r,
 			dot_g  => dot_g,
 			dot_s  => dot_s,
-			clk    => sys_clk,
+			clk    => clk,
 			data_r => dot_data_r,
 			data_g => dot_data_g
 		);
