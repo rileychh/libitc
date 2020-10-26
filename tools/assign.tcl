@@ -24,8 +24,8 @@ if {[is_project_open]} {
 if {$make_assignments} {
 	set_global_assignment -name FAMILY "Cyclone III"
 	set_global_assignment -name DEVICE EP3C16Q240C8
-	set_location_assignment PIN_149 -to sys_clk
-	set_location_assignment PIN_145 -to sys_rst
+	set_location_assignment PIN_149 -to clk
+	set_location_assignment PIN_145 -to rst
 	set_location_assignment PIN_231 -to seg_1[7]
 	set_location_assignment PIN_233 -to seg_1[6]
 	set_location_assignment PIN_235 -to seg_1[5]
@@ -90,9 +90,11 @@ if {$make_assignments} {
 	set_location_assignment PIN_50 -to sw[2]
 	set_location_assignment PIN_46 -to sw[1]
 	set_location_assignment PIN_44 -to sw[0]
+	set_location_assignment PIN_131 -to dht_data
 	set_location_assignment PIN_144 -to tsl_scl
 	set_location_assignment PIN_143 -to tsl_sda
-	set_location_assignment PIN_131 -to dht_data
+	set_location_assignment PIN_147 -to tts_scl
+	set_location_assignment PIN_146 -to tts_sda
 
 	# Commit assignments
 	export_assignments

@@ -14,19 +14,19 @@ Under `src/`, every hardware have its own `.vhd` file, consists of one package, 
 |  dot  | 8 x 8 bicolor (red/green) dot matrix display scanner |  working   |
 |  lcd  |        ST7735 128x160 RGB TFT LCD's interface        |    N/A     |
 |  dht  |  DHT11 humidity and temperature sensor's interface   |  working   |
-|  tsl  |        TSL2561 luminosity sensor's interface         | developing |
+|  tsl  |        TSL2561 luminosity sensor's interface         |  working   |
 |  tts  |          SD178B Big5 TTS module's interface          | developing |
 
 ## Utilities
 
 Under `src/util`, there are shared dependency used by multiple files for converting types, generating waves, etc.
 
-| Name  |                           For                            |   Status   |
-| :---: | :------------------------------------------------------: | :--------: |
-|  clk  |                  System clock dividers                   |  working   |
-|  pwm  |            Single phase PWM signal generator             |  working   |
-|  bcd  | Converting unsigned integer into BCD vectors (for `seg`) |  working   |
-|  i2c  |                I2C (IIC) master interface                | developing |
+| Name  |                           For                            | Status  |
+| :---: | :------------------------------------------------------: | :-----: |
+|  clk  |                  System clock dividers                   | working |
+|  pwm  |            Single phase PWM signal generator             | working |
+|  bcd  | Converting unsigned integer into BCD vectors (for `seg`) | working |
+|  i2c  |                I2C (IIC) master interface                | working |
 
 ## Tests
 

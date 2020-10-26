@@ -4,13 +4,15 @@ No version is backwards compatible!
 
 ## To-dos
 
-* Add I2C interface (`i2c.vhd`)
-* Add support for TSL2561 light sensor (`tsl.vhd`)
+* Add support for SM178B text-to-speech module
+* Add support for ST7735 TFT LCD module
 
 ## v4
 
 * Changed range of `temp` and `hum` in `dht` to prevent overflow
 * Added edge detector `edge` in `clk_p`
+* Added I2C interface (`i2c.vhd`)
+* Added support for TSL2561 light sensor (`tsl.vhd`)
 
 ## v3
 
