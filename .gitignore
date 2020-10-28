@@ -4,3 +4,4 @@ output_files/
 simulation/
 *.qsf
 *.qws
+*.alc
