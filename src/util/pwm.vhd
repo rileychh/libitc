@@ -46,8 +46,8 @@ end pwm;
 architecture arch of pwm is
 
 	constant period : integer := sys_clk_freq / pwm_freq; -- number of clocks in one pwm period
+	signal high_period : integer range 0 to period := 0; -- number of clocks the output should be high
 	signal cnt : integer range 0 to period - 1 := 0; -- period counter
-	signal high_period : integer range 0 to period - 1 := 0; -- number of clocks in 1/2 duty cycle
 
 begin
 
