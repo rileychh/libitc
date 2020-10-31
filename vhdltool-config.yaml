@@ -1,4 +1,8 @@
 Libraries:
+  - name: ieee
+    paths:
+      - C:\Tools\VHDL-Libraries\ieee\**\*.vhd
+      - C:\Tools\VHDL-Libraries\ieee\**\*.vhdl
   - name: work
     paths:
-      - ./src/**/*.vhd
+      - ./**/*.vhd
