@@ -37,19 +37,21 @@ if {$make_assignments} {
 	set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
 	set_global_assignment -name SEARCH_PATH src\\util
 	set_global_assignment -name SEARCH_PATH src
-	set_global_assignment -name TOP_LEVEL_ENTITY tts_test
+	set_global_assignment -name TOP_LEVEL_ENTITY rgb_test
 	set_global_assignment -name VHDL_FILE tests/key_seg_test.vhd
 	set_global_assignment -name VHDL_FILE tests/dot_test.vhd
 	set_global_assignment -name VHDL_FILE tests/bcd_seg_test.vhd
 	set_global_assignment -name VHDL_FILE tests/dht_seg_test.vhd
 	set_global_assignment -name VHDL_FILE tests/tsl_seg_test.vhd
 	set_global_assignment -name VHDL_FILE tests/tts_test.vhd
+	set_global_assignment -name VHDL_FILE tests/rgb_test.vhd
 	set_global_assignment -name VHDL_FILE src/seg.vhd
 	set_global_assignment -name VHDL_FILE src/key.vhd
 	set_global_assignment -name VHDL_FILE src/dht.vhd
 	set_global_assignment -name VHDL_FILE src/dot.vhd
 	set_global_assignment -name VHDL_FILE src/tsl.vhd
 	set_global_assignment -name VHDL_FILE src/tts.vhd
+	set_global_assignment -name VHDL_FILE src/rgb.vhd
 	set_global_assignment -name VHDL_FILE src/util/clk.vhd
 	set_global_assignment -name VHDL_FILE src/util/pwm.vhd
 	set_global_assignment -name VHDL_FILE src/util/i2c.vhd

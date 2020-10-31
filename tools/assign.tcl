@@ -95,6 +95,9 @@ if {$make_assignments} {
 	set_location_assignment PIN_143 -to tsl_sda
 	set_location_assignment PIN_147 -to tts_scl
 	set_location_assignment PIN_146 -to tts_sda
+	set_location_assignment PIN_81 -to rgb_r
+	set_location_assignment PIN_78 -to rgb_g
+	set_location_assignment PIN_73 -to rgb_b
 
 	# Commit assignments
 	export_assignments
