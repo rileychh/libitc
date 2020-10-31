@@ -77,7 +77,9 @@ package tts_p is
 			ena     : in std_logic;
 			busy    : out std_logic;
 			txt     : in txt_t(0 to txt_len_max - 1);
-			txt_len : in integer range 0 to txt_len_max
+			txt_len : in integer range 0 to txt_len_max;
+			-- d
+			d_i2c_ena : out std_logic
 		);
 	end component;
 end package;
@@ -104,7 +106,9 @@ entity tts is
 		ena     : in std_logic; -- start on enable rising edge
 		busy    : out std_logic;
 		txt     : in txt_t(0 to txt_len_max - 1);
-		txt_len : in integer range 0 to txt_len_max
+		txt_len : in integer range 0 to txt_len_max;
+		-- d
+		d_tts_info_1 : out unsigned(7 downto 0)
 	);
 end tts;
 
@@ -112,7 +116,7 @@ architecture arch of tts is
 
 	constant tts_addr : unsigned(6 downto 0) := "0100000";
 
-	type tts_state_t is (idle, send, stop);
+	type tts_state_t is (idle, send, speak, check);
 	signal state : tts_state_t;
 
 	signal start : std_logic; -- enable rising edge
@@ -125,9 +129,21 @@ architecture arch of tts is
 	signal i2c_accepted : std_logic;
 	signal i2c_done : std_logic;
 
-	signal txt_cnt : integer range 0 to txt_len_max - 1;
+	signal txt_cnt : integer range 0 to txt_len_max;
+
+	-- information read from tts
+	-- 0, 1: number of unprocessed bytes in buffer (high byte, low byte)
+	-- 2, 3: number of available space in buffer (high byte, low byte)
+	-- 4: (MO2, MO1, MO0, delaying, playing, speaking, can't find firmware, can't open file), high active
+	-- 5: (X, X, X, X, waiting for delay parameter, pausing, waiting for instant command parameter, waiting for normal command parameter), high active
+	-- 6, 7: board version (e.g. 0x02 0x02 == v2.2)
+	type tts_info_t is array(0 to 7) of unsigned(7 downto 0);
+	signal tts_info : tts_info_t;
+	signal info_cnt : integer range 0 to 8;
 
 begin
+	-- debug
+	d_tts_info_1 <= to_unsigned(info_cnt, 8);
 
 	i2c_inst : entity work.i2c(arch)
 		generic map(
@@ -156,14 +172,14 @@ begin
 		);
 
 	-- start on enable rising edge
-	edge_inst_ena: entity work.edge(arch)
-	port map (
-		clk => clk,
-		rst => rst,
-		signal_in => ena,
-		rising => start,
-		falling => open
-	);
+	edge_inst_ena : entity work.edge(arch)
+		port map(
+			clk       => clk,
+			rst       => rst,
+			signal_in => ena,
+			rising    => start,
+			falling   => open
+		);
 
 	process (clk, rst) begin
 		if rst = '0' then
@@ -175,32 +191,47 @@ begin
 					if start = '1' then
 						busy <= '1';
 						i2c_rw <= '0'; -- write
-						i2c_in <= txt(0); -- send first byte
-						i2c_ena <= '1';
+						i2c_in <= txt(txt_cnt); -- send first byte
 						txt_cnt <= 1; -- next index is 1
+						i2c_ena <= '1';
 						state <= send;
 					end if;
 
 				when send =>
 					if i2c_done = '1' then -- interface is ready for next byte
-						i2c_in <= txt(txt_cnt);
-						if txt_cnt = txt_len - 1 then
+						if txt_cnt = txt_len then -- turn off i2c enable on the last byte
 							txt_cnt <= 0;
-							state <= stop;
+							i2c_ena <= '0';
+							state <= speak;
 						else
+							i2c_in <= txt(txt_cnt); -- from 1 to txt_len - 1
 							txt_cnt <= txt_cnt + 1;
 						end if;
 					end if;
 
-				when stop =>
-					if i2c_accepted = '1' then -- last byte sent to interface
-						i2c_ena <= '0';
+				when speak => -- read info until unprocessed buffer is zero
+					i2c_rw <= '1'; -- read
+					i2c_ena <= '1';
+					info_cnt <= 0;
+					state <= check;
+
+				when check =>
+					if i2c_done = '1' then
+						if info_cnt = info_cnt'high then
+							info_cnt <= 0;
+							i2c_ena <= '0';
+							if tts_info(0) & tts_info(1) = 0 then -- unprocessed buffer is zero
+								busy <= '0';
+								state <= idle;
+							else
+								state <= speak;
+							end if;
+						else
+							tts_info(info_cnt) <= i2c_out;
+							info_cnt <= info_cnt + 1;
+						end if;
 					end if;
 
-					if i2c_done = '1' then -- last byte transmission complete
-						busy <= '0';
-						state <= idle;
-					end if;
 			end case;
 		end if;
 	end process;
