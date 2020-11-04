@@ -2,55 +2,50 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-package dot_p is
-	type dot_data_t is array (0 to 7) of unsigned(0 to 7);
-	type dot_anim_t is array(integer range <>) of dot_data_t;
-
-	constant dot_zeros : dot_data_t := (others => (others => '0'));
-	constant dot_ones : dot_data_t := (others => (others => '1'));
-
-	component dot
-		port (
-			-- dot
-			dot_r, dot_g, dot_s : out unsigned(0 to 7);
-			-- system
-			clk : in std_logic; -- 1kHz
-			-- user logic
-			data_r, data_g : in dot_data_t
-		);
-	end component;
-end package;
-
-library ieee;
-use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
-
-use work.dot_p.all;
+use work.itc.all;
 
 entity dot is
 	port (
-		-- dot
-		dot_r, dot_g, dot_s : out unsigned(0 to 7);
 		-- system
-		clk : in std_logic; -- 1kHz
+		clk, rst_n : in std_logic;
+		-- dot
+		dot_r, dot_g, dot_s : out byte_be_t;
 		-- user logic
-		data_r, data_g : in dot_data_t
+		data_r, data_g : in bytes_be_t(0 to 7)
 	);
 end dot;
 
 architecture arch of dot is
 
-	signal scan_cnt : integer range 0 to 7;
+	signal clk_scan : std_logic;
+	signal row : integer range 0 to 7;
 
 begin
 
-	process (clk) begin
-		if rising_edge(clk) then
-			dot_s <= "01111111" ror scan_cnt; -- rotates '0' because common cathode
-			dot_r <= data_r(scan_cnt);
-			dot_g <= data_g(scan_cnt);
-			scan_cnt <= scan_cnt + 1;
+	clk_inst : entity work.clk(arch)
+		generic map(
+			freq => 1_000_000
+		)
+		port map(
+			clk_in  => clk,
+			rst_n   => rst_n,
+			clk_out => clk_scan
+		);
+
+	process (clk_scan, rst_n) begin
+		if rst_n = '0' then
+			row <= 0;
+		elsif rising_edge(clk_scan) then
+			if row = row'high then
+				row <= 0;
+			else
+				row <= row + 1;
+			end if;
 		end if;
 	end process;
+
+	dot_s <= "01111111" ror row; -- rotates '0' because common cathode
+	dot_r <= data_r(row);
+	dot_g <= data_g(row);
 
 end arch;

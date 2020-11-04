@@ -2,143 +2,24 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-package seg_p is
-	component seg
-		port (
-			-- seg
-			seg_1, seg_2 : out unsigned(7 downto 0); -- abcdefgp * 2
-			seg_s        : out unsigned(0 to 7);     -- seg2_s1 ~ seg1_s4
-			-- system
-			clk : in std_logic;
-			-- use logic
-			data : in string(1 to 8);  -- string type only allow positive range
-			dot  : in unsigned(0 to 7) -- dots are individually controlled
-		);
-	end component;
-
-	function to_character(n : integer range 0 to 15) return character;
-	function to_character(n : unsigned(3 downto 0)) return character;
-
-	-- converts an number into bcd
-	-- n: the number
-	-- n_width: number of bits needed to represent n
-	-- bcd_len: return length in nibbles (1 digit == 4 bits)
-	function to_bcd(n, n_width, bcd_len : integer) return unsigned;
-	function to_bcd(n : unsigned; n_width, bcd_len : integer) return unsigned;
-end package;
-
-package body seg_p is
-	function to_character(n : integer range 0 to 15) return character is begin
-		if n < 10 then -- n is decimal
-			return character'val(n + character'pos('0'));
-		else -- n is hexadecimal
-			return character'val(n - 10 + character'pos('A'));
-		end if;
-	end function;
-
-	function to_character(n : unsigned(3 downto 0)) return character is begin
-		if n < 10 then -- n is decimal
-			return character'val(to_integer(n) + character'pos('0'));
-		else -- n is hexadecimal
-			return character'val(to_integer(n - 10) + character'pos('A'));
-		end if;
-	end function;
-
-	function to_bcd(n, n_width, bcd_len : integer) return unsigned is
-
-		variable bin : unsigned(n_width - 1 downto 0) := to_unsigned(n, n_width);
-		variable bcd : unsigned(bcd_len * 4 - 1 downto 0) := (others => '0');
-		variable j : integer;
-
-	begin
-
-		-- convert binary to BCD
-		for i in 0 to n_width - 1 loop
-			-- check if any nibble (bcd digit) is more then 4
-			-- for (j = 0; j < bcd_len - 4; j += 4)
-			-- j is the bit count, 
-			j := 0;
-			while j < (bcd_len - 1) * 4 loop
-				if bcd(j + 3 downto j) > 4 then
-					bcd(j + 3 downto j) := bcd(j + 3 downto j) + 3; -- add 3 to the nibble
-				end if;
-
-				j := j + 4;
-			end loop;
-
-			--   shift
-			--  <------
-			-- bcd & bin
-			bcd := bcd sll 1;
-			bcd(bcd'right) := bin(bin'left);
-			bin := bin sll 1;
-		end loop;
-
-		return bcd;
-
-	end function;
-
-	function to_bcd(n : unsigned; n_width, bcd_len : integer) return unsigned is
-
-		variable bin : unsigned(n'range) := n;
-		variable bcd : unsigned(bcd_len * 4 - 1 downto 0) := (others => '0');
-		variable j : integer;
-
-	begin
-
-		-- convert binary to BCD
-		for i in 0 to n_width - 1 loop
-			-- check if any nibble (bcd digit) is more then 4
-			-- for (j = 0; j < bcd_len - 4; j += 4)
-			-- j is the bit count, 
-			j := 0;
-			while j < (bcd_len - 1) * 4 loop
-				if bcd(j + 3 downto j) > 4 then
-					bcd(j + 3 downto j) := bcd(j + 3 downto j) + 3; -- add 3 to the nibble
-				end if;
-
-				j := j + 4;
-			end loop;
-
-			--   shift
-			--  <------
-			-- bcd & bin
-			bcd := bcd sll 1;
-			bcd(bcd'right) := bin(bin'left);
-			bin := bin sll 1;
-		end loop;
-
-		return bcd;
-
-	end function;
-end package body;
-
-library ieee;
-use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
-
-use work.clk_p.all;
+use work.itc.all;
 
 entity seg is
 	port (
-		-- seg
-		seg_1, seg_2 : out unsigned(7 downto 0); -- abcdefgp * 2
-		seg_s        : out unsigned(0 to 7);     -- seg2_s1 ~ seg1_s4
 		-- system
-		clk : in std_logic;
+		clk, rst_n : in std_logic;
+		-- seg
+		seg_1, seg_2, seg_s : out byte_be_t; -- abcdefgp * 2, seg2_s1 ~ seg1_s4
 		-- use logic
-		data : in string(1 to 8);  -- string type only allow positive range
-		dot  : in unsigned(0 to 7) -- dots are individually controlled
+		data : in string(1 to 8); -- string type only allow positive range
+		dot  : in byte_be_t       -- dots are individually controlled
 	);
 end seg;
 
 architecture arch of seg is
 
-	-- clock
-	signal scan_clk : std_logic;
-
 	-- decoder look up table
-	type lut_t is array(0 to 127) of unsigned(7 downto 0);
+	type lut_t is array(0 to 2 ** 7 - 1) of byte_be_t;
 	constant lut : lut_t := (
 		-- HACK add additional characters between 0 to 31
 		x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00",
@@ -153,36 +34,42 @@ architecture arch of seg is
 	);
 
 	-- output wire
-	signal led : unsigned(7 downto 0);
+	signal seg_i : byte_be_t;
 
-	-- scan count
-	signal scan_cnt : integer range 0 to 7;
+	signal clk_scan : std_logic;
+	signal digit : integer range 0 to 7;
 
 begin
 
 	clk_inst : entity work.clk(arch)
 		generic map(
-			freq => 1_000
+			freq => 10_000_000
 		)
 		port map(
 			clk_in  => clk,
-			rst     => '1',
-			clk_out => scan_clk
+			rst_n   => rst_n,
+			clk_out => clk_scan
 		);
 
 	-- both outputs are the same
-	seg_1 <= led;
-	seg_2 <= led;
+	seg_1 <= seg_i;
+	seg_2 <= seg_i;
 
-	process (scan_clk) begin
-		if rising_edge(scan_clk) then
-			seg_s <= "01111111" ror scan_cnt; -- rotates '0' because common cathode
-			led <= lut(character'pos(data(scan_cnt + 1))); -- get the digit, then filter though look-up table
-			if dot(scan_cnt) = '1' then -- current segment should light up dot
-				led(0) <= '1'; -- led(0) is the dot segment
+	process (clk_scan, rst_n)
+	begin
+		if rst_n = '0' then
+			digit <= 0;
+		elsif rising_edge(clk_scan) then
+			if digit = digit'high then
+				digit <= 0;
+			else
+				digit <= digit + 1;
 			end if;
-			scan_cnt <= scan_cnt + 1;
 		end if;
 	end process;
+
+	seg_s <= "01111111" ror digit; -- rotates '0' because common cathode
+	seg_i(0 to 6) <= lut(character'pos(data(digit + 1)))(0 to 6); -- get the digit, then look up from table
+	seg_i(7) <= dot(digit); -- rightmost bit is the dot segment
 
 end arch;

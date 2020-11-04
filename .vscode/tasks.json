@@ -2,14 +2,12 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "Deploy",
+			"label": "Build",
 			"type": "shell",
 			"command": [
 				"bash -c '",
-				"quartus_sh -t tools/project.tcl;",
-				"quartus_sh -t tools/assign.tcl;",
-				"read -p \"Press Ctrl-L in Quartus II, press ENTER when Assembler is done\";",
-				"quartus_pgm -c \"USB-Blaster [USB-0]\" output_files/libitc.cdf",
+				"quartus_sh -t tools/assign.tcl | sed \"/^[ \\t]*Info/d\";",
+				"quartus_sh -t tools/compile.tcl | sed \"/^[ \\t]*Info/d\"",
 				"'"
 			],
 			"problemMatcher": [],
@@ -19,11 +17,13 @@
 			}
 		},
 		{
-			"label": "Program",
+			"label": "Deploy",
 			"type": "shell",
 			"command": [
 				"bash -c '",
-				"quartus_pgm -c \"USB-Blaster [USB-0]\" output_files/libitc.cdf",
+				"quartus_sh -t tools/assign.tcl | sed \"/^[ \\t]*Info/d\";",
+				"quartus_sh -t tools/compile.tcl | sed \"/^[ \\t]*Info/d\";",
+				"quartus_pgm -c \"USB-Blaster [USB-0]\" output_files/libitc.cdf | sed \"/^[ \\t]*Info/d\"",
 				"'"
 			],
 			"problemMatcher": [],

@@ -2,40 +2,36 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-use work.dot_p.all;
+use work.itc.all;
 
-entity dot_test is 
+entity dot_test is
 	port (
 		-- sys
-		clk, rst : in std_logic;
+		clk, rst_n : in std_logic;
 		-- dot
-		dot_r, dot_g, dot_s : out unsigned(0 to 7);
+		dot_r, dot_g, dot_s : out byte_be_t;
 		-- sw 
-		sw : in unsigned(7 downto 0)
-	); 
+		sw : in byte_t
+	);
 end dot_test;
 
 architecture arch of dot_test is
 
-	-- test buffer for dot
-	constant test_buf_r : dot_data_t := ("01111111", "11111111", "11111111", "11111111", "00011000", "00011000", "00000000", "00000001");
-	constant test_buf_g : dot_data_t := ("10000000", "00000000", "00011000", "00011000", "11111111", "11111111", "11111111", "11111110");
-
-	signal dot_data_r, dot_data_g : dot_data_t;
+	-- test buffers for dot
+	constant test_buf_r : bytes_be_t(0 to 7) := ("11111111", "10000001", "10111101", "10100101", "10100101", "10111101", "10000001", "11111111");
+	constant test_buf_g : bytes_be_t(0 to 7) := ("11111111", "11111111", "11000011", "11011011", "11011011", "11000011", "11111111", "11111111");
 
 begin
 
 	dot_inst : entity work.dot(arch)
 		port map(
+			clk    => clk,
+			rst_n  => rst_n,
 			dot_r  => dot_r,
 			dot_g  => dot_g,
 			dot_s  => dot_s,
-			clk    => clk,
-			data_r => dot_data_r,
-			data_g => dot_data_g
+			data_r => test_buf_r,
+			data_g => test_buf_g
 		);
-
-	dot_data_r <= test_buf_r;
-	dot_data_g <= test_buf_g;
 
 end arch;

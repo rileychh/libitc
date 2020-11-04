@@ -2,58 +2,40 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-use work.clk_p.all;
+use work.itc.all;
 
 entity rgb is
+	generic (
+		color_depth : integer := 4
+	);
 	port (
 		-- system
-		clk : in std_logic;
+		clk, rst_n : in std_logic;
 		-- rgb
-		rgb_r, rgb_g, rgb_b : out std_logic;
+		rgb : out std_logic_vector(0 to 2);
 		-- user logic
-		color : in unsigned(11 downto 0) -- format: 0xRGB (4-bit color)
+		color : in unsigned(color_depth * 3 - 1 downto 0) -- format: 0xRGB (if 4-bit color)
 	);
 end rgb;
 
 architecture arch of rgb is
 
-	-- higher means less LCs, but LED won't turn on if too high
-	-- 3125000Hz (max for 4-bit color) is tested and working
-	constant pwm_freq : integer := sys_clk_freq / 2 ** 4;
-
 begin
 
-	pwm_inst_r : entity work.pwm(arch)
-		generic map(
-			pwm_freq => pwm_freq,
-			duty_res => 2 ** 4
-		)
-		port map(
-			clk     => clk,
-			duty    => to_integer(color(11 downto 8)),
-			pwm_out => rgb_r
-		);
-
-	pwm_inst_g : entity work.pwm(arch)
-		generic map(
-			pwm_freq => pwm_freq,
-			duty_res => 2 ** 4
-		)
-		port map(
-			clk     => clk,
-			duty    => to_integer(color(7 downto 4)),
-			pwm_out => rgb_g
-		);
-
-	pwm_inst_b : entity work.pwm(arch)
-		generic map(
-			pwm_freq => pwm_freq,
-			duty_res => 2 ** 4
-		)
-		port map(
-			clk     => clk,
-			duty    => to_integer(color(3 downto 0)),
-			pwm_out => rgb_b
-		);
+	pwm_gen : for i in 0 to 2 generate
+		pwm_inst : entity work.pwm(arch)
+			generic map(
+				-- higher means less LCs, but LED won't turn on if too high
+				-- 3125000Hz (max for 4-bit color) is tested and working
+				pwm_freq => sys_clk_freq / 2 ** color_depth,
+				duty_res => 2 ** color_depth
+			)
+			port map(
+				clk     => clk,
+				rst_n   => rst_n,
+				duty    => to_integer(color((2 - i) * color_depth + color_depth - 1 downto (2 - i) * color_depth)),
+				pwm_out => rgb(i)
+			);
+	end generate pwm_gen;
 
 end arch;

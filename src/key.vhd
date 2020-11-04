@@ -2,148 +2,61 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-package key_p is
-	component dbnce
-		generic (
-			clk_cnt : integer := 2 -- wait for this amount of cycles
-		);
-
-		port (
-			-- user logic
-			clk       : in std_logic;
-			dbnce_in  : in std_logic;
-			dbnce_out : out std_logic
-		);
-	end component;
-
-	component key
-		port (
-			-- key
-			key_col : out unsigned(0 to 3);
-			key_row : in unsigned(0 to 3);
-			-- system
-			clk : in std_logic;
-			-- user logic
-			int     : out std_logic; -- '1' if something is pressed, debounced
-			pressed : out integer range 0 to 15
-		);
-	end component;
-end package;
-
---
--- dbnce
--- push button debouncer module
---
-
-library ieee;
-use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
-
-entity dbnce is
-	generic (
-		clk_cnt : integer := 2 -- wait for this amount of cycles
-	);
-
-	port (
-		-- user logic
-		clk       : in std_logic;
-		dbnce_in  : in std_logic;
-		dbnce_out : out std_logic
-	);
-end dbnce;
-
-architecture arch of dbnce is
-
-	signal cnt : integer range 0 to clk_cnt - 1;
-
-begin
-
-	process (clk) begin
-		if rising_edge(clk) then
-			if dbnce_in = '1' then
-				if cnt = clk_cnt - 1 then
-					dbnce_out <= '1';
-				else
-					cnt <= cnt + 1;
-				end if;
-			else
-				dbnce_out <= '0';
-				cnt <= 0;
-			end if;
-		end if;
-	end process;
-
-end arch;
-
---
--- key
---
-
-library ieee;
-use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
-
-use work.key_p.all;
-use work.clk_p.all;
+use work.itc.all;
 
 entity key is
 	port (
-		-- key
-		key_col : out unsigned(0 to 3);
-		key_row : in unsigned(0 to 3);
 		-- system
-		clk : in std_logic;
+		clk, rst_n : in std_logic;
+		-- key
+		key_row : in nibble_be_t;
+		key_col : out nibble_be_t;
 		-- user logic
-		int     : out std_logic; -- '1' if something is pressed, debounced
-		pressed : out integer range 0 to 15
+		pressed : out std_logic;
+		key     : out integer range 0 to 15
 	);
 end key;
 
 architecture arch of key is
 
-	signal scan_clk : std_logic;
-	signal col_cnt : integer range 0 to 3; -- column count, for shifting key_col
-	signal int_reg : std_logic;
+	signal pressed_i : std_logic; -- not debounced pressed flag
 
 begin
 
-	dbnce_inst : dbnce generic map(40) port map(clk, int_reg, int);
-
-	clk_inst : entity work.clk(arch)
-		generic map(
-			freq => 1_000
-		)
-		port map(
-			clk_in  => clk,
-			rst     => '1',
-			clk_out => scan_clk
-		);
-
-	process (clk) begin
-		if rising_edge(clk) then
-			if key_row = "1111" then -- if nothing is pressed
-				-- cycle '0' between columns
-				-- HACK: why start at "0111" is wrong?
-				key_col <= "1011" ror col_cnt;
+	-- scan through columns
+	process (clk, rst_n)
+		variable curr_cycle_pressed : std_logic;
+		variable column : integer range 0 to 3;
+	begin
+		if rst_n = '0' then
+			column := 0;
+		elsif rising_edge(clk) then
+			if reduce(key_row, "and") = '0' then -- key_row has zeros (some key is pressed)
+				key <= index_of(key_row, '0') * 4 + column;
+				curr_cycle_pressed := '1'; -- remeber a button is pressed this cycle
 			end if;
 
-			int_reg <= '1';
+			if column = column'high then
+				column := 0;
+				pressed_i <= curr_cycle_pressed; -- update pressed flag
+				curr_cycle_pressed := '0'; -- reset for next cycle
+			else
+				column := column + 1;
+			end if;
 
-			case key_row is
-				when "0111" => -- 0, 4, 8, c
-					pressed <= col_cnt * 4;
-				when "1011" => -- 1, 5, 9, d
-					pressed <= col_cnt * 4 + 1;
-				when "1101" => -- 2, 6, a, e
-					pressed <= col_cnt * 4 + 2;
-				when "1110" => -- 3, 7, b, f
-					pressed <= col_cnt * 4 + 3;
-				when others =>
-					int_reg <= '0';
-			end case;
-
-			col_cnt <= col_cnt + 1;
+			key_col <= "0111" ror column; -- cycle '0' between columns
 		end if;
 	end process;
+
+	debounce_inst : entity work.debounce(arch)
+		generic map(
+			stable_time => 10
+		)
+		port map(
+			clk     => clk,
+			rst_n   => rst_n,
+			sig_in  => pressed_i,
+			sig_out => pressed
+		);
 
 end arch;

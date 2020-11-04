@@ -1,3 +1,5 @@
+-- rainbow party
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -5,9 +7,9 @@ use ieee.numeric_std.all;
 entity rgb_test is
 	port (
 		-- sys
-		clk, rst : in std_logic; -- rising edge clock, low reset
+		clk, rst_n : in std_logic; -- rising edge clock, low reset
 		-- rgb
-		rgb_r, rgb_g, rgb_b : out std_logic
+		rgb : out std_logic_vector(0 to 2)
 	);
 end rgb_test;
 
@@ -24,28 +26,30 @@ begin
 
 	clk_inst : entity work.clk(arch)
 		generic map(
-			freq => 10
+			freq => 20
 		)
 		port map(
 			clk_in  => clk,
-			rst     => rst,
+			rst_n   => rst_n,
 			clk_out => color_clk
 		);
 
 	rgb_inst : entity work.rgb(arch)
+		generic map(
+			color_depth => 4
+		)
 		port map(
 			clk   => clk,
-			rgb_r => rgb_r,
-			rgb_g => rgb_g,
-			rgb_b => rgb_b,
+			rst_n => rst_n,
+			rgb   => rgb,
 			color => color
 		);
 
 	color <= to_unsigned(r, 4) & to_unsigned(g, 4) & to_unsigned(b, 4);
 
-	process (color_clk, rst)
+	process (color_clk, rst_n)
 	begin
-		if rst = '0' then
+		if rst_n = '0' then
 			r <= 15;
 			g <= 0;
 			b <= 0;

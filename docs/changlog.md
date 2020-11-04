@@ -1,50 +1,80 @@
 # Changelog
 
-No version is backwards compatible!
+All notable changes to this project will be documented in this file.
 
-## To-dos
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-* Add support for SM178B text-to-speech module
-* Add support for ST7735 TFT LCD module
+## [Unreleased]
 
-## v4
+### Added
 
-* Changed range of `temp` and `hum` in `dht` to prevent overflow
-* Added edge detector `edge` in `clk_p`
-* Added I2C interface (`i2c.vhd`)
-* Added support for TSL2561 light sensor (`tsl.vhd`)
-* Fixed `pwm` overflows when duty cycle is over 50%
+- Support for SM178B text-to-speech module
+- Support for ST7735 TFT LCD module
+- I2C interface (`i2c.vhd`)
+- Support for TSL2561 light sensor (`tsl.vhd`)
+- Edge detector `edge` in `clk_p`
 
-## v3
+### Changed
 
-* Changed some ports to simpler names
-* Added deploy and program script for VSCode
-* Added DHT11 interface (`dht.vhd`)
-* Seven segment display now uses string type as data input
-  * You can use `to_character()` function to convert integer or unsigned into hexadecimal format
-* `seg.vhd` now reversed `seg_s` port bit order, you'll need to update pin assignment
-* Changed `clk_sys`'s name to `clk`
-* Fixed `clk` overflow, now timing will be correct
-* Removed simulation files
-* Removed `clk_div` component
+- `rst` port is now `rst_n`
+- Auto compiling and deploying VSCode tasks
 
-## v2
+### Fixed
 
-* Add enable pins to `dot` and `seg` drivers
-* Some new features for `dot`
-  * `dot_zeros` and `dot_ones` constants which are just `dot_data_t` type with full of '0's and '1's
-  * `dot_anim_t` type: array of `dot_data_t` dor creating animations
-* Fixed `seg_data_t` type to `integer range 0 to seg_lut_len - 1`
-* Fixed `clk_sys` component "divide by zero error"
-* Update documentations
+- `pwm` overflows when duty cycle is over 50%
+- Range of `temp` and `hum` in `dht` is too small
 
-## v1
+## [0.3.0]
 
-* Add more glyphs to the `seg_lut`
-* Increased `seg_data_t` range
-* Add new constants:
-  * `seg_lut_len`: the length of `seg_lut`
-  * `seg_dot`: add this number to any element of `seg_data` to turn on the dot
-  * `seg_spc`: space
-  * `seg_deg`: degree symbol
-  * `seg_lb`, `seg_rb`: brackets
+### Added
+
+- Deploy and program script for VSCode
+- DHT11 interface (`dht.vhd`)
+
+### Removed
+
+- Simulation files
+- `clk_div` component
+
+### Changed
+
+- Changed some ports to simpler names
+- Seven segment display now uses string type as data input
+  - You can use `to_character()` function to convert integer or unsigned into hexadecimal format
+- `seg.vhd` now reversed `seg_s` port bit order, you'll need to update pin assignment
+- Changed `clk_sys`'s name to `clk`
+
+### Fixed
+
+- Fixed `clk` overflow, now timing will be correct
+
+## [0.2.0]
+
+### Added
+
+- Add enable pins to `dot` and `seg` drivers
+- Some new features for `dot`
+  - `dot_zeros` and `dot_ones` constants which are just `dot_data_t` type with full of '0's and '1's
+  - `dot_anim_t` type: array of `dot_data_t` dor creating animations
+
+### Fixed
+
+- Fixed `seg_data_t` type to `integer range 0 to seg_lut_len - 1`
+- Fixed `clk_sys` component "divide by zero error"
+
+## [0.1.0]
+
+### Added
+
+- More glyphs in the `seg_lut`
+- Add new constants:
+  - `seg_lut_len`: the length of `seg_lut`
+  - `seg_dot`: add this number to any element of `seg_data` to turn on the dot
+  - `seg_spc`: space
+  - `seg_deg`: degree symbol
+  - `seg_lb`, `seg_rb`: brackets
+
+### Changed
+
+- Increased `seg_data_t` range

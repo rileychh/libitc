@@ -5,28 +5,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-package pwm_p is
-	component pwm
-		generic (
-			pwm_freq : integer := 100_000; -- PWM switching frequency in Hz
-			duty_res : integer := 100      -- resolution setting of the duty cycle
-		);
-
-		port (
-			-- system
-			clk : in std_logic; -- system clock
-			-- user logic
-			duty    : in integer range 0 to duty_res - 1; -- duty cycle
-			pwm_out : out std_logic                       -- pwm output
-		);
-	end component;
-end package;
-
-library ieee;
-use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
-
-use work.clk_p.all; -- for sys_clk_freq constant
+use work.itc.all;
 
 entity pwm is
 	generic (
@@ -36,7 +15,7 @@ entity pwm is
 
 	port (
 		-- system
-		clk : in std_logic; -- system clock
+		clk, rst_n : in std_logic; -- system clock
 		-- user logic
 		duty    : in integer range 0 to duty_res - 1; -- duty cycle
 		pwm_out : out std_logic                       -- pwm output
@@ -51,8 +30,10 @@ architecture arch of pwm is
 
 begin
 
-	process (clk) begin -- counter
-		if rising_edge(clk) then
+	process (clk, rst_n) begin -- counter
+		if rst_n = '0' then
+			cnt <= 0;
+		elsif rising_edge(clk) then
 			if cnt = cnt'high then
 				cnt <= 0;
 			else
