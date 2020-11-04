@@ -11,12 +11,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Support for SM178B text-to-speech module
 - Support for ST7735 TFT LCD module
-- I2C interface (`i2c.vhd`)
 - Support for TSL2561 light sensor (`tsl.vhd`)
-- Edge detector `edge` in `clk_p`
+- I2C interface (`i2c.vhd`)
+- Edge detector `edge`
+- Useful functions
+  - `log(base, num)`
+  - `reverse(vector)`
+  - `reduce(vector, operation)`
+  - `index_of(vector, element)`
+  - `to_string(num, num_max, base, length)`
+- Useful types
+  - `nibble_t`
+  - `nibble_be_t`
+  - `nibbles_t`
+  - `nibbles_be_t`
+  - `byte_t`
+  - `byte_be_t`
+  - `bytes_t`
+  - `bytes_be_t`
 
 ### Changed
 
+- Complete rewrite
+- Some port bit order
+- Unified packages to one `itc` package
 - `rst` port is now `rst_n`
 - Auto compiling and deploying VSCode tasks
 
