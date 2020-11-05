@@ -163,7 +163,7 @@ begin
 			end if;
 
 			if busy_fall = '1' and rw_prev = '1' and data_out_cnt < data_out_cnt'high then -- previous transaction is done
-					data_out_wr_ena <= '1'; -- store the read data
+				data_out_wr_ena <= '1'; -- store the read data
 			end if;
 		end if;
 	end process;
