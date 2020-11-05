@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import pyperclip
 from textwrap import *
 
@@ -12,14 +14,15 @@ for i in range(cnt):
     name.append(input())
     text.append(input())
 
-encoded_text = [s.encode('big5') for s in text] # encode all inputs
-byte_len = [len(s) for s in encoded_text] # lengths (in bytes) of encoded texts
+encoded_text = [s.encode('big5') for s in text]  # encode all inputs
+# lengths (in bytes) of encoded texts
+byte_len = [len(s) for s in encoded_text]
 max_len = max(byte_len)
 result = f'constant max_len : integer := {max_len};\n\n'
 
 for i in range(cnt):
     array_elements = '", x"'.join(f'{c:02x}' for c in encoded_text[i])
-    
+
     result += fill(f'-- "{text[i]}", {byte_len[i]}', width=60, subsequent_indent='-- ') + '\n' + \
         f'-- {txt_signal_name}(0 to {byte_len[i] - 1}) <= {name[i]};\n' + \
         f'-- {txt_len_signal_name} <= {byte_len[i]};\n' + \
