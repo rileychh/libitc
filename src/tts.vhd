@@ -9,15 +9,17 @@ entity tts is
 		txt_len_max : integer := 16 -- maximum length of text
 	);
 	port (
-		-- tts
-		tts_scl, tts_sda : inout std_logic;
 		-- system
 		clk, rst_n : in std_logic;
+		-- tts
+		tts_scl, tts_sda : inout std_logic;
 		-- user logic
 		ena     : in std_logic;
 		busy    : out std_logic;
 		txt     : in bytes_t(0 to txt_len_max - 1);
-		txt_len : in integer range 1 to txt_len_max
+		txt_len : in integer range 1 to txt_len_max;
+
+		dbg : out byte_t
 	);
 end tts;
 
@@ -50,6 +52,8 @@ architecture arch of tts is
 
 begin
 
+	dbg <= reverse(to_unsigned(i2c_in_cnt, 8));
+
 	i2c_inst : entity work.i2c(arch)
 		generic map(
 			bus_freq => 100_000
@@ -71,6 +75,8 @@ begin
 		if rst_n = '0' then
 			data_cnt <= 0;
 			state <= idle;
+			i2c_in_ena <= '0';
+			i2c_out_ena <= '0';
 		elsif rising_edge(clk) then
 			-- default values
 			i2c_in_ena <= '0';

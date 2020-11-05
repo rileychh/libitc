@@ -157,15 +157,13 @@ begin
 			data_out_wr_ena <= '0';
 			busy_prev <= busy;
 
-			if busy_rise = '1' and err = '0' then -- transaction latched, get new data unless errored
+			if busy_rise = '1' and err = '0' and data_in_cnt > 0 then -- transaction latched, get new data unless errored
 				rw_prev <= data_in(8);
 				data_in_rd_ena <= '1'; -- pulse enable high, next data set
 			end if;
 
-			if busy_fall = '1' then -- previous transaction is done
-				if rw_prev = '1' then -- previous command is a read command
+			if busy_fall = '1' and rw_prev = '1' and data_out_cnt < data_out_cnt'high then -- previous transaction is done
 					data_out_wr_ena <= '1'; -- store the read data
-				end if;
 			end if;
 		end if;
 	end process;

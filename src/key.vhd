@@ -29,6 +29,8 @@ begin
 		variable column : integer range 0 to 3;
 	begin
 		if rst_n = '0' then
+			pressed_i <= '0';
+			curr_cycle_pressed := '0';
 			column := 0;
 		elsif rising_edge(clk) then
 			if reduce(key_row, "and") = '0' then -- key_row has zeros (some key is pressed)
