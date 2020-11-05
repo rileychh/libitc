@@ -1,4 +1,7 @@
 {
+    "[vhdl]": {
+        "editor.fontLigatures": false,
+    },
     // File explorer
     "files.exclude": {
         "db/": true,
