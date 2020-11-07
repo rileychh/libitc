@@ -26,6 +26,7 @@ architecture arch of bruh is
 
 	signal sw_i : byte_t;
 	signal seg : string(1 to 8);
+	signal seg_dot : byte_t;
 	signal pressed : std_logic;
 	signal key : integer range 0 to 15;
 	signal temp, hum : integer range 0 to 99;
@@ -37,6 +38,8 @@ architecture arch of bruh is
 	constant key_up : integer := 3;
 	constant key_down : integer := 4;
 	constant key_ok : integer := 5;
+
+	type state_t is (idle, lcd_test, tts_test, sensors_test, combined_test);
 
 begin
 
@@ -56,7 +59,7 @@ begin
 			seg_2 => seg_2,
 			seg_s => seg_s,
 			data  => seg,
-			dot => (others => '0')
+			dot   => seg_dot
 		);
 
 	key_inst : entity work.key(arch)
@@ -80,23 +83,42 @@ begin
 			hum_dec  => open
 		);
 
-	mode <= to_integer(sw(7 downto 6));
-
-	process (all) begin
-		if rising_edge(pressed) then
-			key_pressed <= key;
-		end if;
-	end process;
+	tsl_inst : entity work.tsl(arcj)
+		port map(
+			tsl_scl => tsl_scl,
+			tsl_sda => tsl_sda,
+			clk     => clk,
+			rst_n   => rst_n,
+			lux     => lux
+		);
 
 	process (clk, rst_n) begin
 		if rst_n = '0' then
 			state <= idle;
-		elsif rising_edge(clk) then
+			elsif rising_edge(clk) then
 			case state is
 				when idle =>
-					if pressed = '1' and key = then
-
+					if pressed = '1' and key = key_start_stop then
+						mode <= to_integer(sw(7 downto 6));
 					end if;
+
+				when run =>
+					if pressed = '1' and key = key_start_stop then
+						state <= pause;
+					end if;
+
+					case mode is
+						when 0 => -- lcd_test
+						when 1 => -- tts_test
+						when 2 => -- sensors_test
+						when 3 => -- combined_test
+					end case;
+
+				when pause =>
+					if pressed = '1' and key = key_start_stop then
+						state <= run;
+					end if;
+
 			end case;
 		end if;
 	end process;
