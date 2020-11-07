@@ -2,7 +2,8 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-use work.bruh_data_all;
+use work.itc.all;
+use work.bruh_data.all;
 
 entity bruh is
   port (
@@ -35,7 +36,7 @@ architecture arch of bruh is
   signal lux : integer range 0 to 40000;
   signal tts_ena, tts_busy : std_logic;
   signal txt : bytes_t(0 to txt_len_max - 1);
-  signal txt_len : integer range 0 to txt_len;
+  signal txt_len : integer range 0 to txt_len_max;
 
   signal mode : integer range 0 to 3;
   constant key_start_stop : integer := 0;
@@ -45,7 +46,8 @@ architecture arch of bruh is
   constant key_down : integer := 7;
   constant key_ok : integer := 8;
 
-  type state_t is (idle, lcd_test, tts_test, sensors_test, combined_test);
+  type state_t is (idle, run, pause);
+  signal state : state_t;
 
 begin
 
@@ -127,7 +129,7 @@ begin
   begin
     if rst_n = '0' then
       state <= idle;
-      elsif rising_edge(clk) then
+    elsif rising_edge(clk) then
       case state is
         when idle =>
           if pressed = '1' and key = key_start_stop then
@@ -151,9 +153,9 @@ begin
                     vol := 5;
                   when key_func =>
                     if func = 3 then -- loop between functions
-                      func <= 1;
+                      func := 1;
                     else
-                      func <= func + 1;
+                      func := func + 1;
                     end if;
                   when others => null;
                 end case;
@@ -221,24 +223,25 @@ begin
                   end case;
                   seg_dot <= "00100001";
 
+                when others => null;
               end case;
 
-              tts_config(0 to 2) := tts_set_vol & (2 ** 8 / 10) * vol & tts_set_channel;
+              tts_config(0 to 2) := (tts_set_vol, to_unsigned((2 ** 8 / 10) * vol, 8), tts_set_channel);
               case channel_disp is
                 when 0 => -- right
-                  tts_config(3) <= x"06";
+                  tts_config(3) := x"06";
                 when 1 => -- left
-                  tts_config(3) <= x"05";
+                  tts_config(3) := x"05";
                 when 2 => -- both
-                  tts_config(3) <= x"07";
+                  tts_config(3) := x"07";
               end case;
 
               if content = '0' then -- text
-                tts_txt(0 to 45 + 4) <= tts_config & txt_sensor_init;
-                tts_txt_len <= 46 + 4;
+                txt(0 to 45 + 4) <= tts_config & txt_sensor_init;
+                txt_len <= 46 + 4;
               else -- music
-                tts_txt(0 to 4 + 4) <= tts_config & tts_play_file & x"0001" & x"0001"; -- play 0001.wav 1 time
-                tts_txt_len <= 5 + 4;
+                txt(0 to 4 + 4) <= tts_config & tts_play_file & x"00" & x"01" & x"00" & x"01"; -- play 0001.wav 1 time
+                txt_len <= 5 + 4;
               end if;
               tts_ena <= '1';
 
