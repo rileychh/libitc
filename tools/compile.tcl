@@ -60,7 +60,8 @@ if {$make_assignments} {
 	set_global_assignment -name VHDL_FILE src/util/debounce.vhd
 	set_global_assignment -name VHDL_FILE src/util/edge.vhd
 	set_global_assignment -name VHDL_FILE src/util/fifo.vhd
-	set_global_assignment -name VHDL_FILE src/util/i2c_master.vhd
+	# set_global_assignment -name VHDL_FILE src/util/i2c_master.vhd
+	set_global_assignment -name VHDL_FILE src/util/i2c.vhd
 	set_global_assignment -name VHDL_FILE src/util/itc_pkg.vhd
 	set_global_assignment -name VHDL_FILE src/util/pwm.vhd
 	set_global_assignment -name VHDL_FILE src/util/spi_master.vhd

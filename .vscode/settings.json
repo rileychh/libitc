@@ -1,0 +1,68 @@
+{
+    "[vhdl]": {
+        "editor.fontLigatures": false,
+    },
+    // File explorer
+    "files.exclude": {
+        "db/": true,
+        "incremental_db/": true,
+        "output_files/": true,
+        "simulation/": true
+    },
+    // VHDL formatter
+    "vhdl.formatter.align.function": true,
+    "vhdl.formatter.align.generic": true,
+    "vhdl.formatter.align.port": true,
+    "vhdl.formatter.align.procedure": true,
+    "vhdl.formatter.case.keyword": "LowerCase",
+    "vhdl.formatter.case.typename": "LowerCase",
+    "vhdl.formatter.newline.generic": "NoNewLine",
+    "vhdl.formatter.newline.port": "NoNewLine",
+    "vhdl.formatter.newline.else": "None",
+    "vhdl.formatter.insertFinalNewline": true,
+    // Modern VHDL
+    "vhdl.suggestLibraryCase": "lower",
+    "vhdl.enableStutterComments": true,
+    "vhdl.enableStutterDelimiters": true,
+    "vhdl.enableStutterBrackets": true,
+    // Python
+    "python.pythonPath": "tools\\venv\\Scripts\\python.exe",
+    // Markdown
+    "markdownlint.config": {
+        "MD041": false, // first-line-h1
+        "MD024": false, // no-duplicate-heading
+        "MD033": false, // no-inline-html
+    },
+    // Spell checker
+    "cSpell.enableFiletypes": [
+        "vhdl"
+    ],
+    "cSpell.userWords": [
+        "LEDs",
+        "abcdefgp",
+        "combinational",
+        "conv",
+        "cpha",
+        "cpol",
+        "curr",
+        "datasheet",
+        "dbnce",
+        "debouncer",
+        "downto",
+        "eewiki",
+        "inout",
+        "integ",
+        "libitc",
+        "mosi",
+        "quartus",
+        "sclk",
+        "testbench",
+        "uart",
+        "vhdl"
+    ],
+    "cSpell.ignoreRegExpList": [
+        ".*'.*" // VHDL attributes, e.g. "key_row'range"
+    ],
+    // Todo tree
+    "todo-tree.regex.regex": "((//|#|<!--|;|/\\*|^|--)\\s*($TAGS)|^\\s*- \\[ \\])",
+}

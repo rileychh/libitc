@@ -1,31 +1,8 @@
---////////////////////////// FIFO RAM MEMORY ///////////////////////////////////--
--- ***********************************************************************
--- FileName: FIFO.vhd
--- FPGA: Lattice ECP2-70E
--- IDE: Lattice Diamond ver 2.0.1
---
--- HDL IS PROVIDED "AS IS." DIGI-KEY EXPRESSLY DISCLAIMS ANY
--- WARRANTY OF ANY KIND, WHETHER EXPRESS OR IMPLIED, INCLUDING BUT NOT
--- LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
--- PARTICULAR PURPOSE, OR NON-INFRINGEMENT. IN NO EVENT SHALL DIGI-KEY
--- BE LIABLE FOR ANY INCIDENTAL, SPECIAL, INDIRECT OR CONSEQUENTIAL
--- DAMAGES, LOST PROFITS OR LOST DATA, HARM TO YOUR EQUIPMENT, COST OF
--- PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY OR SERVICES, ANY CLAIMS
--- BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
--- ANY CLAIMS FOR INDEMNITY OR CONTRIBUTION, OR OTHER SIMILAR COSTS.
--- DIGI-KEY ALSO DISCLAIMS ANY LIABILITY FOR PATENT OR COPYRIGHT
--- INFRINGEMENT.
---
--- Version History
--- Version 1.0 15/11/2012 Tony Storey
--- Initial Public Release
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
-------------------------------------------------------
 
-----------------------------------------------------------------------------
 entity fifo_eewiki is
 	generic (
 		addr_w  : integer := 4;  -- address width in bits
@@ -49,9 +26,7 @@ entity fifo_eewiki is
 		err         : out std_logic
 	);
 end fifo_eewiki;
-----------------------------------------------------------------------------
 
-----------------------------------------------------------------------------------------------------------------------
 architecture arch of fifo_eewiki is
 
 	type reg_file_type is array (0 to ((2 ** ADDR_W) - 1)) of std_logic_vector(DATA_W - 1 downto 0);
@@ -71,12 +46,9 @@ architecture arch of fifo_eewiki is
 	signal q_reg, q_next : std_logic_vector(ADDR_W downto 0); -- data counter
 	signal q_add, q_sub : std_logic;
 
-	---------------------------------------------------
-
 begin
 
 	---------- Process to update read, write, full, and empty on clock edges
-	reg_update :
 	process (clk)
 	begin
 		if rising_edge(clk) then
@@ -101,7 +73,6 @@ begin
 	end process;
 
 	-- --------------Process to control almost full and almost emptly flags
-	Wtr_Mrk_Cont :
 	process (q_reg, almst_e_ff, almst_f_ff)
 	begin
 		almst_e_ff_nxt <= almst_e_ff;
@@ -119,7 +90,6 @@ begin
 		end if;
 	end process;
 	----------- Process to control read and write pointers and empty/full flip flops
-	Ptr_Cont :
 	process (wr_en, rd_en, wr_ptr, rd_ptr, empty_ff, full_ff, q_reg)
 
 	begin
@@ -185,7 +155,6 @@ begin
 		end if;
 	end process;
 	-------- Process to control memory array writing and reading		
-	mem_cont :
 	process (clk)
 	begin
 		if rising_edge(clk) then

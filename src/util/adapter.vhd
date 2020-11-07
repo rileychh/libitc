@@ -9,6 +9,7 @@ entity fifo is
 		addr_width : integer := 8;
 		data_width : integer := 8
 	);
+
 	port (
 		-- system
 		clk, rst_n : in std_logic;
@@ -54,123 +55,122 @@ begin
 
 end arch;
 
-library ieee;
-use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
+-- library ieee;
+-- use ieee.std_logic_1164.all;
+-- use ieee.numeric_std.all;
 
-use work.itc.all;
+-- use work.itc.all;
 
-entity i2c is
-	generic (
-		bus_freq : integer := 100_000
-	);
-	port (
-		-- system
-		clk, rst_n : in std_logic;
-		-- I2C slave
-		scl, sda : inout std_logic;
-		-- user logic: flags
-		data_in_wr_ena, data_out_rd_ena : in std_logic;
-		data_in_cnt, data_out_cnt       : out integer range 0 to 2 ** 8 - 1;
-		-- user logic: data
-		data_in  : in std_logic_vector(15 downto 0); -- address & read/write & data
-		data_out : out std_logic_vector(7 downto 0)
-	);
-end i2c;
+-- entity i2c is
+-- 	generic (
+-- 		bus_freq : integer := 100_000
+-- 	);
 
-architecture arch of i2c is
+-- 	port (
+-- 		-- system
+-- 		clk, rst_n : in std_logic;
+-- 		-- I2C slave
+-- 		scl, sda : inout std_logic;
+-- 		-- user logic: flags
+-- 		data_in_wr_ena, data_out_rd_ena : in std_logic;
+-- 		data_in_cnt, data_out_cnt       : out integer range 0 to 2 ** 8 - 1;
+-- 		-- user logic: data
+-- 		data_in  : in std_logic_vector(15 downto 0); -- address & read/write & data
+-- 		data_out : out std_logic_vector(7 downto 0)
+-- 	);
+-- end i2c;
 
-	signal i2c_data_in : std_logic_vector(15 downto 0);
-	signal i2c_data_out : std_logic_vector(7 downto 0);
-	signal data_in_rd_ena, data_out_wr_ena : std_logic;
+-- architecture arch of i2c is
 
-	signal ena, busy, err : std_logic;
-	signal busy_prev, busy_rise, busy_fall : std_logic;
+-- 	signal i2c_data_in : std_logic_vector(15 downto 0);
+-- 	signal i2c_data_out : std_logic_vector(7 downto 0);
+-- 	signal data_in_rd_ena, data_out_wr_ena : std_logic;
 
-	signal rw_prev : std_logic;
+-- 	signal ena, busy, err : std_logic;
+-- 	signal busy_prev, busy_rise, busy_fall : std_logic;
 
-begin
+-- 	signal rw_prev : std_logic;
 
-	fifo_inst_in : entity work.fifo(arch)
-		generic map(
-			addr_width => 8,
-			data_width => 16
-		)
-		port map(
-			clk      => clk,
-			rst_n    => rst_n,
-			rd_ena   => data_in_rd_ena,
-			wr_ena   => data_in_wr_ena,
-			data_cnt => data_in_cnt,
-			data_in  => data_in,
-			data_out => i2c_data_in
-		);
+-- begin
 
-	fifo_inst_data_out : entity work.fifo(arch)
-		generic map(
-			addr_width => 8,
-			data_width => 8
-		)
-		port map(
-			clk      => clk,
-			rst_n    => rst_n,
-			rd_ena   => data_out_rd_ena,
-			wr_ena   => data_out_wr_ena,
-			data_cnt => data_out_cnt,
-			data_in  => i2c_data_out,
-			data_out => data_out
-		);
+-- 	fifo_inst_in : entity work.fifo(arch)
+-- 		generic map(
+-- 			addr_width => 8,
+-- 			data_width => 16
+-- 		)
+-- 		port map(
+-- 			clk      => clk,
+-- 			rst_n    => rst_n,
+-- 			rd_ena   => data_in_rd_ena,
+-- 			wr_ena   => data_in_wr_ena,
+-- 			data_cnt => data_in_cnt,
+-- 			data_in  => data_in,
+-- 			data_out => i2c_data_in
+-- 		);
 
-	i2c_master_inst : entity work.i2c_master(logic)
-		generic map(
-			input_clk => sys_clk_freq,
-			bus_clk   => bus_freq
-		)
-		port map(
-			clk       => clk,
-			reset_n   => rst_n,
-			ena       => ena,
-			addr      => i2c_data_in(15 downto 9),
-			rw        => i2c_data_in(8),
-			data_wr   => i2c_data_in(7 downto 0),
-			busy      => busy,
-			data_rd   => i2c_data_out,
-			ack_error => err,
-			sda       => sda,
-			scl       => scl
-		);
+-- 	fifo_inst_data_out : entity work.fifo(arch)
+-- 		generic map(
+-- 			addr_width => 8,
+-- 			data_width => 8
+-- 		)
+-- 		port map(
+-- 			clk      => clk,
+-- 			rst_n    => rst_n,
+-- 			rd_ena   => data_out_rd_ena,
+-- 			wr_ena   => data_out_wr_ena,
+-- 			data_cnt => data_out_cnt,
+-- 			data_in  => i2c_data_out,
+-- 			data_out => data_out
+-- 		);
 
-	ena <= '1' when data_in_cnt > 0 else '0';
+-- 	i2c_master_inst : entity work.i2c_master(logic)
+-- 		generic map(
+-- 			input_clk => sys_clk_freq,
+-- 			bus_clk   => bus_freq
+-- 		)
+-- 		port map(
+-- 			clk       => clk,
+-- 			reset_n   => rst_n,
+-- 			ena       => ena,
+-- 			addr      => i2c_data_in(15 downto 9),
+-- 			rw        => i2c_data_in(8),
+-- 			data_wr   => i2c_data_in(7 downto 0),
+-- 			busy      => busy,
+-- 			data_rd   => i2c_data_out,
+-- 			ack_error => err,
+-- 			sda       => sda,
+-- 			scl       => scl
+-- 		);
 
-	busy_rise <= not busy_prev and busy;
-	busy_fall <= busy_prev and not busy;
+-- 	ena <= '1' when data_in_cnt > 0 else '0';
 
-	process (clk, rst_n) begin
-		if rst_n = '0' then
-			data_in_rd_ena <= '0'; -- enables are normally low
-			data_out_wr_ena <= '0';
-			busy_prev <= '1';
-			rw_prev <= '0';
-		elsif rising_edge(clk) then
-			-- default values
-			data_in_rd_ena <= '0'; -- enables are normally low
-			data_out_wr_ena <= '0';
-			busy_prev <= busy;
+-- 	busy_rise <= not busy_prev and busy;
+-- 	busy_fall <= busy_prev and not busy;
 
-			if busy_rise = '1' and err = '0' then -- transaction latched, get new data unless errored
-				rw_prev <= data_in(8);
-				data_in_rd_ena <= '1'; -- pulse enable high, next data set
-			end if;
+-- 	process (clk, rst_n) begin
+-- 		if rst_n = '0' then
+-- 			data_in_rd_ena <= '0'; -- enables are normally low
+-- 			data_out_wr_ena <= '0';
+-- 			busy_prev <= '1';
+-- 			rw_prev <= '0';
+-- 		elsif rising_edge(clk) then
+-- 			-- default values
+-- 			data_in_rd_ena <= '0'; -- enables are normally low
+-- 			data_out_wr_ena <= '0';
+-- 			busy_prev <= busy;
 
-			if busy_fall = '1' then -- previous transaction is done
-				if rw_prev = '1' then -- previous command is a read command
-					data_out_wr_ena <= '1'; -- store the read data
-				end if;
-			end if;
-		end if;
-	end process;
+-- 			if busy_rise = '1' and err = '0' and data_in_cnt > 0 then -- transaction latched, get new data unless errored
+-- 				rw_prev <= data_in(8);
+-- 				data_in_rd_ena <= '1'; -- pulse enable high, next data set
+-- 			end if;
 
-end arch;
+-- 			if busy_fall = '1' and rw_prev = '1' and data_out_cnt < data_out_cnt'high then -- previous transaction is done
+-- 				data_out_wr_ena <= '1'; -- store the read data
+-- 			end if;
+-- 		end if;
+-- 	end process;
+
+-- end arch;
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -382,42 +382,5 @@ begin
 			end if;
 		end if;
 	end process;
-
-end arch;
-
-library ieee;
-use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
-
-use work.itc.all;
-
-entity debounce is
-	generic (
-		stable_time : integer := 10 -- time button must remain stable in ms
-	);
-	port (
-		-- system
-		clk, rst_n : in std_logic;
-		-- user logic
-		sig_in  : in std_logic;
-		sig_out : out std_logic
-	);
-end debounce;
-
-architecture arch of debounce is
-
-begin
-
-	debounce_eewiki_inst : entity work.debounce_eewiki(logic)
-		generic map(
-			clk_freq    => sys_clk_freq,
-			stable_time => stable_time
-		)
-		port map(
-			clk     => clk,
-			reset_n => rst_n,
-			button  => sig_in,
-			result  => sig_out
-		);
 
 end arch;
