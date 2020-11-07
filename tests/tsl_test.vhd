@@ -13,7 +13,7 @@ entity tsl_test is
 		-- tsl
 		tsl_scl, tsl_sda : inout std_logic;
 		-- dbg
-		dbg_a, dbg_b : out std_logic_vector(0 to 7)
+		dbg_a, dbg_b : out byte_be_t
 	);
 end tsl_test;
 
@@ -23,8 +23,9 @@ architecture arch of tsl_test is
 
 begin
 
-	dbg_a(0) <= tsl_sda;
-	dbg_a(1) <= tsl_scl;
+	dbg_a <= tsl_sda & tsl_scl & "000000";
+	-- dbg_b <= reverse(tsl_dbg);
+	dbg_b <= (others => '0');
 
 	tsl_inst : entity work.tsl(arch)
 		port map(

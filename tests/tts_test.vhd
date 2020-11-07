@@ -93,22 +93,38 @@ architecture arch of tts_test is
 begin
 
 	dbg_a(0 to 4) <= tts_sda & tts_scl & rst_n & ena & busy;
-	dbg_b <= dbg;
+	-- dbg_b <= dbg;
+	dbg_b <= (others => '0');
 
-	tts_inst: entity work.tts(arch)
+	-- tts_inst: entity work.tts(arch)
+	-- generic map (
+	-- 	txt_len_max => max_len
+	-- )
+	-- port map (
+	-- 	clk => clk,
+	-- 	rst_n => rst_n,
+	-- 	tts_scl => tts_scl,
+	-- 	tts_sda => tts_sda,
+	-- 	ena => ena,
+	-- 	busy => busy,
+	-- 	txt => txt,
+	-- 	txt_len => len,
+	-- 	dbg => dbg
+    -- );
+    
+    tts_inst: entity work.tts(arch)
 	generic map (
 		txt_len_max => max_len
 	)
 	port map (
-		clk => clk,
-		rst_n => rst_n,
 		tts_scl => tts_scl,
 		tts_sda => tts_sda,
+		clk => clk,
+		rst_n => rst_n,
 		ena => ena,
 		busy => busy,
 		txt => txt,
-		txt_len => len,
-		dbg => dbg
+		txt_len => len
 	);
 
 	key_inst: entity work.key(arch)
@@ -162,6 +178,7 @@ begin
 					state <= stop;
 
 				when stop =>
+					ena <= '0'; -- cancel enable
 					if busy = '0' then
 						state <= idle;
 					end if;
