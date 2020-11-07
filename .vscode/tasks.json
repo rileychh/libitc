@@ -6,10 +6,8 @@
 			"type": "shell",
 			"command": [
 				"bash -c '",
-				//"quartus_sh -t tools/assign.tcl | sed \"/^[ \\t]*Info/d\";",
-				//"quartus_sh -t tools/compile.tcl | sed \"/^[ \\t]*Info/d\"",
-				"quartus_sh -t tools/assign.tcl;",
-				"quartus_sh -t tools/compile.tcl",
+				"quartus_sh -t tools/assign.tcl | sed \"/^[ \\t]*Info/d\";",
+				"quartus_sh -t tools/compile.tcl | sed \"/^[ \\t]*Info/d\"",
 				"'"
 			],
 			"problemMatcher": [],
@@ -23,12 +21,9 @@
 			"type": "shell",
 			"command": [
 				"bash -c '",
-				// "quartus_sh -t tools/assign.tcl | sed \"/^[ \\t]*Info/d\";",
-				// "quartus_sh -t tools/compile.tcl | sed \"/^[ \\t]*Info/d\";",
-				"quartus_sh -t tools/assign.tcl;",
-				"quartus_sh -t tools/compile.tcl;",
-				// "quartus_pgm -c \"USB-Blaster [USB-0]\" output_files/libitc.cdf | sed \"/^[ \\t]*Info/d\"",
-				"quartus_pgm -c \"USB-Blaster [USB-0]\" output_files/libitc.cdf",
+				"quartus_sh -t tools/assign.tcl | sed \"/^[ \\t]*Info/d\";",
+				"quartus_sh -t tools/compile.tcl | sed \"/^[ \\t]*Info/d\";",
+				"quartus_pgm -c \"USB-Blaster [USB-0]\" output_files/libitc.cdf | sed \"/^[ \\t]*Info/d\"",
 				"'"
 			],
 			"problemMatcher": [],
