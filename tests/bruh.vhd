@@ -118,7 +118,10 @@ begin
 		variable func : integer range 0 to 3;
 		variable param : string(1 to 5); -- parameter of function displayed on seg
 		variable vol : integer range 0 to 9; -- func 1 param: volume
+		variable output_content_disp : std_logic; -- func 2 param disp: saves info output_content after pressing key_ok
 		variable output_content : std_logic; -- func 2 param: text (low) or music (high)
+		variable output_channel_disp : integer range 0 to 2; -- func 3 param disp: saves info output_content after pressing key_ok
+		variable output_channel : integer range 0 to 2; -- func 3 param: {0: right, 1: left, 2: both}
 	begin
 		if rst_n = '0' then
 			state <= idle;
@@ -176,22 +179,15 @@ begin
 									if pressed = '1' then
 										case key is
 											when key_down =>
-												output_content := not output_content;
+												output_content_disp := not output_content_disp;
 											when key_ok =>
-												if output_content = '0' then -- text
-													tts_txt(0 to 45) <= txt_sensor_init;
-													tts_txt_len <= 46;
-												else -- music
-													tts_txt(0 to 4) <= tts_play_file & x"0001" & x"0001"; -- play 0001.wav 1 time
-													tts_txt_len <= 5;
-												end if;
-												tts_ena <= '1';
+												output_content := output_content_disp;
 											when others => null;
 										end case;
 									end if;
 
 									seg(1 to 3) <= "F2 ";
-									if output_content = '0' then -- text
+									if output_content_disp = '0' then -- text
 										seg(4 to 8) <= "SPEAt";
 									else -- music
 										seg(4 to 8) <= "3US1C";
@@ -202,11 +198,34 @@ begin
 									if pressed = '1' then
 										case key is
 											when key_down =>
-
+												output_channel_disp := output_channel_disp + 1;
+											when key_ok =>
+												output_channel := output_channel_disp;
+											when others => null;
 										end case;
 									end if;
 
+									seg(1 to 3) <= "F3 ";
+									case output_channel_disp is
+										when 0 => -- right
+											seg(4 to 8) <= "A16H7";
+										when 1 => -- left
+											seg(4 to 8) <= "LEF7 ";
+										when 2 => -- both
+											seg(4 to 8) <= "807H ";
+									end case;
+									seg_dot <= "00100001";
+
 							end case;
+
+							if output_content = '0' then -- text
+								tts_txt(0 to 45) <= txt_sensor_init;
+								tts_txt_len <= 46;
+							else -- music
+								tts_txt(0 to 4) <= tts_play_file & x"0001" & x"0001"; -- play 0001.wav 1 time
+								tts_txt_len <= 5;
+							end if;
+							tts_ena <= '1';
 
 						when 2 => -- sensors_test
 						when 3 => -- combined_test
