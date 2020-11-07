@@ -172,6 +172,7 @@ begin
 											when others => null;
 										end case;
 									end if;
+
 									seg <= "F1 VOL" & to_string(vol, vol'high, 10, 2);
 									seg_dot <= "00100000";
 
@@ -198,7 +199,11 @@ begin
 									if pressed = '1' then
 										case key is
 											when key_down =>
-												output_channel_disp := output_channel_disp + 1;
+												if output_channel_disp = 2 then
+													output_channel_disp := 0;
+												else
+													output_channel_disp := output_channel_disp + 1;
+												end if;
 											when key_ok =>
 												output_channel := output_channel_disp;
 											when others => null;
@@ -218,6 +223,7 @@ begin
 
 							end case;
 
+							-- tts_config
 							if output_content = '0' then -- text
 								tts_txt(0 to 45) <= txt_sensor_init;
 								tts_txt_len <= 46;
