@@ -42,9 +42,9 @@ architecture arch of bruh is
   constant key_start_stop : integer := 0;
   constant key_rst : integer := 1;
   constant key_func : integer := 2;
-  constant key_up : integer := 6;
-  constant key_down : integer := 7;
-  constant key_ok : integer := 8;
+  constant key_up : integer := 4;
+  constant key_down : integer := 5;
+  constant key_ok : integer := 6;
 
   type state_t is (idle, run, pause);
   signal state : state_t;
@@ -117,15 +117,10 @@ begin
 
   process (clk, rst_n)
     -- tts_test vars	
-    variable func : integer range 0 to 3;
-    variable param : string(1 to 5); -- parameter of function displayed on seg
-    variable vol_disp : integer range 0 to 9; -- func 1 param: volume
-    variable vol : integer range 0 to 9; -- func 1 param: volume
-    variable content_disp : std_logic; -- func 2 param disp: saves info output_content after pressing key_ok
-    variable content : std_logic; -- func 2 param: text (low) or music (high)
-    variable channel_disp : integer range 0 to 2; -- func 3 param disp: saves info output_content after pressing key_ok
-    variable channel : integer range 0 to 2; -- func 3 param: {0: right, 1: left, 2: both}
-    variable tts_config : bytes_t(0 to 3);
+    variable func : integer range 1 to 3;
+    variable vol, vol_disp : integer range 0 to 9 := 5; -- func 1 param: volume
+    variable content, content_disp : integer range 0 to 1 := 0; -- func 2 param: text (low) or music (high)
+    variable channel, channel_disp : integer range 0 to 2 := 0; -- func 3 param: {0: right, 1: left, 2: both}
   begin
     if rst_n = '0' then
       state <= idle;
@@ -133,7 +128,8 @@ begin
       case state is
         when idle =>
           if pressed = '1' and key = key_start_stop then
-            mode <= to_integer(sw(7 downto 6));
+            mode <= to_integer(sw_i(7 downto 6));
+            state <= run;
           end if;
 
         when run =>
@@ -150,7 +146,7 @@ begin
                 case key is
                   when key_rst =>
                     func := 1;
-                    vol := 5;
+                    vol_disp := 5;
                   when key_func =>
                     if func = 3 then -- loop between functions
                       func := 1;
@@ -166,9 +162,9 @@ begin
                   if pressed = '1' then
                     case key is
                       when key_up =>
-                        vol := vol + 1;
+                        vol_disp := vol_disp + 1;
                       when key_down =>
-                        vol := vol - 1;
+                        vol_disp := vol_disp - 1;
                       when key_ok =>
                         vol := vol_disp;
                       when others => null;
@@ -182,7 +178,11 @@ begin
                   if pressed = '1' then
                     case key is
                       when key_down =>
-                        content_disp := not content_disp;
+                        if content_disp = 1 then
+                          content_disp := 0;
+                        else
+                          content_disp := content_disp + 1;
+                        end if;
                       when key_ok =>
                         content := content_disp;
                       when others => null;
@@ -190,7 +190,7 @@ begin
                   end if;
 
                   seg(1 to 3) <= "F2 ";
-                  if content_disp = '0' then -- text
+                  if content_disp = 0 then -- text
                     seg(4 to 8) <= "SPEAt";
                   else -- music
                     seg(4 to 8) <= "3US1C";
@@ -226,23 +226,23 @@ begin
                 when others => null;
               end case;
 
-              tts_config(0 to 2) := (tts_set_vol, to_unsigned((2 ** 8 / 10) * vol, 8), tts_set_channel);
-              case channel_disp is
+              txt(0 to 2) <= (tts_set_vol, to_unsigned((2 ** 8 / 10) * vol, 8), tts_set_channel);
+              case channel is
                 when 0 => -- right
-                  tts_config(3) := x"06";
+                  txt(3) <= x"06";
                 when 1 => -- left
-                  tts_config(3) := x"05";
+                  txt(3) <= x"05";
                 when 2 => -- both
-                  tts_config(3) := x"07";
+                  txt(3) <= x"07";
               end case;
-
-              if content = '0' then -- text
-                txt(0 to 45 + 4) <= tts_config & txt_sensor_init;
-                txt_len <= 46 + 4;
-              else -- music
-                txt(0 to 4 + 4) <= tts_config & tts_play_file & x"00" & x"01" & x"00" & x"01"; -- play 0001.wav 1 time
-                txt_len <= 5 + 4;
-              end if;
+              case content is
+                when 0 => -- speak
+                  txt(4 to txt_sensor_init'length + 3) <= txt_sensor_init;
+                  txt_len <= 4 + txt_sensor_init'length;
+                when 1 => -- music
+                  txt(4 to 8) <= (tts_play_file, x"00", x"01", x"00", x"01"); -- play 0001.wav 1 time
+                  txt_len <= 4 + 5;
+              end case;
               tts_ena <= '1';
 
             when 2 => -- sensors_test

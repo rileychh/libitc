@@ -9,11 +9,10 @@ entity tts is
         txt_len_max : integer := 16 -- maximum length of text
     );
     port (
+        -- system
+        clk, rst_n : in std_logic;
         -- tts
         tts_scl, tts_sda : inout std_logic;
-        -- system
-        clk   : in std_logic;
-        rst_n : in std_logic;
         -- user logic
         ena     : in std_logic; -- start on enable rising edge
         busy    : out std_logic;
@@ -83,7 +82,7 @@ begin
         if rst_n = '0' then
             txt_cnt <= 0;
             state <= idle;
-        elsif rising_edge(clk) then
+            elsif rising_edge(clk) then
             case state is
                 when idle =>
                     if start = '1' then

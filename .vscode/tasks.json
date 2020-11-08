@@ -5,10 +5,9 @@
 			"label": "Build",
 			"type": "shell",
 			"command": [
-				"bash -c '",
-				"quartus_sh -t tools/assign.tcl | sed \"/^[ \\t]*Info/d\";",
-				"quartus_sh -t tools/compile.tcl | sed \"/^[ \\t]*Info/d\"",
-				"'"
+                "set -o pipefail",
+				"quartus_sh -t tools/assign.tcl | sed -e 's/^\\s*//g' -e '/^Info/d' &&",
+				"quartus_sh -t tools/compile.tcl | sed -e 's/^\\s*//g' -e '/^Info/d'",
 			],
 			"problemMatcher": [],
 			"group": {
@@ -20,11 +19,10 @@
 			"label": "Deploy",
 			"type": "shell",
 			"command": [
-				"bash -c '",
-				"quartus_sh -t tools/assign.tcl | sed \"/^[ \\t]*Info/d\";",
-				"quartus_sh -t tools/compile.tcl | sed \"/^[ \\t]*Info/d\";",
-				"quartus_pgm -c \"USB-Blaster [USB-0]\" output_files/libitc.cdf | sed \"/^[ \\t]*Info/d\"",
-				"'"
+                "set -o pipefail",
+				"quartus_sh -t tools/assign.tcl | sed -e 's/^\\s*//g' -e '/^Info/d' &&",
+				"quartus_sh -t tools/compile.tcl | sed -e 's/^\\s*//g' -e '/^Info/d' &&",
+				"quartus_pgm -c 'USB-Blaster [USB-0]' output_files/libitc.cdf | sed -e 's/^\\s*//g' -e '/^Info/d'",
 			],
 			"problemMatcher": [],
 			"group": {

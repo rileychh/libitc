@@ -40,8 +40,8 @@ if {$make_assignments} {
 	set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
 	set_global_assignment -name TOP_LEVEL_ENTITY bruh
 
-	set_global_assignment -name VHDL_FILE tests/bruh.vhd
-	set_global_assignment -name VHDL_FILE tests/bruh_data_pkg.vhd
+	set_global_assignment -name VHDL_FILE tests/bruh/bruh.vhd
+	set_global_assignment -name VHDL_FILE tests/bruh/bruh_data_pkg.vhd
 	set_global_assignment -name VHDL_FILE tests/dht_test.vhd
 	set_global_assignment -name VHDL_FILE tests/dot_test.vhd
 	set_global_assignment -name VHDL_FILE tests/key_test.vhd

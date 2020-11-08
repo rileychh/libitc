@@ -37,7 +37,7 @@
     "cSpell.enableFiletypes": [
         "vhdl"
     ],
-    "cSpell.userWords": [
+    "cSpell.words": [
         "LEDs",
         "abcdefgp",
         "combinational",
@@ -58,7 +58,9 @@
         "sclk",
         "testbench",
         "uart",
-        "vhdl"
+        "vhdl",
+        "bruh",
+        "disp"
     ],
     "cSpell.ignoreRegExpList": [
         ".*'.*" // VHDL attributes, e.g. "key_row'range"
