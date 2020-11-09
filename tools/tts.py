@@ -3,8 +3,9 @@
 import pyperclip
 from textwrap import *
 
-txt_signal_name = 'tts_txt'
-txt_len_signal_name = 'tts_txt_len'
+txt_type = 'bytes_t'
+txt_signal_name = 'txt'
+txt_len_signal_name = 'len'
 
 cnt = int(input())
 name = []
@@ -17,8 +18,8 @@ for i in range(cnt):
 encoded_text = [s.encode('big5') for s in text]  # encode all inputs
 # lengths (in bytes) of encoded texts
 byte_len = [len(s) for s in encoded_text]
-max_len = max(byte_len)
-result = f'constant max_len : integer := {max_len};\n\n'
+
+result = f'constant max_len : integer := {max(byte_len)};\n\n'
 
 for i in range(cnt):
     array_elements = '", x"'.join(f'{c:02x}' for c in encoded_text[i])
@@ -26,7 +27,7 @@ for i in range(cnt):
     result += fill(f'-- "{text[i]}", {byte_len[i]}', width=60, subsequent_indent='-- ') + '\n' + \
         f'-- {txt_signal_name}(0 to {byte_len[i] - 1}) <= {name[i]};\n' + \
         f'-- {txt_len_signal_name} <= {byte_len[i]};\n' + \
-        f'constant {name[i]} : txt_t(0 to {byte_len[i] - 1}) := (\n' + \
+        f'constant {name[i]} : {txt_type}(0 to {byte_len[i] - 1}) := (\n' + \
         indent(fill(f'x"{array_elements}"', width=111), '\t') + '\n' + \
         ');\n\n'
 
