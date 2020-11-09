@@ -78,6 +78,10 @@ package itc is
 
 	--- common functions
 
+	-- to_integer: converts '0' and '1' to 0 and 1.
+	-- logic: signal to be converted
+	function to_integer(logic : std_logic) return integer;
+
 	-- log. Yes, log. returns ceil(log_base(num))
 	function log(base, num : integer) return integer;
 
@@ -105,6 +109,14 @@ package itc is
 end package;
 
 package body itc is
+	function to_integer(logic : std_logic) return integer is begin
+		if logic = '0' then
+			return 0;
+		else
+			return 1;
+		end if;
+	end function;
+
 	function log(base, num : integer) return integer is
 		variable temp : integer := 1;
 		variable result : integer := 0;

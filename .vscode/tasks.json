@@ -1,16 +1,24 @@
 {
 	"version": "2.0.0",
+	"presentation": {
+		"echo": false,
+		"reveal": "silent",
+		"focus": false,
+		"panel": "shared",
+		"showReuseMessage": true,
+		"clear": true
+	},
 	"tasks": [
 		{
 			"label": "Build",
 			"type": "shell",
 			"command": [
-				"bash -c '",
-				//"quartus_sh -t tools/assign.tcl | sed \"/^[ \\t]*Info/d\";",
-				//"quartus_sh -t tools/compile.tcl | sed \"/^[ \\t]*Info/d\"",
-				"quartus_sh -t tools/assign.tcl",
+				"set -o pipefail;",
+				"rm libitc.qsf;",
+				"(",
+				"quartus_sh -t tools/assign.tcl &&",
 				"quartus_sh -t tools/compile.tcl",
-				"'"
+				") | sed -e 's/^\\s*//g' -e '/^Info/d'"
 			],
 			"problemMatcher": [],
 			"group": {
@@ -22,14 +30,13 @@
 			"label": "Deploy",
 			"type": "shell",
 			"command": [
-				"bash -c '",
-				// "quartus_sh -t tools/assign.tcl | sed \"/^[ \\t]*Info/d\";",
-				// "quartus_sh -t tools/compile.tcl | sed \"/^[ \\t]*Info/d\";",
-				"quartus_sh -t tools/assign.tcl",
-				"quartus_sh -t tools/compile.tcl",
-				// "quartus_pgm -c \"USB-Blaster [USB-0]\" output_files/libitc.cdf | sed \"/^[ \\t]*Info/d\"",
-				"quartus_pgm -c \"USB-Blaster [USB-0]\" output_files/libitc.cdf#",
-				"'"
+				"set -o pipefail;",
+				"rm libitc.qsf;",
+				"(",
+				"quartus_sh -t tools/assign.tcl &&",
+				"quartus_sh -t tools/compile.tcl &&",
+				"quartus_pgm -c 'USB-Blaster [USB-0]' output_files/libitc.cdf",
+				") | sed -e 's/^\\s*//g' -e '/^Info/d'"
 			],
 			"problemMatcher": [],
 			"group": {

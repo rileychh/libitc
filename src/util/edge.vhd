@@ -1,20 +1,13 @@
---
--- edge detector
---
-
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
 
 entity edge is
 	port (
 		-- system
-		clk   : in std_logic;
-		rst_n : in std_logic;
+		clk, rst_n : in std_logic;
 		-- user logic
-		sig_in  : in std_logic;
-		rising  : out std_logic;
-		falling : out std_logic
+		sig_in          : in std_logic;
+		rising, falling : out std_logic
 	);
 end edge;
 

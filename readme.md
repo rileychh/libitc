@@ -6,18 +6,18 @@ VHDL library for 108th and 109th ITC hardware. Current version is v3.
 
 Under `src/`, every hardware have its own `.vhd` file, consists of one package, which can have one or more constants and components.
 
-| Name  |                           For                           |  Status   |
-| :---: | :-----------------------------------------------------: | :-------: |
-|  seg  |       2x4 digit seven segment display controller        |  working  |
-|  key  |                  4x4 keypad controller                  |  working  |
-|  sw   |                  8 switches debouncer                   |  working  |
-|  rgb  |                   RGB LED controller                    |  working  |
-|  mot  |       L293D H-Bridge for 2 DC motors' controller        |    N/A    |
-|  dot  | 8 x 8 bicolor (red/green) dot matrix display controller |  working  |
-|  lcd  |         ST7735 128x160 RGB TFT LCD's controller         |    N/A    |
-|  dht  |   DHT11 humidity and temperature sensor's controller    |  working  |
-|  tsl  |         TSL2561 luminosity sensor's controller          | debugging |
-|  tts  |           SD178B Big5 TTS module's controller           | debugging |
+| Name |                           For                           |  Status   |
+| :--: | :-----------------------------------------------------: | :-------: |
+| seg  |       2x4 digit seven segment display controller        |  working  |
+| key  |                  4x4 keypad controller                  |  working  |
+|  sw  |                  8 switches debouncer                   |  working  |
+| rgb  |                   RGB LED controller                    |  working  |
+| mot  |       L293D H-Bridge for 2 DC motors' controller        |  working  |
+| dot  | 8 x 8 bicolor (red/green) dot matrix display controller |  working  |
+| lcd  |         ST7735 128x160 RGB TFT LCD's controller         |    N/A    |
+| dht  |   DHT11 humidity and temperature sensor's controller    |  working  |
+| tsl  |         TSL2561 luminosity sensor's controller          | debugging |
+| tts  |           SD178B Big5 TTS module's controller           | debugging |
 
 ## Utilities
 

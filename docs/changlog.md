@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Support for RGB LED
+- Support for L293D H-bridge
 - Support for SM178B text-to-speech module
 - Support for ST7735 TFT LCD module
 - Support for TSL2561 light sensor (`tsl.vhd`)
