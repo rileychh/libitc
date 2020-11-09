@@ -1,4 +1,5 @@
 {
+	"editor.insertSpaces": false,
 	"[vhdl]": {
 		"editor.fontLigatures": false
 	},
@@ -28,11 +29,20 @@
 	// Python
 	"python.pythonPath": "tools\\venv\\Scripts\\python.exe",
 	// Markdown
+	"[markdown]": {
+		"editor.defaultFormatter": "yzhang.markdown-all-in-one"
+	},
 	"markdownlint.config": {
 		"MD041": false, // first-line-h1
 		"MD024": false, // no-duplicate-heading
 		"MD033": false // no-inline-html
 	},
+	// JSON
+	"[jsonc]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"prettier.tabWidth": 4,
+	"prettier.useTabs": true,
 	// Spell checker
 	"cSpell.enableFiletypes": ["vhdl"],
 	"cSpell.words": [
