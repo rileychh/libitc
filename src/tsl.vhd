@@ -102,14 +102,13 @@ begin
 			bus_freq => 400_000
 		)
 		port map(
-			scl      => tsl_scl,
-			sda      => tsl_sda,
 			clk      => clk,
 			rst_n    => rst_n,
+			scl      => tsl_scl,
+			sda      => tsl_sda,
 			ena      => i2c_ena,
 			busy     => i2c_busy,
-			addr     => tsl_addr,
-			rw       => i2c_rw,
+			cmd      => tsl_addr & i2c_rw,
 			data_in  => i2c_in,
 			data_out => i2c_out
 		);
