@@ -95,10 +95,10 @@ if {$make_assignments} {
 	set_location_assignment PIN_73 -to rgb[2]
 
 	# IN{1,2,3,4}, PWM{1..2}
-	set_location_assignment PIN_76 -to mot_out[0]
-	set_location_assignment PIN_80 -to mot_out[1]
-	set_location_assignment PIN_82 -to mot_out[2]
-	set_location_assignment PIN_84 -to mot_out[3]
+	set_location_assignment PIN_76 -to mot_ch[0]
+	set_location_assignment PIN_80 -to mot_ch[1]
+	set_location_assignment PIN_82 -to mot_ch[2]
+	set_location_assignment PIN_84 -to mot_ch[3]
 	set_location_assignment PIN_86 -to mot_ena[0]
 	set_location_assignment PIN_88 -to mot_ena[1]
 
@@ -147,9 +147,10 @@ if {$make_assignments} {
 	set_location_assignment PIN_143 -to tsl_scl
 	set_location_assignment PIN_142 -to tsl_sda
 
-	# SCL1, SDA1
+	# SCL1, SDA1, MO0
 	set_location_assignment PIN_147 -to tts_scl
 	set_location_assignment PIN_146 -to tts_sda
+	set_location_assignment PIN_144 -to tts_mo0
 
 	# Debug ports
 	set_location_assignment PIN_187 -to dbg_a[0]
