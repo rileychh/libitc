@@ -6,3 +6,4 @@ tools/venv/
 *.qsf
 *.qws
 *.alc
+tools/assign.tcl

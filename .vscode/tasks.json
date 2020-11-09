@@ -2,7 +2,7 @@
 	"version": "2.0.0",
 	"presentation": {
 		"echo": false,
-		"reveal": "silent",
+		"reveal": "always",
 		"focus": false,
 		"panel": "shared",
 		"showReuseMessage": true,
