@@ -44,8 +44,8 @@ if {$make_assignments} {
 	set_location_assignment PIN_235 -to seg_2[1]
 	set_location_assignment PIN_239 -to seg_2[2]  
 	set_location_assignment PIN_6 -to seg_2[3]
-	set_location_assignment PIN_21 -to seg_2[4]
-	set_location_assignment PIN_13 -to seg_2[5]
+	set_location_assignment PIN_13 -to seg_2[4]
+	set_location_assignment PIN_21 -to seg_2[5]
 	set_location_assignment PIN_37 -to seg_2[6]
 	set_location_assignment PIN_39 -to seg_2[7]
 
