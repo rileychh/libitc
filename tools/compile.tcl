@@ -36,36 +36,39 @@ if {$make_assignments} {
 	set_global_assignment -name SYNTHESIS_EFFORT AUTO
 	set_global_assignment -name SMART_RECOMPILE ON
 
+	# disable unused pins
+	set_global_assignment -name RESERVE_ALL_UNUSED_PINS_WEAK_PULLUP "AS INPUT TRI-STATED"
+
 	# source files
 	set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
-	set_global_assignment -name TOP_LEVEL_ENTITY dot_test 
+	set_global_assignment -name TOP_LEVEL_ENTITY tts_test
 
 	# set_global_assignment -name VHDL_FILE tests/bruh/bruh.vhd
 	# set_global_assignment -name VHDL_FILE tests/bruh/bruh_data_pkg.vhd
-	# set_global_assignment -name VHDL_FILE tests/dht_test.vhd
+	set_global_assignment -name VHDL_FILE tests/dht_test.vhd
 	set_global_assignment -name VHDL_FILE tests/dot_test.vhd
-	# set_global_assignment -name VHDL_FILE tests/key_test.vhd
-	# set_global_assignment -name VHDL_FILE tests/rgb_test.vhd
-	# set_global_assignment -name VHDL_FILE tests/seg_test.vhd
-	# set_global_assignment -name VHDL_FILE tests/tsl_test.vhd
-	# set_global_assignment -name VHDL_FILE tests/tts_test.vhd
-	# set_global_assignment -name VHDL_FILE tests/mot_test.vhd
-	# set_global_assignment -name VHDL_FILE src/dht.vhd
+	set_global_assignment -name VHDL_FILE tests/key_test.vhd
+	set_global_assignment -name VHDL_FILE tests/rgb_test.vhd
+	set_global_assignment -name VHDL_FILE tests/seg_test.vhd
+	set_global_assignment -name VHDL_FILE tests/tsl_test.vhd
+	set_global_assignment -name VHDL_FILE tests/tts_test.vhd
+	set_global_assignment -name VHDL_FILE tests/mot_test.vhd
+	set_global_assignment -name VHDL_FILE src/dht.vhd
 	set_global_assignment -name VHDL_FILE src/dot.vhd
-	# set_global_assignment -name VHDL_FILE src/key.vhd
-	# set_global_assignment -name VHDL_FILE src/rgb.vhd
-	# set_global_assignment -name VHDL_FILE src/seg.vhd
-	# set_global_assignment -name VHDL_FILE src/sw.vhd
-	# set_global_assignment -name VHDL_FILE src/tsl.vhd
-	# set_global_assignment -name VHDL_FILE src/tts.vhd
-	# set_global_assignment -name VHDL_FILE src/mot.vhd
+	set_global_assignment -name VHDL_FILE src/key.vhd
+	set_global_assignment -name VHDL_FILE src/rgb.vhd
+	set_global_assignment -name VHDL_FILE src/seg.vhd
+	set_global_assignment -name VHDL_FILE src/sw.vhd
+	set_global_assignment -name VHDL_FILE src/tsl.vhd
+	set_global_assignment -name VHDL_FILE src/tts.vhd
+	set_global_assignment -name VHDL_FILE src/mot.vhd
 	set_global_assignment -name VHDL_FILE src/util/itc_pkg.vhd
 	set_global_assignment -name VHDL_FILE src/util/clk.vhd
 	set_global_assignment -name VHDL_FILE src/util/debounce.vhd
 	set_global_assignment -name VHDL_FILE src/util/edge.vhd
-	# set_global_assignment -name VHDL_FILE src/util/pwm.vhd
-	# set_global_assignment -name VHDL_FILE src/util/i2c.vhd
-	# set_global_assignment -name VHDL_FILE src/util/spi.vhd
+	set_global_assignment -name VHDL_FILE src/util/pwm.vhd
+	set_global_assignment -name VHDL_FILE src/util/i2c.vhd
+	set_global_assignment -name VHDL_FILE src/util/spi.vhd
 	# set_global_assignment -name VHDL_FILE src/util/uart.vhd
 
 	# Commit assignments
