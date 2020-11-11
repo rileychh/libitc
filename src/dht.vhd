@@ -12,8 +12,8 @@ entity dht is
 		-- dht
 		dht_data : inout std_logic;
 		-- user logic
-		temp_int, temp_dec : out integer range 0 to 99;
-		hum_int, hum_dec   : out integer range 0 to 99
+		temp_int, hum_int : out integer range 0 to 99;
+		temp_dec, hum_dec : out integer range 0 to 9
 	);
 end dht;
 
