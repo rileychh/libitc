@@ -11,17 +11,17 @@ entity seg_test is
 		-- system
 		clk, rst_n : in std_logic;
 		-- sw
-		sw : in byte_t;
+		sw : in u8_t;
 		-- seg
-		seg_1, seg_2, seg_s : out byte_be_t -- abcdefgp * 2, seg2_s1 ~ seg1_s4
+		seg_1, seg_2, seg_s : out u8r_t -- abcdefgp * 2, seg2_s1 ~ seg1_s4
 	);
 end seg_test;
 
 architecture arch of seg_test is
 
-	signal sw_i : byte_t;
+	signal sw_i : u8_t;
 
-	signal clocks : byte_be_t;
+	signal clocks : u8r_t;
 	signal clk_cnt : std_logic;
 	signal base : integer range 1 to 16;
 	signal cnt : integer range 0 to 99_999_999 := 0;

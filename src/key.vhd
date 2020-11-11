@@ -9,11 +9,11 @@ entity key is
 		-- system
 		clk, rst_n : in std_logic;
 		-- key
-		key_row : in nibble_be_t;
-		key_col : out nibble_be_t;
+		key_row : in u4r_t;
+		key_col : out u4r_t;
 		-- user logic
 		pressed : out std_logic;
-		key     : out integer range 0 to 15
+		key     : out i4_t
 	);
 end key;
 

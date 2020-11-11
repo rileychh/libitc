@@ -26,10 +26,10 @@ architecture arch of tsl is
 	-- block means continuos reading/writing.
 	-- addr means register address. for example, control register is at 0x0, id register is at 0xa
 	constant tsl_addr : unsigned(6 downto 0) := "0111001"; -- device address (0x39)
-	constant reg_ctrl : unsigned(7 downto 0) := x"80"; -- (write) byte to control register
-	constant ctrl_power_on : unsigned(7 downto 0) := x"03"; -- power on command for control register
-	constant reg_data_0 : unsigned(7 downto 0) := x"ac"; -- (read) word from data register 0
-	constant reg_data_1 : unsigned(7 downto 0) := x"ae"; -- (read) word from data register 1
+	constant reg_ctrl : u8_t := x"80"; -- (write) byte to control register
+	constant ctrl_power_on : u8_t := x"03"; -- power on command for control register
+	constant reg_data_0 : u8_t := x"ac"; -- (read) word from data register 0
+	constant reg_data_1 : u8_t := x"ae"; -- (read) word from data register 1
 
 	-- state machine
 	type i2c_state_t is (reg, data);
@@ -42,19 +42,19 @@ architecture arch of tsl is
 	signal i2c_ena : std_logic;
 	signal i2c_busy : std_logic;
 	signal i2c_rw : std_logic;
-	signal i2c_in : unsigned(7 downto 0);
-	signal i2c_out : unsigned(7 downto 0);
+	signal i2c_in : u8_t;
+	signal i2c_out : u8_t;
 	signal i2c_accepted : std_logic; -- indicates interface accepted data
 	signal i2c_done : std_logic; -- indicates transmission is done
 
 	-- sensor values
 	signal reg_sel : integer range 0 to 3; -- select between ADC 0 and ADC 1
-	signal data_0 : unsigned(15 downto 0);
-	signal data_1 : unsigned(15 downto 0);
+	signal data_0 : u16_t;
+	signal data_1 : u16_t;
 
 	-- convert sensor values to lux reading
 	-- see docs/lux.cpp
-	function to_lux(data_0, data_1 : unsigned(15 downto 0)) return integer is
+	function to_lux(data_0, data_1 : u16_t) return integer is
 		constant lux_scale : integer := 14;
 		constant ratio_scale : integer := 9;
 

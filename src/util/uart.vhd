@@ -17,10 +17,10 @@ entity uart is
 		-- user logic
 		tx_ena   : in std_logic;  -- initiate transmission
 		tx_busy  : out std_logic; -- transmission in progress
-		tx_data  : in byte_t;     -- data to transmit
+		tx_data  : in u8_t;       -- data to transmit
 		rx_busy  : out std_logic; -- data reception in progress
 		rx_error : out std_logic; -- start, parity, or stop bit error detected
-		rx_data  : out byte_t     -- data received
+		rx_data  : out u8_t       -- data received
 	);
 end uart;
 

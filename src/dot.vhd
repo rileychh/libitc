@@ -9,9 +9,9 @@ entity dot is
 		-- system
 		clk, rst_n : in std_logic;
 		-- dot
-		dot_r, dot_g, dot_s : out byte_be_t;
+		dot_r, dot_g, dot_s : out u8r_t;
 		-- user logic
-		data_r, data_g : in bytes_be_t(0 to 7)
+		data_r, data_g : in u8r_arr_t(0 to 7)
 	);
 end dot;
 

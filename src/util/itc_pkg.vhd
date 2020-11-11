@@ -7,15 +7,31 @@ package itc is
 	-- common types
 	--------------------------------------------------------------------------------
 
-	subtype nibble_t is unsigned(3 downto 0);
-	subtype nibble_be_t is unsigned(0 to 3); -- big endian nibble
-	type nibbles_t is array (integer range <>) of nibble_t;
-	type nibbles_be_t is array (integer range <>) of nibble_be_t;
+	subtype u2_t is unsigned(1 downto 0);
+	subtype u2r_t is unsigned(0 to 1); -- big endian bits
+	type u2_arr_t is array (integer range <>) of u2_t;
+	type u2r_arr_t is array (integer range <>) of u2r_t;
 
-	subtype byte_t is unsigned(7 downto 0);
-	subtype byte_be_t is unsigned(0 to 7); -- big endian byte
-	type bytes_t is array (integer range <>) of byte_t;
-	type bytes_be_t is array (integer range <>) of byte_be_t;
+	subtype u4_t is unsigned(3 downto 0);
+	subtype u4r_t is unsigned(0 to 3); -- big endian nibble
+	type u4_arr_t is array (integer range <>) of u4_t;
+	type u4r_arr_t is array (integer range <>) of u4r_t;
+
+	subtype u8_t is unsigned(7 downto 0);
+	subtype u8r_t is unsigned(0 to 7); -- big endian byte
+	type u8_arr_t is array (integer range <>) of u8_t;
+	type u8r_arr_t is array (integer range <>) of u8r_t;
+
+	subtype u16_t is unsigned(15 downto 0);
+	subtype u16r_t is unsigned(0 to 15); -- big endian word
+	type u16_arr_t is array (integer range <>) of u16_t;
+	type u16r_arr_t is array (integer range <>) of u16r_t;
+
+	subtype i4_t is integer range 0 to 2 ** 4 - 1;
+	type i4_arr_t is array (integer range <>) of i4_t;
+
+	subtype i8_t is integer range 0 to 2 ** 8 - 1;
+	type i8_arr_t is array (integer range <>) of i8_t;
 
 	--------------------------------------------------------------------------------
 	-- system constants
@@ -28,7 +44,7 @@ package itc is
 	--------------------------------------------------------------------------------
 
 	-- (square root of 0 to 255) * 16
-	constant sqrt : bytes_t(0 to 2 ** 8 - 1) := (
+	constant sqrt : u8_arr_t(i8_t'range) := (
 		x"00", x"10", x"16", x"1b", x"20", x"23", x"27", x"2a", 
 		x"2d", x"30", x"32", x"35", x"37", x"39", x"3b", x"3d", 
 		x"40", x"41", x"43", x"45", x"47", x"49", x"4b", x"4c", 
@@ -67,44 +83,44 @@ package itc is
 	-- tts command constants
 	--------------------------------------------------------------------------------
 
-	-- constant tts_instant_clear : byte_t := (x"80"); -- DO NOT USE, MAY CRASH MODULE
-	constant tts_instant_vol_up : byte_t := x"81";
-	constant tts_instant_vol_down : byte_t := x"82";
-	constant tts_instant_pause : bytes_t(0 to 1) := (x"8f", x"00");
-	constant tts_instant_resume : bytes_t(0 to 1) := (x"8f", x"01");
-	constant tts_instant_skip : bytes_t(0 to 1) := (x"8f", x"02"); -- skips delay or music
-	constant tts_instant_soft_reset : bytes_t(0 to 1) := (x"8f", x"03"); -- TODO what's the use case?
+	-- constant tts_instant_clear : u8_t := (x"80"); -- DO NOT USE, MAY CRASH MODULE
+	constant tts_instant_vol_up : u8_t := x"81";
+	constant tts_instant_vol_down : u8_t := x"82";
+	constant tts_instant_pause : u8_arr_t(0 to 1) := (x"8f", x"00");
+	constant tts_instant_resume : u8_arr_t(0 to 1) := (x"8f", x"01");
+	constant tts_instant_skip : u8_arr_t(0 to 1) := (x"8f", x"02"); -- skips delay or music
+	constant tts_instant_soft_reset : u8_arr_t(0 to 1) := (x"8f", x"03"); -- TODO what's the use case?
 
 	-- concatenate 1 speed byte after
 	-- e.g. 0x83 0x19 means 25% faster 
 	-- range 0x00 to 0x28 (40%)
 	-- default is 0x00
-	constant tts_set_speed : byte_t := x"83";
+	constant tts_set_speed : u8_t := x"83";
 
 	-- concatenate 1 volume byte after
 	-- e.g. 0xff means 0db, 0xfe means -0.5db, 0x01 means -127db, 0x00 means mute
 	-- range 0x00 to 0xff
 	-- default is 0xd2 (-105db)
-	constant tts_set_vol : byte_t := x"86";
+	constant tts_set_vol : u8_t := x"86";
 
 	-- concatenate 4 time bytes after
 	-- e.g. 0x0001d4c0 means delay 120000ms
 	-- range 0x00000000 to 0xffffffff
-	constant tts_delay : byte_t := x"87";
+	constant tts_delay : u8_t := x"87";
 
 	-- concatenate 2 filename bytes and 2 repeat bytes after
 	-- e.g. 0x03fd_0005 means play "1021.wav" 5 times
 	-- filename can be 0x0001 to 0x270f (0001 to 9999)
 	-- repeat = 0 means do not stop
-	constant tts_play_file : byte_t := x"88";
+	constant tts_play_file : u8_t := x"88";
 
-	constant tts_sleep : byte_t := x"89";
+	constant tts_sleep : u8_t := x"89";
 
 	-- concatenate 1 state byte after, only last 3 bits (2 downto 0) have an effect
 	-- e.g. 0x06 means set MO2, MO1, MO0 = 1, 1, 0
 	-- range 0x00 to 0x07
 	-- default is 0x07
-	constant tts_set_mo : byte_t := x"8a";
+	constant tts_set_mo : u8_t := x"8a";
 
 	-- concatenate 1 mode byte after
 	-- | mode  | line out | headphone | speaker |
@@ -120,7 +136,7 @@ package itc is
 	-- | 0x09  |    L     |           |    L    |
 	-- | 0x0a  |    R     |           |    R    |
 	-- | 0x0b  |   both   |           |  both   |
-	constant tts_set_channel : byte_t := x"8b";
+	constant tts_set_channel : u8_t := x"8b";
 
 	--------------------------------------------------------------------------------
 	-- common functions
@@ -132,6 +148,13 @@ package itc is
 
 	-- log. Yes, log. returns ceil(log_base(num))
 	function log(base, num : integer) return integer;
+
+	-- repeat: repeat same bit/vector many times.
+	-- logic/vector: std_logic/vector to repeat
+	-- num: number of times to repeat
+	function repeat(logic : std_logic; num : integer) return std_logic_vector;
+	function repeat(vector : std_logic_vector; num : integer) return std_logic_vector;
+	function repeat(vector : unsigned; num : integer) return unsigned;
 
 	-- reverse: returns vector in reversed order.
 	-- vector: vector to be reversed
@@ -177,6 +200,41 @@ package body itc is
 				return result;
 			end if;
 		end loop;
+	end function;
+
+	function repeat(logic : std_logic; num : integer) return std_logic_vector is
+		variable result : std_logic_vector(0 to num - 1);
+	begin
+		for i in result'range loop
+			result(i) := logic;
+		end loop;
+
+		return result;
+	end function;
+
+	function repeat(vector : std_logic_vector; num : integer) return std_logic_vector is
+		variable result : std_logic_vector(0 to vector'length * num - 1);
+		variable vector_asc : std_logic_vector(0 to vector'length - 1);
+	begin
+		if vector'ascending then
+			vector_asc := vector;
+		else
+			vector_asc := reverse(vector);
+		end if;
+
+		for i in 0 to num - 1 loop
+			result(i * vector_asc'length to i * vector_asc'length + vector_asc'high) := vector_asc;
+		end loop;
+
+		if vector'ascending then
+			return result;
+		else
+			return reverse(result);
+		end if;
+	end function;
+
+	function repeat(vector : unsigned; num : integer) return unsigned is begin
+		return unsigned(repeat(std_logic_vector(vector), num));
 	end function;
 
 	function reverse(vector : std_logic_vector) return std_logic_vector is

@@ -4,6 +4,8 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+use work.itc.all;
+
 entity rgb_test is
 	port (
 		-- sys
@@ -15,7 +17,7 @@ end rgb_test;
 
 architecture arch of rgb_test is
 
-	signal r, g, b : integer range 0 to 15;
+	signal r, g, b : i4_t;
 	signal color : unsigned(11 downto 0);
 	signal color_clk : std_logic;
 
@@ -35,9 +37,6 @@ begin
 		);
 
 	rgb_inst : entity work.rgb(arch)
-		generic map(
-			color_depth => 4
-		)
 		port map(
 			clk   => clk,
 			rst_n => rst_n,

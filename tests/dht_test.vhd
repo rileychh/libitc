@@ -11,7 +11,7 @@ entity dht_test is
 		-- dht
 		dht_data : inout std_logic;
 		-- seg
-		seg_1, seg_2, seg_s : out byte_be_t --  abcdefgp * 2, seg2_s1 ~ seg1_s4
+		seg_1, seg_2, seg_s : out u8r_t --  abcdefgp * 2, seg2_s1 ~ seg1_s4
 	);
 end dht_test;
 

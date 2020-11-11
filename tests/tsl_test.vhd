@@ -9,11 +9,11 @@ entity tsl_test is
 		-- sys
 		clk, rst_n : in std_logic; -- rising edge clock, low reset
 		-- seg
-		seg_1, seg_2, seg_s : out byte_be_t; -- abcdefgp * 2, seg2_s1 ~ seg1_s4
+		seg_1, seg_2, seg_s : out u8r_t; -- abcdefgp * 2, seg2_s1 ~ seg1_s4
 		-- tsl
 		tsl_scl, tsl_sda : inout std_logic;
 		-- dbg
-		dbg_a, dbg_b : out byte_be_t
+		dbg_a, dbg_b : out u8r_t
 	);
 end tsl_test;
 

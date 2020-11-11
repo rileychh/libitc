@@ -17,9 +17,9 @@ entity i2c is
 		-- user logic
 		ena      : in std_logic;  -- if high, start the transmission
 		busy     : out std_logic; -- if high, addr, rw and tx will be ignored
-		cmd      : in byte_t;     -- slave address & r/w (high read, low write)
-		data_in  : in byte_t;     -- byte to write to slave
-		data_out : out byte_t     -- byte read from slave
+		cmd      : in u8_t;       -- slave address & r/w (high read, low write)
+		data_in  : in u8_t;       -- byte to write to slave
+		data_out : out u8_t       -- byte read from slave
 	);
 end i2c;
 
@@ -92,7 +92,7 @@ begin
 		signal scl_ena : std_logic; -- SCL enable
 		signal sda_out : std_logic; -- internal SDA (tri-state open drain buffer)
 		signal cnt : integer range 0 to 8; -- generic loop counter
-		signal command : byte_t; -- command byte (address + r/w)
+		signal command : u8_t; -- command byte (address + r/w)
 		signal err : std_logic; -- error flag, automatically retry
 	begin
 		process (clk, rst_n) begin

@@ -2,6 +2,8 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+use work.itc.all;
+
 package itc_lcd is
 	constant lcd_width : integer := 128;
 	constant lcd_height : integer := 160;
@@ -17,44 +19,42 @@ package itc_lcd is
 	-- only the used commands are listed here
 	--------------------------------------------------------------------------------
 
-	constant lcd_slpout : byte_t := x"11";
-	constant lcd_frmctr1 : byte_t := x"b1";
-	constant lcd_pwctr1 : byte_t := x"c0";
-	constant lcd_pwctr2 : byte_t := x"c1";
-	constant lcd_pwctr3 : byte_t := x"c2";
-	constant lcd_vmctr1 : byte_t := x"c5";
-	constant lcd_gmctrp1 : byte_t := x"e0"; -- aka gamctrp1
-	constant lcd_gmctrn1 : byte_t := x"e1"; -- aka gamctrn1
-	constant lcd_colmod : byte_t := x"3a";
-	constant lcd_dispon : byte_t := x"29";
-	constant lcd_ramwr : byte_t := x"2c";
+	constant lcd_slpout : u8_t := x"11";
+	constant lcd_frmctr1 : u8_t := x"b1";
+	constant lcd_pwctr1 : u8_t := x"c0";
+	constant lcd_pwctr2 : u8_t := x"c1";
+	constant lcd_pwctr3 : u8_t := x"c2";
+	constant lcd_vmctr1 : u8_t := x"c5";
+	constant lcd_gmctrp1 : u8_t := x"e0"; -- aka gamctrp1
+	constant lcd_gmctrn1 : u8_t := x"e1"; -- aka gamctrn1
+	constant lcd_colmod : u8_t := x"3a";
+	constant lcd_dispon : u8_t := x"29";
+	constant lcd_ramwr : u8_t := x"2c";
 
 	--------------------------------------------------------------------------------
 	-- initialization commands and arguments
-	-- format: command, parameter count + delay constant (if needed), parameters, length of delay (ms)
 	--------------------------------------------------------------------------------
 
-	constant lcd_cmd_delay : byte_t := x"80";
-	constant lcd_init : bytes_t(0 to 63) := (
-		lcd_slpout, lcd_cmd_delay, 120, -- no args, delay 120ms
-		lcd_frmctr1, 3, x"05", x"3c", x"3c", -- 3 args, no delay
-		lcd_pwctr1, 3, x"28", x"08", x"04",
-		lcd_pwctr2, 1, x"c0",
-		lcd_pwctr3, 2, x"0d", x"00",
-		lcd_vmctr1, 1, x"1a",
-		lcd_gmctrp1, 16, x"04", x"22", x"07", x"0a", x"2e", x"30", x"25", x"2a", x"28", x"26", x"2e", x"3a", x"00", x"01", x"03", x"13",
-		lcd_gmctrn1, 16, x"04", x"16", x"06", x"0d", x"2d", x"26", x"23", x"27", x"27", x"25", x"2d", x"3b", x"00", x"01", x"04", x"13",
-		lcd_colmod, 1, x"03",
-		lcd_dispon, 0
+	constant lcd_cmd_delay : u8_t := x"80";
+	constant lcd_init : u8_arr_t(0 to 51) := (
+		lcd_frmctr1, x"05", x"3c", x"3c",
+		lcd_pwctr1, x"28", x"08", x"04",
+		lcd_pwctr2, x"c0",
+		lcd_pwctr3, x"0d", x"00",
+		lcd_vmctr1, x"1a",
+		lcd_gmctrp1, x"04", x"22", x"07", x"0a", x"2e", x"30", x"25", x"2a", x"28", x"26", x"2e", x"3a", x"00", x"01", x"03", x"13",
+		lcd_gmctrn1, x"04", x"16", x"06", x"0d", x"2d", x"26", x"23", x"27", x"27", x"25", x"2d", x"3b", x"00", x"01", x"04", x"13",
+		lcd_colmod, x"03",
+		lcd_dispon
 	);
 
 	--------------------------------------------------------------------------------
 	-- functions
 	--------------------------------------------------------------------------------
 
-	-- to_bytes: convert pixels_t to bytes_t
+	-- to_bytes: convert pixels_t to u8_arr_t
 	-- pixels: array of pixels to convert
-	function to_bytes(pixels : pixels_t) return bytes_t(0 to lcd_bit_cnt / 8 - 1);
+	function to_bytes(pixels : pixels_t) return u8_arr_t(0 to lcd_bit_cnt / 8 - 1);
 
 	--------------------------------------------------------------------------------
 	-- font
@@ -167,9 +167,9 @@ package itc_lcd is
 end package;
 
 package body itc_lcd is
-	function to_bytes(pixels : pixels_t) return bytes_t(0 to lcd_bit_cnt / 8 - 1) is
+	function to_bytes(pixels : pixels_t) return u8_arr_t(0 to lcd_bit_cnt / 8 - 1) is
 		variable joined_bits : unsigned(lcd_bit_cnt - 1 downto 0);
-		variable result : bytes_t(lcd_bit_cnt / 8 - 1 downto 0);
+		variable result : u8_arr_t(lcd_bit_cnt / 8 - 1 downto 0);
 	begin
 		for p in pixels'range loop -- join into bits
 			joined_bits(lcd_bit_cnt - p * lcd_color_depth + (lcd_color_depth - 1) downto lcd_bit_cnt - p * lcd_color_depth) := pixels(p);

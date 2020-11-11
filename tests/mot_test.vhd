@@ -20,13 +20,13 @@ entity mot_test is
 		-- sys
 		clk, rst_n : in std_logic;
 		-- seg
-		seg_1, seg_2, seg_s : out byte_be_t; -- abcdefgp * 2, seg2_s1 ~ seg1_s4
+		seg_1, seg_2, seg_s : out u8r_t; -- abcdefgp * 2, seg2_s1 ~ seg1_s4
 		-- key
-		key_row : in nibble_be_t;
-		key_col : out nibble_be_t;
+		key_row : in u4r_t;
+		key_col : out u4r_t;
 		-- mot
-		mot_ch  : out std_logic_vector(0 to 3);
-		mot_ena : out std_logic_vector(0 to 1)
+		mot_ch  : out u4r_t;
+		mot_ena : out u2r_t
 	);
 end mot_test;
 
@@ -34,14 +34,14 @@ architecture arch of mot_test is
 
 	signal seg : string(1 to 8);
 	signal pressed : std_logic;
-	signal key : integer range 0 to 15;
-	signal dir : std_logic_vector(0 to 1);
-	type speed_t is array (0 to 1) of integer range 0 to 9;
-	signal speed : speed_t;
+	signal key : i4_t;
+	signal dir : u2r_t;
+	signal speed : i8_arr_t(0 to 1);
 
 	signal mot_disp : integer range 0 to 1;
-	signal dir_disp : std_logic_vector(0 to 1);
-	signal speed_disp : speed_t;
+	signal dir_disp : u2r_t;
+	type speed_disp_t is array (0 to 1) of integer range 0 to 9;
+	signal speed_disp : speed_disp_t;
 
 begin
 
@@ -79,9 +79,6 @@ begin
 
 	mot_gen : for i in 0 to 1 generate
 		mot_inst : entity work.mot(arch)
-			generic map(
-				speed_res => 10
-			)
 			port map(
 				clk     => clk,
 				rst_n   => rst_n,
@@ -120,7 +117,9 @@ begin
 						mot_disp <= mot_disp + 1;
 					end if;
 				when 13 => -- OK
-					speed <= speed_disp;
+					for i in 0 to 1 loop
+						speed(i) <= speed_disp(i) * (i8_t'high + 1) / 10;
+					end loop;
 					dir <= dir_disp;
 				when others => null;
 			end case;

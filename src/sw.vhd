@@ -9,9 +9,9 @@ entity sw is
 		-- system
 		clk, rst_n : in std_logic;
 		-- sw
-		sw : in byte_t;
+		sw : in u8_t;
 		-- user logic
-		sw_out : out byte_t
+		sw_out : out u8_t
 	);
 end sw;
 

@@ -9,16 +9,15 @@ use work.itc.all;
 
 entity pwm is
 	generic (
-		pwm_freq : integer := 100_000; -- PWM switching frequency in Hz
-		duty_res : integer := 100      -- resolution setting of the duty cycle
+		pwm_freq : integer := 100_000 -- PWM switching frequency in Hz
 	);
 
 	port (
 		-- system
 		clk, rst_n : in std_logic; -- system clock
 		-- user logic
-		duty    : in integer range 0 to duty_res - 1; -- duty cycle
-		pwm_out : out std_logic                       -- pwm output
+		duty    : in u8_t;      -- duty cycle
+		pwm_out : out std_logic -- pwm output
 	);
 end pwm;
 
@@ -42,7 +41,7 @@ begin
 		end if;
 	end process;
 
-	high_period <= period * duty / (duty_res - 1);
+	high_period <= period * to_integer(duty) / i8_t'high;
 	pwm_out <= '1' when cnt < high_period else '0';
 
 end arch;

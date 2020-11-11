@@ -10,12 +10,12 @@ entity key_test is
 		-- sys
 		clk, rst_n : in std_logic;
 		-- key
-		key_row : in nibble_be_t;
-		key_col : out nibble_be_t;
+		key_row : in u4r_t;
+		key_col : out u4r_t;
 		-- seg
-		seg_1, seg_2, seg_s : out byte_be_t; -- abcdefgp * 2, seg2_s1 ~ seg1_s4
+		seg_1, seg_2, seg_s : out u8r_t; -- abcdefgp * 2, seg2_s1 ~ seg1_s4
 		-- dbg
-		dbg_a, dbg_b : out byte_be_t
+		dbg_a, dbg_b : out u8r_t
 	);
 
 end key_test;
@@ -23,7 +23,7 @@ end key_test;
 architecture arch of key_test is
 
 	signal pressed : std_logic;
-	signal key : integer range 0 to 15;
+	signal key : i4_t;
 	signal buf : string(1 to 8); -- keyboard input buffer (stores text)
 
 begin

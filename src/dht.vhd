@@ -26,7 +26,7 @@ architecture arch of dht is
 	-- timer
 	signal clk_1m : std_logic; -- clock for timing
 	signal timer_clr : std_logic; -- if high, timer resets
-	signal timer_us : integer range 0 to 2 ** 20 - 1; -- microsecond count
+	signal timer_us : integer range 0 to 1_000_000; -- microsecond count
 
 	-- data received
 	signal rx : unsigned(39 downto 0);
@@ -79,7 +79,7 @@ begin
 		elsif rising_edge(clk) then
 			case state is
 				when delay => -- wait for 1s
-					if timer_us < 1_000_000 then
+					if timer_us <= 1_000_000 then
 						dht_data <= 'Z';
 						timer_clr <= '0';
 					else
@@ -88,7 +88,7 @@ begin
 					end if;
 
 				when start_low => -- pull down at least 18ms
-					if timer_us < 20_000 then
+					if timer_us <= 20_000 then
 						dht_data <= '0';
 						timer_clr <= '0';
 					else
@@ -98,7 +98,7 @@ begin
 					end if;
 
 				when start_high => -- release 20 to 40us
-					if timer_us < 40 then
+					if timer_us <= 40 then
 						timer_clr <= '0';
 						if dht_fall = '1' then
 							timer_clr <= '1';
@@ -130,7 +130,7 @@ begin
 				when read_data_high => -- dht pulls up 26~28us => '0', 70us => '1' 
 					if dht_fall = '1' then
 						timer_clr <= '1';
-						if timer_us < 50 then -- dht pulls up more than 28us, less then 70us
+						if timer_us <= 50 then -- dht pulls up more than 28us, less then 70us
 							rx(bit_cnt) <= '0';
 						else
 							rx(bit_cnt) <= '1';

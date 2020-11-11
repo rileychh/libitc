@@ -17,10 +17,10 @@ entity tts is
 		-- user logic
 		ena     : in std_logic; -- start on enable rising edge
 		busy    : out std_logic;
-		txt     : in bytes_t(0 to txt_len_max - 1);
+		txt     : in u8_arr_t(0 to txt_len_max - 1);
 		txt_len : in integer range 0 to txt_len_max;
 		-- debug
-		dbg : out byte_t
+		dbg : out u8_t
 	);
 end tts;
 
@@ -33,7 +33,7 @@ architecture arch of tts is
 
 	signal i2c_ena : std_logic;
 	signal i2c_busy : std_logic;
-	signal i2c_in : byte_t;
+	signal i2c_in : u8_t;
 
 	signal start : std_logic;
 	signal i2c_accepted : std_logic;

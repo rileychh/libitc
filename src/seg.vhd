@@ -9,17 +9,17 @@ entity seg is
 		-- system
 		clk, rst_n : in std_logic;
 		-- seg
-		seg_1, seg_2, seg_s : out byte_be_t; -- abcdefgp * 2, seg2_s1 ~ seg1_s4
+		seg_1, seg_2, seg_s : out u8r_t; -- abcdefgp * 2, seg2_s1 ~ seg1_s4
 		-- use logic
 		data : in string(1 to 8); -- string type only allow positive range
-		dot  : in byte_be_t       -- dots are individually controlled
+		dot  : in u8r_t           -- dots are individually controlled
 	);
 end seg;
 
 architecture arch of seg is
 
 	-- decoder look up table
-	type lut_t is array(0 to 2 ** 7 - 1) of byte_be_t;
+	type lut_t is array(0 to 2 ** 7 - 1) of u8r_t;
 	constant lut : lut_t := (
 		-- HACK add additional characters between 0 to 31
 		x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00",
@@ -34,7 +34,7 @@ architecture arch of seg is
 	);
 
 	-- output wire
-	signal seg_i : byte_be_t;
+	signal seg_i : u8r_t;
 
 	signal clk_scan : std_logic;
 	signal digit : integer range 0 to 7;

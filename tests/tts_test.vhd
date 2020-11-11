@@ -9,13 +9,13 @@ entity tts_test is
 		-- sys
 		clk, rst_n : in std_logic;
 		-- key
-		key_row : in nibble_be_t;
-		key_col : out nibble_be_t;
+		key_row : in u4r_t;
+		key_col : out u4r_t;
 		-- tts
 		tts_scl, tts_sda : inout std_logic;
 		tts_mo0          : in std_logic;
 		-- dbg
-		dbg_a, dbg_b : out byte_be_t
+		dbg_a, dbg_b : out u8r_t
 	);
 end tts_test;
 
@@ -26,7 +26,7 @@ architecture arch of tts_test is
 	-- "給我一瓶酒/再給我一支菸/說走就走/我有的是時間/我不想在未來的日子裡/獨自哭著無法往前", 83
 	-- txt(0 to 82) <= song;
 	-- len <= 83;
-	constant song : bytes_t(0 to 82) := (
+	constant song : u8_arr_t(0 to 82) := (
 		x"b5", x"b9", x"a7", x"da", x"a4", x"40", x"b2", x"7e", x"b0", x"73", x"2f", x"a6", x"41", x"b5", x"b9", x"a7",
 		x"da", x"a4", x"40", x"a4", x"e4", x"b5", x"d2", x"2f", x"bb", x"a1", x"a8", x"ab", x"b4", x"4e", x"a8", x"ab",
 		x"2f", x"a7", x"da", x"a6", x"b3", x"aa", x"ba", x"ac", x"4f", x"ae", x"c9", x"b6", x"a1", x"2f", x"a7", x"da",
@@ -40,7 +40,7 @@ architecture arch of tts_test is
 	-- 哉金裡嗨，搭給當賊來。", 242
 	-- txt(0 to 241) <= what;
 	-- len <= 242;
-	constant what : bytes_t(0 to 241) := (
+	constant what : u8_arr_t(0 to 241) := (
 		x"c5", x"a5", x"c1", x"bf", x"a1", x"41", x"c5", x"53", x"a6", x"e8", x"ae", x"c9", x"b1", x"60", x"b0", x"b5",
 		x"b9", x"42", x"b0", x"ca", x"a1", x"41", x"a8", x"ad", x"c5", x"e9", x"b0", x"b7", x"b1", x"64", x"ba", x"eb",
 		x"af", x"ab", x"a6", x"6e", x"a1", x"41", x"c5", x"53", x"a6", x"e8", x"a1", x"49", x"ad", x"f9", x"ac", x"7e",
@@ -62,11 +62,11 @@ architecture arch of tts_test is
 	-- "啊", 2
 	-- txt(0 to 1) <= ah;
 	-- len <= 2;
-	constant ah : bytes_t(0 to 1) := (
+	constant ah : u8_arr_t(0 to 1) := (
 		x"b0", x"da"
 	);
 
-	constant datasheet_example : bytes_t(0 to 60) := (
+	constant datasheet_example : u8_arr_t(0 to 60) := (
 		x"8a", x"00", -- mo[0..2] = "000"
 		x"b5", x"be", x"ad", x"b5", x"ac", x"ec", x"a7", x"de", x"31", x"37", x"38", x"42", x"b4", x"fa", x"b8", x"d5", -- 翔音科技178b測試
 		x"86", x"e0", -- volume = 0xe0
@@ -80,16 +80,16 @@ architecture arch of tts_test is
 
 	signal ena : std_logic;
 	signal busy : std_logic;
-	signal txt : bytes_t(0 to max_len - 1);
+	signal txt : u8_arr_t(0 to max_len - 1);
 	signal len : integer range 0 to max_len;
 
 	signal pressed : std_logic;
-	signal key, key_pressed : integer range 0 to 15;
+	signal key, key_pressed : i4_t;
 
 	type state_t is (idle, send, stop);
 	signal state : state_t;
 
-	signal dbg : byte_t;
+	signal dbg : u8_t;
 
 begin
 

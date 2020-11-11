@@ -9,17 +9,17 @@ entity dot_test is
 		-- sys
 		clk, rst_n : in std_logic;
 		-- seg
-		seg_1, seg_2, seg_s : out byte_be_t; -- abcdefgp * 2, seg2_s1 ~ seg1_s4
+		seg_1, seg_2, seg_s : out u8r_t; -- abcdefgp * 2, seg2_s1 ~ seg1_s4
 		-- dot
-		dot_r, dot_g, dot_s : out byte_be_t;
+		dot_r, dot_g, dot_s : out u8r_t;
 		-- sw 
-		sw : in byte_t
+		sw : in u8_t
 	);
 end dot_test;
 
 architecture arch of dot_test is
 
-	signal dot_data_r, dot_data_g : bytes_be_t(0 to 7);
+	signal dot_data_r, dot_data_g : u8r_arr_t(0 to 7);
 
 	signal x_pos, y_pos : integer range 0 to 7;
 	signal clk_pos : std_logic;
@@ -44,7 +44,7 @@ begin
 			seg_1 => seg_1,
 			seg_2 => seg_2,
 			seg_s => seg_s,
-			data  => to_string(x_pos, x_pos'high, 10, 4) & to_string(y_pos, y_pos'high, 10, 4),
+			data  => 'X' & to_string(x_pos, x_pos'high, 10, 3) & 'Y' & to_string(y_pos, y_pos'high, 10, 3),
 			dot => (others => '0')
 		);
 
@@ -78,11 +78,11 @@ begin
 			dot_data_g <= (others => (others => '0'));
 
 			if sw(0) = '1' then
-				dot_data_g(x_pos)(y_pos) <= '1';
+				dot_data_g(y_pos)(x_pos) <= '1';
 			end if;
 
 			if sw(1) = '1' then
-				dot_data_r(x_pos)(y_pos) <= '1';
+				dot_data_r(y_pos)(x_pos) <= '1';
 			end if;
 		end if;
 	end process;
