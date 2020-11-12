@@ -31,10 +31,22 @@ if {$make_assignments} {
 	# speed up compilation
 	set_global_assignment -name PHYSICAL_SYNTHESIS_EFFORT FAST
 	set_global_assignment -name FITTER_EFFORT FAST_FIT
-	# may be faster, may be slower
-	# set_global_assignment -name SYNTHESIS_EFFORT FAST
-	set_global_assignment -name SYNTHESIS_EFFORT AUTO
+	set_global_assignment -name SYNTHESIS_EFFORT FAST
 	set_global_assignment -name SMART_RECOMPILE ON
+	set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS OFF
+	set_global_assignment -name SYNTH_TIMING_DRIVEN_SYNTHESIS OFF
+	set_global_assignment -name OPTIMIZE_POWER_DURING_SYNTHESIS OFF
+	set_global_assignment -name OPTIMIZE_HOLD_TIMING OFF
+	set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING OFF
+	set_global_assignment -name OPTIMIZE_POWER_DURING_FITTING OFF
+	set_global_assignment -name OPTIMIZE_TIMING OFF
+	set_global_assignment -name OPTIMIZE_IOC_REGISTER_PLACEMENT_FOR_TIMING OFF
+	set_global_assignment -name OPTIMIZE_FOR_METASTABILITY OFF
+	set_global_assignment -name IO_PLACEMENT_OPTIMIZATION OFF
+	set_global_assignment -name FINAL_PLACEMENT_OPTIMIZATION NEVER
+	set_global_assignment -name ROUTER_TIMING_OPTIMIZATION_LEVEL MINIMUM
+	set_global_assignment -name PLACEMENT_EFFORT_MULTIPLIER 0.000001
+	set_global_assignment -name ROUTER_EFFORT_MULTIPLIER 0.25
 
 	# disable unused pins
 	set_global_assignment -name RESERVE_ALL_UNUSED_PINS_WEAK_PULLUP "AS INPUT TRI-STATED"
