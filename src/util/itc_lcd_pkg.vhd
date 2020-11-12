@@ -48,7 +48,7 @@ package itc_lcd is
 		lcd_dispon,
 		lcd_ramwr
 	);
-	constant lcd_init_dc : std_logic_vector(0 to 52) := not "10001000101001010000000000000000100000000000000001011";
+	constant lcd_init_dc : std_logic_vector(0 to 52) := "01110111010110101111111111111111011111111111111110100";
 
 	--------------------------------------------------------------------------------
 	-- functions
@@ -169,15 +169,10 @@ end package;
 
 package body itc_lcd is
 	function to_bytes(pixels : pixels_t) return u8_arr_t is
-		variable joined_bits : unsigned(lcd_bit_cnt - 1 downto 0);
 		variable result : u8_arr_t(lcd_bit_cnt / 8 - 1 downto 0);
 	begin
-		for p in pixels'range loop -- join into bits
-			joined_bits(p * pixel_t'length + pixel_t'high downto p * pixel_t'length) := pixels(p);
-		end loop;
-
-		for b in result'range loop -- split info bytes
-			result(b) := joined_bits(b * 8 + 7 downto b * 8);
+		for i in lcd_bit_cnt - 1 downto 0 loop -- join into bits
+			result(i / 8)(i mod 8) := pixels(i / lcd_color_depth)(i mod lcd_color_depth);
 		end loop;
 
 		return result;
