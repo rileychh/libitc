@@ -12,7 +12,7 @@ package itc_lcd is
 	constant lcd_bit_cnt : integer := lcd_pixel_cnt * lcd_color_depth;
 
 	subtype pixel_t is unsigned(lcd_color_depth - 1 downto 0);
-	type pixels_t is array (integer range 0 to lcd_pixel_cnt - 1) of pixel_t;
+	type pixels_t is array (0 to lcd_pixel_cnt - 1) of pixel_t;
 
 	--------------------------------------------------------------------------------
 	-- command constants
@@ -36,7 +36,7 @@ package itc_lcd is
 	--------------------------------------------------------------------------------
 
 	constant lcd_cmd_delay : u8_t := x"80";
-	constant lcd_init : u8_arr_t(0 to 51) := (
+	constant lcd_init : u8_arr_t(0 to 52) := (
 		lcd_frmctr1, x"05", x"3c", x"3c",
 		lcd_pwctr1, x"28", x"08", x"04",
 		lcd_pwctr2, x"c0",
@@ -45,8 +45,10 @@ package itc_lcd is
 		lcd_gmctrp1, x"04", x"22", x"07", x"0a", x"2e", x"30", x"25", x"2a", x"28", x"26", x"2e", x"3a", x"00", x"01", x"03", x"13",
 		lcd_gmctrn1, x"04", x"16", x"06", x"0d", x"2d", x"26", x"23", x"27", x"27", x"25", x"2d", x"3b", x"00", x"01", x"04", x"13",
 		lcd_colmod, x"03",
-		lcd_dispon
+		lcd_dispon,
+		lcd_ramwr
 	);
+	constant lcd_init_dc : std_logic_vector(0 to 52) := not "10001000101001010000000000000000100000000000000001011";
 
 	--------------------------------------------------------------------------------
 	-- functions
@@ -54,7 +56,7 @@ package itc_lcd is
 
 	-- to_bytes: convert pixels_t to u8_arr_t
 	-- pixels: array of pixels to convert
-	function to_bytes(pixels : pixels_t) return u8_arr_t(0 to lcd_bit_cnt / 8 - 1);
+	function to_bytes(pixels : pixels_t) return u8_arr_t;
 
 	--------------------------------------------------------------------------------
 	-- font
@@ -163,20 +165,19 @@ package itc_lcd is
 	("00000", "00100", "00010", "11111", "00010", "00100", "00000"), -- [126] '~' -- right arrow
 	("00000", "00100", "01000", "11111", "01000", "00100", "00000") --  [127] '' -- left arrow
 	);
-
 end package;
 
 package body itc_lcd is
-	function to_bytes(pixels : pixels_t) return u8_arr_t(0 to lcd_bit_cnt / 8 - 1) is
+	function to_bytes(pixels : pixels_t) return u8_arr_t is
 		variable joined_bits : unsigned(lcd_bit_cnt - 1 downto 0);
 		variable result : u8_arr_t(lcd_bit_cnt / 8 - 1 downto 0);
 	begin
 		for p in pixels'range loop -- join into bits
-			joined_bits(lcd_bit_cnt - p * lcd_color_depth + (lcd_color_depth - 1) downto lcd_bit_cnt - p * lcd_color_depth) := pixels(p);
+			joined_bits(p * pixel_t'length + pixel_t'high downto p * pixel_t'length) := pixels(p);
 		end loop;
 
 		for b in result'range loop -- split info bytes
-			result(b) <= joined_bits(lcd_bit_cnt - b * 8 + 7 downto lcd_bit_cnt - b * 8);
+			result(b) := joined_bits(b * 8 + 7 downto b * 8);
 		end loop;
 
 		return result;

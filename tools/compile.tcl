@@ -41,13 +41,14 @@ if {$make_assignments} {
 
 	# source files
 	set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
-	set_global_assignment -name TOP_LEVEL_ENTITY tts_test
+	set_global_assignment -name TOP_LEVEL_ENTITY lcd_test
 
 	# set_global_assignment -name VHDL_FILE tests/bruh/bruh.vhd
 	# set_global_assignment -name VHDL_FILE tests/bruh/bruh_data_pkg.vhd
 	set_global_assignment -name VHDL_FILE tests/dht_test.vhd
 	set_global_assignment -name VHDL_FILE tests/dot_test.vhd
 	set_global_assignment -name VHDL_FILE tests/key_test.vhd
+	set_global_assignment -name VHDL_FILE tests/lcd_test.vhd
 	set_global_assignment -name VHDL_FILE tests/mot_test.vhd
 	set_global_assignment -name VHDL_FILE tests/rgb_test.vhd
 	set_global_assignment -name VHDL_FILE tests/seg_test.vhd
@@ -56,7 +57,7 @@ if {$make_assignments} {
 	set_global_assignment -name VHDL_FILE src/dht.vhd
 	set_global_assignment -name VHDL_FILE src/dot.vhd
 	set_global_assignment -name VHDL_FILE src/key.vhd
-	# set_global_assignment -name VHDL_FILE src/lcd.vhd
+	set_global_assignment -name VHDL_FILE src/lcd.vhd
 	set_global_assignment -name VHDL_FILE src/mot.vhd
 	set_global_assignment -name VHDL_FILE src/rgb.vhd
 	set_global_assignment -name VHDL_FILE src/seg.vhd
@@ -64,7 +65,7 @@ if {$make_assignments} {
 	set_global_assignment -name VHDL_FILE src/tsl.vhd
 	set_global_assignment -name VHDL_FILE src/tts.vhd
 	set_global_assignment -name VHDL_FILE src/util/itc_pkg.vhd
-	# set_global_assignment -name VHDL_FILE src/util/itc_lcd_pkg.vhd
+	set_global_assignment -name VHDL_FILE src/util/itc_lcd_pkg.vhd
 	set_global_assignment -name VHDL_FILE src/util/clk.vhd
 	set_global_assignment -name VHDL_FILE src/util/debounce.vhd
 	set_global_assignment -name VHDL_FILE src/util/edge.vhd
