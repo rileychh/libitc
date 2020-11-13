@@ -1,7 +1,8 @@
+#!/usr/bin/env python
+
 import argparse
 from PIL import Image
 from pathlib import Path
-from binascii import hexlify
 
 
 def convert(img_path: Path, new_width=128, new_height=160) -> Path:
@@ -28,7 +29,7 @@ def convert(img_path: Path, new_width=128, new_height=160) -> Path:
 
 def bmp_to_mif(bmp_path: Path, mif_path: Path):
     header = '''\
-WIDTH=12;
+WIDTH=16;
 DEPTH=20480;
 
 ADDRESS_RADIX=UNS;
@@ -42,14 +43,13 @@ END;
 '''
 
     # get 24-bit pixels without header and EOF
-    content = str(hexlify(bmp_path.read_bytes()))[54 * 2 + 2:-1].upper()
-    print(len(content))
-    # convert content into 12-bit pixels
-    pixels = ''.join(content[i] for i in range(0, len(content), 2))
-    print(len(pixels))
+    bitmap = bmp_path.read_bytes()[54:]
+    # convert content into list of pixels
+    pixels = [bitmap[i:i+3] for i in range(0, len(bitmap), 3)]
+    # convert 24-bit color to 16-bit color
+    pixels = [((p[0] & 0b11111000) << 8 | (p[1] & 0b11111100) << 3 | (p[2] & 0b11111000)).to_bytes(2, 'big') for p in pixels]
     # add syntax
-    data = ''.join(
-        f'\t{i}: {pixels[i * 3:i * 3 + 3]};\n' for i in range(int(len(pixels) / 3)))
+    data = ''.join(f'\t{i}: {p.hex()};\n' for i, p in enumerate(pixels))
     mif_path.write_text(header + data + footer)
 
 
