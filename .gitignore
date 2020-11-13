@@ -3,7 +3,7 @@ incremental_db/
 output_files/
 simulation/
 tools/venv/
+docs/ref
 *.qsf
 *.qws
 *.alc
-tools/assign.tcl
