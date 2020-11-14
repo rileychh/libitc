@@ -7,12 +7,11 @@ use work.itc.all;
 package itc_lcd is
 	constant lcd_width : integer := 128;
 	constant lcd_height : integer := 160;
-	constant lcd_color_depth : integer := 12;
+	constant lcd_color_depth : integer := 16;
 	constant lcd_pixel_cnt : integer := lcd_width * lcd_height;
-	constant lcd_bit_cnt : integer := lcd_pixel_cnt * lcd_color_depth;
+	constant lcd_frame_width : integer := lcd_pixel_cnt * lcd_color_depth;
 
-	subtype pixel_t is unsigned(lcd_color_depth - 1 downto 0);
-	type pixels_t is array (0 to lcd_pixel_cnt - 1) of pixel_t;
+	type lcd_frame_t is array (0 to lcd_pixel_cnt - 1) of u16_t;
 
 	--------------------------------------------------------------------------------
 	-- command constants
@@ -35,7 +34,6 @@ package itc_lcd is
 	-- initialization commands and arguments
 	--------------------------------------------------------------------------------
 
-	constant lcd_cmd_delay : u8_t := x"80";
 	constant lcd_init : u8_arr_t(0 to 52) := (
 		lcd_frmctr1, x"05", x"3c", x"3c",
 		lcd_pwctr1, x"28", x"08", x"04",
@@ -44,7 +42,7 @@ package itc_lcd is
 		lcd_vmctr1, x"1a",
 		lcd_gmctrp1, x"04", x"22", x"07", x"0a", x"2e", x"30", x"25", x"2a", x"28", x"26", x"2e", x"3a", x"00", x"01", x"03", x"13",
 		lcd_gmctrn1, x"04", x"16", x"06", x"0d", x"2d", x"26", x"23", x"27", x"27", x"25", x"2d", x"3b", x"00", x"01", x"04", x"13",
-		lcd_colmod, x"03",
+		lcd_colmod, x"05",
 		lcd_dispon,
 		lcd_ramwr
 	);
@@ -54,17 +52,13 @@ package itc_lcd is
 	-- functions
 	--------------------------------------------------------------------------------
 
-	-- to_bytes: convert pixels_t to u8_arr_t
-	-- pixels: array of pixels to convert
-	function to_bytes(pixels : pixels_t) return u8_arr_t;
-
 	--------------------------------------------------------------------------------
 	-- font
 	-- HD44780 5x7 pixel font data, http://eleif.net/HD44780.html 
 	-- Array index is the relative ASCII code
 	--------------------------------------------------------------------------------
 
-	type glyph_t is array (0 to 6) of std_logic_vector(0 to 4);
+	type glyph_t is array (0 to 6) of unsigned(0 to 4);
 	type font_t is array(32 to 127) of glyph_t;
 
 	constant lcd_font : font_t := (-- this comment is for the formatter
@@ -168,13 +162,4 @@ package itc_lcd is
 end package;
 
 package body itc_lcd is
-	function to_bytes(pixels : pixels_t) return u8_arr_t is
-		variable result : u8_arr_t(lcd_bit_cnt / 8 - 1 downto 0);
-	begin
-		for i in lcd_bit_cnt - 1 downto 0 loop -- join into bits
-			result(i / 8)(i mod 8) := pixels(i / lcd_color_depth)(i mod lcd_color_depth);
-		end loop;
-
-		return result;
-	end function;
 end package body;

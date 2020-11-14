@@ -13,9 +13,8 @@ entity tts_test is
 		key_col : out u4r_t;
 		-- tts
 		tts_scl, tts_sda : inout std_logic;
-		tts_mo0          : in std_logic;
-		-- dbg
-		dbg_a, dbg_b : out u8r_t
+		tts_mo           : in unsigned(2 downto 0);
+		tts_rst_n        : out std_logic
 	);
 end tts_test;
 
@@ -89,12 +88,7 @@ architecture arch of tts_test is
 	type state_t is (idle, send, stop);
 	signal state : state_t;
 
-	signal dbg : u8_t;
-
 begin
-
-	dbg_a(0 to 5) <= tts_sda & tts_scl & tts_mo0 & rst_n & ena & busy;
-	dbg_b <= reverse(to_unsigned(state_t'pos(state), 4)) & reverse(dbg(3 downto 0));
 
 	tts_inst: entity work.tts(arch)
 		generic map (
@@ -105,12 +99,12 @@ begin
 			rst_n => rst_n,
 			tts_scl => tts_scl,
 			tts_sda => tts_sda,
-			tts_mo0 => tts_mo0,
+			tts_mo => tts_mo,
+			tts_rst_n => tts_rst_n,
 			ena => ena,
 			busy => busy,
 			txt => txt,
-			txt_len => len,
-			dbg => dbg
+			txt_len => len
 		);
 
 	key_inst: entity work.key(arch)

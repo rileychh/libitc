@@ -11,7 +11,7 @@ entity dht_test is
 		-- dht
 		dht_data : inout std_logic;
 		-- seg
-		seg_1, seg_2, seg_s : out u8r_t --  abcdefgp * 2, seg2_s1 ~ seg1_s4
+		seg_led, seg_com : out u8r_t
 	);
 end dht_test;
 
@@ -36,12 +36,11 @@ begin
 
 	seg_inst : entity work.seg(arch)
 		port map(
-			clk   => clk,
-			rst_n => rst_n,
-			seg_1 => seg_1,
-			seg_2 => seg_2,
-			seg_s => seg_s,
-			data  => to_string(temp_int, temp_int'high, 10, 2) &
+			clk     => clk,
+			rst_n   => rst_n,
+			seg_led => seg_led,
+			seg_com => seg_com,
+			data    => to_string(temp_int, temp_int'high, 10, 2) &
 			to_string(temp_dec, temp_dec'high, 10, 1) & 'C' &
 			to_string(hum_int, hum_int'high, 10, 2) &
 			to_string(hum_dec, hum_dec'high, 10, 1) & 'H',

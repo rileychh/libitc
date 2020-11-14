@@ -9,7 +9,7 @@ entity dot_test is
 		-- sys
 		clk, rst_n : in std_logic;
 		-- seg
-		seg_1, seg_2, seg_s : out u8r_t; -- abcdefgp * 2, seg2_s1 ~ seg1_s4
+		seg_led, seg_com : out u8r_t;
 		-- dot
 		dot_r, dot_g, dot_s : out u8r_t;
 		-- sw 
@@ -39,12 +39,11 @@ begin
 
 	seg_inst : entity work.seg(arch)
 		port map(
-			clk   => clk,
-			rst_n => rst_n,
-			seg_1 => seg_1,
-			seg_2 => seg_2,
-			seg_s => seg_s,
-			data  => 'X' & to_string(x_pos, x_pos'high, 10, 3) & 'Y' & to_string(y_pos, y_pos'high, 10, 3),
+			clk     => clk,
+			rst_n   => rst_n,
+			seg_led => seg_led,
+			seg_com => seg_com,
+			data    => 'X' & to_string(x_pos, x_pos'high, 10, 3) & 'Y' & to_string(y_pos, y_pos'high, 10, 3),
 			dot => (others => '0')
 		);
 

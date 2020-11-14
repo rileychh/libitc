@@ -13,7 +13,7 @@ entity key_test is
 		key_row : in u4r_t;
 		key_col : out u4r_t;
 		-- seg
-		seg_1, seg_2, seg_s : out u8r_t; -- abcdefgp * 2, seg2_s1 ~ seg1_s4
+		seg_led, seg_com : out u8r_t;
 		-- dbg
 		dbg_a, dbg_b : out u8r_t
 	);
@@ -44,12 +44,11 @@ begin
 
 	seg_inst : entity work.seg(arch)
 		port map(
-			clk   => clk,
-			rst_n => rst_n,
-			seg_1 => seg_1,
-			seg_2 => seg_2,
-			seg_s => seg_s,
-			data  => buf,
+			clk     => clk,
+			rst_n   => rst_n,
+			seg_led => seg_led,
+			seg_com => seg_com,
+			data    => buf,
 			dot => (others => '0')
 		);
 

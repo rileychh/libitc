@@ -13,14 +13,13 @@ entity tts is
 		clk, rst_n : in std_logic;
 		-- tts
 		tts_scl, tts_sda : inout std_logic;
-		tts_mo0          : in std_logic;
+		tts_mo           : in unsigned(2 downto 0);
+		tts_rst_n        : out std_logic;
 		-- user logic
 		ena     : in std_logic; -- start on enable rising edge
 		busy    : out std_logic;
 		txt     : in u8_arr_t(0 to txt_len_max - 1);
-		txt_len : in integer range 0 to txt_len_max;
-		-- debug
-		dbg : out u8_t
+		txt_len : in integer range 0 to txt_len_max
 	);
 end tts;
 
@@ -44,7 +43,7 @@ architecture arch of tts is
 
 begin
 
-	dbg(3 downto 0) <= to_unsigned(tts_state_t'pos(state), 4);
+	tts_rst_n <= rst_n;
 
 	i2c_inst : entity work.i2c(arch)
 		generic map(
@@ -71,7 +70,7 @@ begin
 			falling => i2c_done
 		);
 
-	edge_inst : entity work.edge(arch)
+	edge_inst_ena : entity work.edge(arch)
 		port map(
 			clk     => clk,
 			rst_n   => rst_n,
@@ -84,7 +83,7 @@ begin
 		port map(
 			clk     => clk,
 			rst_n   => rst_n,
-			sig_in  => tts_mo0,
+			sig_in  => tts_mo(0),
 			rising  => tts_done,
 			falling => open
 		);

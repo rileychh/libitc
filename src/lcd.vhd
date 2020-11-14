@@ -10,10 +10,12 @@ entity lcd is
 		-- system
 		clk, rst_n : in std_logic;
 		-- lcd
-		lcd_sclk, lcd_mosi, lcd_ss_n, lcd_dc, lcd_bl, lcd_rst : out std_logic;
+		lcd_sclk, lcd_mosi, lcd_ss_n, lcd_dc, lcd_bl, lcd_rst_n : out std_logic;
 		-- user logic
 		brightness : in u8_t;
-		lcd_data   : in pixels_t;
+		wr_ena     : in std_logic;
+		pixel_addr : in integer range 0 to lcd_pixel_cnt - 1;
+		pixel_data : in u16_t;
 		-- debug
 		dbg : out u8r_t
 	);
@@ -24,16 +26,30 @@ architecture arch of lcd is
 	signal clk_spi : std_logic;
 	signal spi_ena, spi_busy, spi_done : std_logic;
 	signal spi_data : u8_t;
+	signal buffer_addr : integer range 0 to lcd_frame_width / 8 - 1;
+	signal buffer_data_i : std_logic_vector(7 downto 0);
+	signal buffer_data : u8_t;
 
 	type spi_state_t is (idle, send);
 	signal spi_state : spi_state_t;
-	type lcd_state_t is (rst_wait, wake, wake_wait, init, draw);
+	type lcd_state_t is (wake, wake_wait, init, draw);
 	signal lcd_state : lcd_state_t;
 
 begin
 
-	lcd_rst <= rst_n;
+	lcd_rst_n <= rst_n;
+	buffer_data <= unsigned(buffer_data_i);
 	dbg <= spi_busy & spi_ena & reverse(to_unsigned(lcd_state_t'pos(lcd_state), 6));
+
+	framebuffer_inst : entity work.framebuffer(syn)
+		port map(
+			clk         => clk,
+			wr_ena      => wr_ena,
+			pixel_addr  => std_logic_vector(to_unsigned(pixel_addr, 15)),
+			pixel_in    => std_logic_vector(pixel_data),
+			buffer_addr => std_logic_vector(to_unsigned(buffer_addr, 16)),
+			buffer_out  => buffer_data_i
+		);
 
 	--------------------------------------------------------------------------------
 	-- SPI interface
@@ -107,23 +123,14 @@ begin
 
 	process (clk, rst_n)
 		variable timer : integer range 0 to 120 * (sys_clk_freq / 1000) - 1; -- this timer can count up to 120ms
-		variable byte_cnt : integer range 0 to lcd_bit_cnt / 8 - 1;
 	begin
 		if rst_n = '0' then
 			spi_ena <= '0';
 			lcd_state <= wake;
+			buffer_addr <= 0;
 			timer := 0;
-			byte_cnt := 0;
 		elsif rising_edge(clk) then
 			case lcd_state is
-				when rst_wait => -- wait for 120ms
-					if timer = timer'high then
-						timer := 0;
-						lcd_state <= wake;
-					else
-						timer := timer + 1;
-					end if;
-
 				when wake => -- sen SLPOUT command
 					lcd_dc <= '0';
 					spi_data <= lcd_slpout;
@@ -136,37 +143,35 @@ begin
 
 				when wake_wait => -- wait for 120ms
 					if timer = timer'high then
-						lcd_dc <= lcd_init_dc(byte_cnt);
-						spi_data <= lcd_init(byte_cnt);
-						spi_ena <= '1';
 						lcd_state <= init;
 					else
 						timer := timer + 1;
 					end if;
 
 				when init =>
+					lcd_dc <= lcd_init_dc(buffer_addr);
+					spi_data <= lcd_init(buffer_addr);
+					spi_ena <= '1';
+
 					if spi_done = '1' then
-						if byte_cnt = lcd_init'high then
-							byte_cnt := 0;
-							lcd_dc <= '1';
-							spi_data <= to_bytes(lcd_data)(byte_cnt);
+						if buffer_addr = lcd_init'high then
+							buffer_addr <= 0;
 							lcd_state <= draw;
 						else
-							byte_cnt := byte_cnt + 1;
-							lcd_dc <= lcd_init_dc(byte_cnt);
-							spi_data <= lcd_init(byte_cnt);
+							buffer_addr <= buffer_addr + 1;
 						end if;
 					end if;
 
 				when draw =>
-					if spi_done = '1' then
-						if byte_cnt = byte_cnt'high then
-							byte_cnt := 0;
-						else
-							byte_cnt := byte_cnt + 1;
-						end if;
+					lcd_dc <= '1';
+					spi_data <= buffer_data;
 
-						spi_data <= to_bytes(lcd_data)(byte_cnt);
+					if spi_done = '1' then
+						if buffer_addr = buffer_addr'high then
+							buffer_addr <= 0;
+						else
+							buffer_addr <= buffer_addr + 1;
+						end if;
 					end if;
 			end case;
 		end if;

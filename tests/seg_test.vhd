@@ -13,7 +13,7 @@ entity seg_test is
 		-- sw
 		sw : in u8_t;
 		-- seg
-		seg_1, seg_2, seg_s : out u8r_t -- abcdefgp * 2, seg2_s1 ~ seg1_s4
+		seg_led, seg_com : out u8r_t
 	);
 end seg_test;
 
@@ -50,12 +50,11 @@ begin
 
 	seg_inst : entity work.seg(arch)
 		port map(
-			clk   => clk,
-			rst_n => rst_n,
-			seg_1 => seg_1,
-			seg_2 => seg_2,
-			seg_s => seg_s,
-			data  => to_string(cnt, cnt'high, base, 8),
+			clk     => clk,
+			rst_n   => rst_n,
+			seg_led => seg_led,
+			seg_com => seg_com,
+			data    => to_string(cnt, cnt'high, base, 8),
 			dot => (others => '0')
 		);
 	with to_integer(sw_i(7 downto 6)) select base <=

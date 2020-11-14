@@ -9,7 +9,7 @@ entity tsl_test is
 		-- sys
 		clk, rst_n : in std_logic; -- rising edge clock, low reset
 		-- seg
-		seg_1, seg_2, seg_s : out u8r_t; -- abcdefgp * 2, seg2_s1 ~ seg1_s4
+		seg_led, seg_com : out u8r_t;
 		-- tsl
 		tsl_scl, tsl_sda : inout std_logic;
 		-- dbg
@@ -38,12 +38,11 @@ begin
 
 	seg_inst : entity work.seg(arch)
 		port map(
-			clk   => clk,
-			rst_n => rst_n,
-			seg_1 => seg_1,
-			seg_2 => seg_2,
-			seg_s => seg_s,
-			data  => to_string(tsl_lux, tsl_lux'high, 10, 5) & "LUX",
+			clk     => clk,
+			rst_n   => rst_n,
+			seg_led => seg_led,
+			seg_com => seg_com,
+			data    => to_string(tsl_lux, tsl_lux'high, 10, 5) & "LUX",
 			dot => (others => '0')
 		);
 

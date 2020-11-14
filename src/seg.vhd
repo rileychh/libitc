@@ -9,7 +9,7 @@ entity seg is
 		-- system
 		clk, rst_n : in std_logic;
 		-- seg
-		seg_1, seg_2, seg_s : out u8r_t; -- abcdefgp * 2, seg2_s1 ~ seg1_s4
+		seg_led, seg_com : out u8r_t;
 		-- use logic
 		data : in string(1 to 8); -- string type only allow positive range
 		dot  : in u8r_t           -- dots are individually controlled
@@ -33,9 +33,6 @@ architecture arch of seg is
 		x"ce", x"e6", x"0a", x"b6", x"1e", x"38", x"38", x"28", x"6e", x"76", x"da", x"62", x"0c", x"0e", x"80", x"00"
 	);
 
-	-- output wire
-	signal seg_i : u8r_t;
-
 	signal clk_scan : std_logic;
 	signal digit : integer range 0 to 7;
 
@@ -43,17 +40,13 @@ begin
 
 	clk_inst : entity work.clk(arch)
 		generic map(
-			freq => 10_000_000
+			freq => 1_000
 		)
 		port map(
 			clk_in  => clk,
 			rst_n   => rst_n,
 			clk_out => clk_scan
 		);
-
-	-- both outputs are the same
-	seg_1 <= seg_i;
-	seg_2 <= seg_i;
 
 	process (clk_scan, rst_n)
 	begin
@@ -68,8 +61,8 @@ begin
 		end if;
 	end process;
 
-	seg_s <= "01111111" ror digit; -- rotates '0' because common cathode
-	seg_i(0 to 6) <= lut(character'pos(data(digit + 1)))(0 to 6); -- get the digit, then look up from table
-	seg_i(7) <= dot(digit); -- rightmost bit is the dot segment
+	seg_com <= "01111111" ror digit; -- rotates '0' because common cathode
+	-- get the digit, then look up from table, then or the dot segment (both LUT and dot port can control the dot segment)
+	seg_led <= lut(character'pos(data(digit + 1))) or (0 to 6 => '0', 7 => dot(digit));
 
 end arch;

@@ -55,8 +55,6 @@ if {$make_assignments} {
 	set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
 	set_global_assignment -name TOP_LEVEL_ENTITY lcd_test
 
-	# set_global_assignment -name VHDL_FILE tests/bruh/bruh.vhd
-	# set_global_assignment -name VHDL_FILE tests/bruh/bruh_data_pkg.vhd
 	set_global_assignment -name VHDL_FILE tests/dht_test.vhd
 	set_global_assignment -name VHDL_FILE tests/dot_test.vhd
 	set_global_assignment -name VHDL_FILE tests/key_test.vhd
@@ -66,6 +64,8 @@ if {$make_assignments} {
 	set_global_assignment -name VHDL_FILE tests/seg_test.vhd
 	set_global_assignment -name VHDL_FILE tests/tsl_test.vhd
 	set_global_assignment -name VHDL_FILE tests/tts_test.vhd
+	# set_global_assignment -name QIP_FILE tests/res/image.qip
+	# set_global_assignment -name MIF_FILE tests/res/image.mif
 	set_global_assignment -name VHDL_FILE src/dht.vhd
 	set_global_assignment -name VHDL_FILE src/dot.vhd
 	set_global_assignment -name VHDL_FILE src/key.vhd
@@ -83,6 +83,7 @@ if {$make_assignments} {
 	set_global_assignment -name VHDL_FILE src/util/edge.vhd
 	set_global_assignment -name VHDL_FILE src/util/pwm.vhd
 	set_global_assignment -name VHDL_FILE src/util/i2c.vhd
+	set_global_assignment -name QIP_FILE src/util/framebuffer.qip
 	# set_global_assignment -name VHDL_FILE src/util/uart.vhd
 
 	# Commit assignments
