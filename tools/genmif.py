@@ -42,7 +42,7 @@ CONTENT BEGIN
 END;
 '''
 
-    # get 24-bit pixels without header and EOF
+    # get 24-bit pixels without header
     bitmap = bmp_path.read_bytes()[54:]
     # convert content into list of pixels
     pixels = [bitmap[i:i+3] for i in range(0, len(bitmap), 3)]

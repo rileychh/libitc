@@ -7,3 +7,4 @@ docs/ref
 *.qsf
 *.qws
 *.alc
+tests/res/*.bmp
