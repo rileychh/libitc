@@ -39,7 +39,7 @@ begin
 
 	lcd_rst_n <= rst_n;
 	buffer_data <= unsigned(buffer_data_i);
-	dbg <= spi_busy & spi_ena & reverse(to_unsigned(lcd_state_t'pos(lcd_state), 6));
+	dbg(0 to 4) <= spi_busy & spi_ena & reverse(to_unsigned(spi_state_t'pos(spi_state), 3));
 
 	framebuffer_inst : entity work.framebuffer(syn)
 		port map(
@@ -65,9 +65,10 @@ begin
 			clk_out => clk_spi
 		);
 
-	process (clk_spi, rst_n)
+	process (all)
 		variable bit_cnt : integer range 7 downto 0;
 	begin
+		dbg(5 to 7) <= reverse(to_unsigned(bit_cnt, 3));
 		if rst_n = '0' then
 			lcd_sclk <= '0';
 			lcd_ss_n <= '1';
@@ -168,7 +169,8 @@ begin
 
 					if spi_done = '1' then
 						if buffer_addr = buffer_addr'high then
-							buffer_addr <= 0;
+							spi_ena <= '0';
+							-- buffer_addr <= 0;
 						else
 							buffer_addr <= buffer_addr + 1;
 						end if;
