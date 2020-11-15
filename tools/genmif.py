@@ -5,8 +5,8 @@ from PIL import Image
 from pathlib import Path
 
 
-def convert(img_path: Path, new_width=128, new_height=160) -> Path:
-    img = Image.open(img_path)
+def bmp(img_path: Path, new_width=128, new_height=160) -> Path:
+    img = Image.open(img_path).convert('RGB') # open imaage as 24-bit color format
     aspect = img.width / img.height
     new_aspect = new_width / new_height
 
@@ -23,11 +23,11 @@ def convert(img_path: Path, new_width=128, new_height=160) -> Path:
 
     new_img = img.crop(new_box).resize((new_width, new_height))
 
-    new_img_path = img_path.with_suffix('.bmp')
+    new_img_path = img_path.parent / 'preview.bmp'
     new_img.save(new_img_path, format='bmp')
     return new_img_path
 
-def bmp_to_mif(bmp_path: Path, mif_path: Path):
+def mif(bmp_path: Path, mif_path: Path):
     header = '''\
 WIDTH=16;
 DEPTH=20480;
@@ -59,7 +59,4 @@ if __name__ == '__main__':
     parser.add_argument('output_path', type=Path)
     args = parser.parse_args()
 
-    file_dir = Path(__file__).parent
-    input_path = args.input_path
-    output_path = args.output_path
-    bmp_to_mif(convert(input_path), output_path)
+    mif(bmp(args.input_path), args.output_path)
