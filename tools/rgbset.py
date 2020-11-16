@@ -12,4 +12,4 @@ for i in range(0b1000000):
 for i in range(0b100000):
     lut.append(i << 1 | i >> 4)
 
-print(''.join(f'x"{"{:02x}".format(o)}", ' for o in lut))
+print('x"' + '", x"'.join("{:02x}".format(o) for o in lut) + '"')

@@ -24,13 +24,17 @@ architecture arch of lcd_colors_test is
 	signal pixel_addr : integer range 0 to lcd_pixel_cnt - 1;
 	signal pixel_data : u16_t;
 
+	constant colors_std : u16_arr_t(0 to 7) := (
+		x"0000", x"f800", x"07e0", x"ffe0", x"001f", x"f81f", x"07ff", x"ffff"
+	);
+
 	-- https://github.com/morhetz/gruvbox
-	constant colors : u16_arr_t(0 to 7) := (
-		x"c7d8", x"1e63", x"1cc3", x"26a4", x"8a31", x"8590", x"6b4d", x"63ec"
+	constant colors_gruvbox : u16_arr_t(0 to 7) := (
+		x"c7de", x"1e64", x"1cd2", x"26b3", x"8a30", x"858c", x"6b53", x"63ed"
 	);
 
 	signal clk_color : std_logic;
-	signal color_sel : integer range colors'range;
+	signal color_sel : integer range 0 to 7;
 
 begin
 
@@ -92,7 +96,7 @@ begin
 				pixel_addr <=  pixel_addr + 1;
 			end if;
 
-			pixel_data <= colors(color_sel);
+			pixel_data <= colors_std(color_sel);
 			wr_ena <= '1';
 		end if;
 	end process;

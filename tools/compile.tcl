@@ -53,7 +53,7 @@ if {$make_assignments} {
 
 	# source files
 	set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
-	set_global_assignment -name TOP_LEVEL_ENTITY lcd_colors_test
+	set_global_assignment -name TOP_LEVEL_ENTITY lcd_image_test
 
 	set_global_assignment -name VHDL_FILE tests/dht_test.vhd
 	set_global_assignment -name VHDL_FILE tests/dot_test.vhd
