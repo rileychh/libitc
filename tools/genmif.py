@@ -6,7 +6,7 @@ from typing import Tuple
 from PIL import Image
 
 
-def fit(im: Image.Image, width: int, height: int) -> Image.Image:
+def fill(im: Image.Image, width: int, height: int) -> Image.Image:
     aspect = im.width / im.height
     new_aspect = width / height
 
@@ -26,15 +26,17 @@ def fit(im: Image.Image, width: int, height: int) -> Image.Image:
 
 def rgb565(pixel: Tuple[int, int, int]) -> int:
     r, g, b = pixel
-    return (r & 0b11111000) << 8 | (g & 0b11111100) << 3 | (b & 0b11111000) >> 3
+    return (b >> 3) << 11 | (r >> 2) << 5 | (b >> 3)
+    # return (r >> 3) << 11 | (g >> 2) << 5 | (b >> 3)
 
 
 parser = ArgumentParser()
 parser.add_argument('input_path', type=Path)
 parser.add_argument('output_path', type=Path)
-args = parser.parse_args(['tests/res/white-line.bmp', 'tests/res/image.mif'])
+args = parser.parse_args()
 
-im = fit(Image.open(args.input_path), 128, 160).convert('RGB')
+im = fill(Image.open(args.input_path), 128, 160).convert('RGB')
+# im.show()
 pixels = list(im.getdata())
 
 mif_header = '''\

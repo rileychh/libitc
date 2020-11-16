@@ -20,13 +20,21 @@ package itc_lcd is
 
 	constant lcd_slpout : u8_t := x"11";
 	constant lcd_frmctr1 : u8_t := x"b1";
+	constant lcd_frmctr2 : u8_t := x"b2";
+	constant lcd_frmctr3 : u8_t := x"b3";
 	constant lcd_pwctr1 : u8_t := x"c0";
 	constant lcd_pwctr2 : u8_t := x"c1";
 	constant lcd_pwctr3 : u8_t := x"c2";
+	constant lcd_pwctr4 : u8_t := x"c3";
+	constant lcd_pwctr5 : u8_t := x"c4";
 	constant lcd_vmctr1 : u8_t := x"c5";
 	constant lcd_gmctrp1 : u8_t := x"e0"; -- aka gamctrp1
 	constant lcd_gmctrn1 : u8_t := x"e1"; -- aka gamctrn1
+	constant lcd_rgbset : u8_t := x"2d";
+	constant lcd_madctl : u8_t := x"36";
 	constant lcd_colmod : u8_t := x"3a";
+	constant lcd_caset : u8_t := x"2a";
+	constant lcd_raset : u8_t := x"2b";
 	constant lcd_dispon : u8_t := x"29";
 	constant lcd_ramwr : u8_t := x"2c";
 
@@ -34,19 +42,30 @@ package itc_lcd is
 	-- initialization commands and arguments
 	--------------------------------------------------------------------------------
 
-	constant lcd_init : u8_arr_t(0 to 52) := (
+	constant lcd_init : u8_arr_t(0 to 210) := (
 		lcd_frmctr1, x"05", x"3c", x"3c",
+		lcd_frmctr2, x"05", x"3c", x"3c",
+		lcd_frmctr3, x"05", x"3c", x"3c", x"05", x"3c", x"3c",
 		lcd_pwctr1, x"28", x"08", x"04",
 		lcd_pwctr2, x"c0",
 		lcd_pwctr3, x"0d", x"00",
+		lcd_pwctr4, x"8d", x"2a",
+		lcd_pwctr5, x"8d", x"ee",
 		lcd_vmctr1, x"1a",
 		lcd_gmctrp1, x"04", x"22", x"07", x"0a", x"2e", x"30", x"25", x"2a", x"28", x"26", x"2e", x"3a", x"00", x"01", x"03", x"13",
 		lcd_gmctrn1, x"04", x"16", x"06", x"0d", x"2d", x"26", x"23", x"27", x"27", x"25", x"2d", x"3b", x"00", x"01", x"04", x"13",
-		lcd_colmod, x"05",
+		lcd_rgbset,
+		x"00", x"02", x"04", x"06", x"08", x"0a", x"0c", x"0e", x"10", x"12", x"14", x"16", x"18", x"1a", x"1c", x"1e", x"21", x"23", x"25", x"27", x"29", x"2b", x"2d", x"2f", x"31", x"33", x"35", x"37", x"39", x"3b", x"3d", x"3f",
+		x"00", x"01", x"02", x"03", x"04", x"05", x"06", x"07", x"08", x"09", x"0a", x"0b", x"0c", x"0d", x"0e", x"0f", x"10", x"11", x"12", x"13", x"14", x"15", x"16", x"17", x"18", x"19", x"1a", x"1b", x"1c", x"1d", x"1e", x"1f", x"20", x"21", x"22", x"23", x"24", x"25", x"26", x"27", x"28", x"29", x"2a", x"2b", x"2c", x"2d", x"2e", x"2f", x"30", x"31", x"32", x"33", x"34", x"35", x"36", x"37", x"38", x"39", x"3a", x"3b", x"3c", x"3d", x"3e", x"3f",
+		x"00", x"02", x"04", x"06", x"08", x"0a", x"0c", x"0e", x"10", x"12", x"14", x"16", x"18", x"1a", x"1c", x"1e", x"21", x"23", x"25", x"27", x"29", x"2b", x"2d", x"2f", x"31", x"33", x"35", x"37", x"39", x"3b", x"3d", x"3f",
+		lcd_madctl, x"c0",
+		lcd_colmod, x"55",
+		lcd_caset, x"00", x"02", x"00", x"81",
+		lcd_raset, x"00", x"01", x"00", x"a0",
 		lcd_dispon,
 		lcd_ramwr
 	);
-	constant lcd_init_dc : std_logic_vector(0 to 52) := "01110111010110101111111111111111011111111111111110100";
+	constant lcd_init_dc : std_logic_vector(0 to 210) := "0111011101111110111010110110110101111111111111111011111111111111110111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111110101011110111100";
 
 	--------------------------------------------------------------------------------
 	-- functions
