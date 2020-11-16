@@ -24,10 +24,9 @@ def fill(im: Image.Image, width: int, height: int) -> Image.Image:
     return im.crop(new_box).resize((width, height))
 
 
-def rgb565(pixel: Tuple[int, int, int]) -> int:
+def pack(pixel: Tuple[int, int, int]) -> int:
     r, g, b = pixel
-    return (b >> 3) << 11 | (r >> 2) << 5 | (g >> 3)
-    # return (r >> 3) << 11 | (g >> 2) << 5 | (b >> 3)
+    return r << 16 | g << 8 | b
 
 
 parser = ArgumentParser()
@@ -40,7 +39,7 @@ im = fill(Image.open(args.input_path), 128, 160).convert('RGB')
 pixels = list(im.getdata())
 
 mif_header = '''\
-WIDTH=16;
+WIDTH=24;
 DEPTH=20480;
 
 ADDRESS_RADIX=UNS;
@@ -54,6 +53,6 @@ END;
 '''
 
 mif_data = ''.join(
-    f'\t{i}: {"{:x}".format(rgb565(p))};\n' for i, p in enumerate(pixels))
+    f'\t{i}: {"{:x}".format(pack(p))};\n' for i, p in enumerate(pixels))
 
 args.output_path.write_text(mif_header + mif_data + mif_footer)

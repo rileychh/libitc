@@ -15,7 +15,7 @@ entity lcd is
 		brightness : in u8_t;
 		wr_ena     : in std_logic;
 		pixel_addr : in integer range 0 to lcd_pixel_cnt - 1;
-		pixel_data : in u16_t
+		pixel_data : in lcd_pixel_t
 	);
 end lcd;
 
@@ -23,10 +23,11 @@ architecture arch of lcd is
 
 	signal clk_spi : std_logic;
 	signal spi_ena, spi_busy, spi_done : std_logic;
-	signal spi_data : u8_t;
-	signal buffer_addr : integer range 0 to lcd_frame_width / 8 - 1;
-	signal buffer_data_i : std_logic_vector(7 downto 0);
-	signal buffer_data : u8_t;
+	signal spi_width : integer range 0 to lcd_pixel_t'length;
+	signal spi_data : lcd_pixel_t;
+	signal buffer_addr : integer range 0 to lcd_pixel_cnt - 1;
+	signal buffer_data_i : std_logic_vector(23 downto 0);
+	signal buffer_data : lcd_pixel_t;
 
 	type spi_state_t is (idle, send);
 	signal spi_state : spi_state_t;
@@ -36,18 +37,17 @@ architecture arch of lcd is
 begin
 
 	lcd_rst_n <= rst_n;
-	buffer_data <= unsigned(buffer_data_i);
-	-- dbg(0 to 4) <= spi_busy & spi_ena & reverse(to_unsigned(spi_state_t'pos(spi_state), 3));
 
 	framebuffer_inst : entity work.framebuffer(syn)
 		port map(
-			clk         => clk,
-			wr_ena      => wr_ena,
-			pixel_addr  => std_logic_vector(to_unsigned(pixel_addr, 15)),
-			pixel_in    => std_logic_vector(pixel_data),
-			buffer_addr => std_logic_vector(to_unsigned(buffer_addr, 16)),
-			buffer_out  => buffer_data_i
+			clock     => clk,
+			wren      => wr_ena,
+			wraddress => std_logic_vector(to_unsigned(pixel_addr, 15)),
+			data      => std_logic_vector(pixel_data),
+			rdaddress => std_logic_vector(to_unsigned(buffer_addr, 15)),
+			q         => buffer_data_i
 		);
+	buffer_data <= unsigned(buffer_data_i);
 
 	--------------------------------------------------------------------------------
 	-- SPI interface
@@ -64,20 +64,21 @@ begin
 		);
 
 	process (clk_spi, rst_n)
-		variable bit_cnt : integer range 7 downto 0;
+		variable bit_cnt : integer range lcd_pixel_t'length - 1 downto 0;
 	begin
 		if rst_n = '0' then
 			lcd_sclk <= '0';
 			lcd_ss_n <= '1';
 			spi_busy <= '1';
 			spi_state <= idle;
-			bit_cnt := 7;
+			bit_cnt := bit_cnt'high;
 		elsif rising_edge(clk_spi) then
 			case spi_state is
 				when idle =>
 					lcd_sclk <= '0';
 
 					if spi_ena = '1' then
+						bit_cnt := spi_width - 1;
 						lcd_mosi <= spi_data(bit_cnt);
 						lcd_ss_n <= '0';
 						spi_busy <= '1';
@@ -95,7 +96,6 @@ begin
 						lcd_sclk <= '1';
 
 						if bit_cnt = 0 then
-							bit_cnt := 7;
 							spi_busy <= '0';
 							spi_state <= idle;
 						else
@@ -139,7 +139,8 @@ begin
 
 				when wake => -- send SLPOUT command
 					lcd_dc <= '0';
-					spi_data <= lcd_slpout;
+					spi_width <= 8;
+					spi_data(7 downto 0) <= lcd_slpout;
 					spi_ena <= '1';
 
 					if spi_done = '1' then
@@ -156,7 +157,7 @@ begin
 
 				when init =>
 					lcd_dc <= lcd_init_dc(buffer_addr);
-					spi_data <= lcd_init(buffer_addr);
+					spi_data(7 downto 0) <= lcd_init(buffer_addr);
 					spi_ena <= '1';
 
 					if spi_done = '1' then
@@ -170,11 +171,11 @@ begin
 
 				when draw =>
 					lcd_dc <= '1';
+					spi_width <= 24;
 					spi_data <= buffer_data;
 
 					if spi_done = '1' then
 						if buffer_addr = buffer_addr'high then
-							-- spi_ena <= '0';
 							buffer_addr <= 0;
 						else
 							buffer_addr <= buffer_addr + 1;

@@ -37,18 +37,21 @@ use altera_mf.altera_mf_components.all;
 
 entity framebuffer is
 	port (
-		clk         : in std_logic := '1';
-		wr_ena      : in std_logic := '0';
-		pixel_addr  : in std_logic_vector (14 downto 0);
-		pixel_in    : in std_logic_vector (15 downto 0);
-		buffer_addr : in std_logic_vector (15 downto 0);
-		buffer_out  : out std_logic_vector (7 downto 0)
+		clock     : in std_logic := '1';
+		data      : in std_logic_vector (23 downto 0);
+		rdaddress : in std_logic_vector (14 downto 0);
+		wraddress : in std_logic_vector (14 downto 0);
+		wren      : in std_logic := '0';
+		q         : out std_logic_vector (23 downto 0)
 	);
 end framebuffer;
 
 architecture SYN of framebuffer is
 
+	signal sub_wire0 : std_logic_vector (23 downto 0);
+
 begin
+	q <= sub_wire0(23 downto 0);
 
 	altsyncram_component : altsyncram
 	generic map(
@@ -60,25 +63,25 @@ begin
 		intended_device_family             => "Cyclone III",
 		lpm_type                           => "altsyncram",
 		numwords_a                         => 20480,
-		numwords_b                         => 40960,
+		numwords_b                         => 20480,
 		operation_mode                     => "DUAL_PORT",
 		outdata_aclr_b                     => "NONE",
 		outdata_reg_b                      => "UNREGISTERED",
 		power_up_uninitialized             => "FALSE",
 		read_during_write_mode_mixed_ports => "OLD_DATA",
 		widthad_a                          => 15,
-		widthad_b                          => 16,
-		width_a                            => 16,
-		width_b                            => 8,
+		widthad_b                          => 15,
+		width_a                            => 24,
+		width_b                            => 24,
 		width_byteena_a                    => 1
 	)
 	port map(
-		clock0    => clk,
-		wren_a    => wr_ena,
-		address_a => pixel_addr,
-		address_b => buffer_addr,
-		data_a    => pixel_in,
-		q_b       => buffer_out
+		address_a => wraddress,
+		clock0    => clock,
+		data_a    => data,
+		wren_a    => wren,
+		address_b => rdaddress,
+		q_b       => sub_wire0
 	);
 
 end SYN;
@@ -116,7 +119,7 @@ end SYN;
 -- Retrieval info: PRIVATE: JTAG_ENABLED NUMERIC "0"
 -- Retrieval info: PRIVATE: JTAG_ID STRING "NONE"
 -- Retrieval info: PRIVATE: MAXIMUM_DEPTH NUMERIC "0"
--- Retrieval info: PRIVATE: MEMSIZE NUMERIC "327680"
+-- Retrieval info: PRIVATE: MEMSIZE NUMERIC "491520"
 -- Retrieval info: PRIVATE: MEM_IN_BITS NUMERIC "0"
 -- Retrieval info: PRIVATE: MIFfilename STRING ""
 -- Retrieval info: PRIVATE: OPERATION_MODE NUMERIC "2"
@@ -135,11 +138,11 @@ end SYN;
 -- Retrieval info: PRIVATE: SYNTH_WRAPPER_GEN_POSTFIX STRING "0"
 -- Retrieval info: PRIVATE: USE_DIFF_CLKEN NUMERIC "0"
 -- Retrieval info: PRIVATE: UseDPRAM NUMERIC "1"
--- Retrieval info: PRIVATE: VarWidth NUMERIC "1"
--- Retrieval info: PRIVATE: WIDTH_READ_A NUMERIC "16"
--- Retrieval info: PRIVATE: WIDTH_READ_B NUMERIC "8"
--- Retrieval info: PRIVATE: WIDTH_WRITE_A NUMERIC "16"
--- Retrieval info: PRIVATE: WIDTH_WRITE_B NUMERIC "8"
+-- Retrieval info: PRIVATE: VarWidth NUMERIC "0"
+-- Retrieval info: PRIVATE: WIDTH_READ_A NUMERIC "24"
+-- Retrieval info: PRIVATE: WIDTH_READ_B NUMERIC "24"
+-- Retrieval info: PRIVATE: WIDTH_WRITE_A NUMERIC "24"
+-- Retrieval info: PRIVATE: WIDTH_WRITE_B NUMERIC "24"
 -- Retrieval info: PRIVATE: WRADDR_ACLR_B NUMERIC "0"
 -- Retrieval info: PRIVATE: WRADDR_REG_B NUMERIC "0"
 -- Retrieval info: PRIVATE: WRCTRL_ACLR_B NUMERIC "0"
@@ -154,29 +157,29 @@ end SYN;
 -- Retrieval info: CONSTANT: INTENDED_DEVICE_FAMILY STRING "Cyclone III"
 -- Retrieval info: CONSTANT: LPM_TYPE STRING "altsyncram"
 -- Retrieval info: CONSTANT: NUMWORDS_A NUMERIC "20480"
--- Retrieval info: CONSTANT: NUMWORDS_B NUMERIC "40960"
+-- Retrieval info: CONSTANT: NUMWORDS_B NUMERIC "20480"
 -- Retrieval info: CONSTANT: OPERATION_MODE STRING "DUAL_PORT"
 -- Retrieval info: CONSTANT: OUTDATA_ACLR_B STRING "NONE"
 -- Retrieval info: CONSTANT: OUTDATA_REG_B STRING "UNREGISTERED"
 -- Retrieval info: CONSTANT: POWER_UP_UNINITIALIZED STRING "FALSE"
 -- Retrieval info: CONSTANT: READ_DURING_WRITE_MODE_MIXED_PORTS STRING "OLD_DATA"
 -- Retrieval info: CONSTANT: WIDTHAD_A NUMERIC "15"
--- Retrieval info: CONSTANT: WIDTHAD_B NUMERIC "16"
--- Retrieval info: CONSTANT: WIDTH_A NUMERIC "16"
--- Retrieval info: CONSTANT: WIDTH_B NUMERIC "8"
+-- Retrieval info: CONSTANT: WIDTHAD_B NUMERIC "15"
+-- Retrieval info: CONSTANT: WIDTH_A NUMERIC "24"
+-- Retrieval info: CONSTANT: WIDTH_B NUMERIC "24"
 -- Retrieval info: CONSTANT: WIDTH_BYTEENA_A NUMERIC "1"
 -- Retrieval info: USED_PORT: clock 0 0 0 0 INPUT VCC "clock"
--- Retrieval info: USED_PORT: data 0 0 16 0 INPUT NODEFVAL "data[15..0]"
--- Retrieval info: USED_PORT: q 0 0 8 0 OUTPUT NODEFVAL "q[7..0]"
--- Retrieval info: USED_PORT: rdaddress 0 0 16 0 INPUT NODEFVAL "rdaddress[15..0]"
+-- Retrieval info: USED_PORT: data 0 0 24 0 INPUT NODEFVAL "data[23..0]"
+-- Retrieval info: USED_PORT: q 0 0 24 0 OUTPUT NODEFVAL "q[23..0]"
+-- Retrieval info: USED_PORT: rdaddress 0 0 15 0 INPUT NODEFVAL "rdaddress[14..0]"
 -- Retrieval info: USED_PORT: wraddress 0 0 15 0 INPUT NODEFVAL "wraddress[14..0]"
 -- Retrieval info: USED_PORT: wren 0 0 0 0 INPUT GND "wren"
 -- Retrieval info: CONNECT: @address_a 0 0 15 0 wraddress 0 0 15 0
--- Retrieval info: CONNECT: @address_b 0 0 16 0 rdaddress 0 0 16 0
+-- Retrieval info: CONNECT: @address_b 0 0 15 0 rdaddress 0 0 15 0
 -- Retrieval info: CONNECT: @clock0 0 0 0 0 clock 0 0 0 0
--- Retrieval info: CONNECT: @data_a 0 0 16 0 data 0 0 16 0
+-- Retrieval info: CONNECT: @data_a 0 0 24 0 data 0 0 24 0
 -- Retrieval info: CONNECT: @wren_a 0 0 0 0 wren 0 0 0 0
--- Retrieval info: CONNECT: q 0 0 8 0 @q_b 0 0 8 0
+-- Retrieval info: CONNECT: q 0 0 24 0 @q_b 0 0 24 0
 -- Retrieval info: GEN_FILE: TYPE_NORMAL framebuffer.vhd TRUE
 -- Retrieval info: GEN_FILE: TYPE_NORMAL framebuffer.inc FALSE
 -- Retrieval info: GEN_FILE: TYPE_NORMAL framebuffer.cmp FALSE
