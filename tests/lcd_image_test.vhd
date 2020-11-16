@@ -5,7 +5,7 @@ use ieee.numeric_std.all;
 use work.itc.all;
 use work.itc_lcd.all;
 
-entity lcd_test is
+entity lcd_image_test is
 	port (
 		-- sys
 		clk, rst_n : in std_logic;
@@ -14,9 +14,9 @@ entity lcd_test is
 		-- debug
 		dbg_a, dbg_b : out u8r_t
 	);
-end lcd_test;
+end lcd_image_test;
 
-architecture arch of lcd_test is
+architecture arch of lcd_image_test is
 
 	signal wr_ena : std_logic;
 	signal pixel_addr : integer range 0 to lcd_pixel_cnt - 1;

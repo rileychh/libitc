@@ -174,8 +174,8 @@ begin
 
 					if spi_done = '1' then
 						if buffer_addr = buffer_addr'high then
-							spi_ena <= '0';
-							-- buffer_addr <= 0;
+							-- spi_ena <= '0';
+							buffer_addr <= 0;
 						else
 							buffer_addr <= buffer_addr + 1;
 						end if;

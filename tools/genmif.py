@@ -26,7 +26,7 @@ def fill(im: Image.Image, width: int, height: int) -> Image.Image:
 
 def rgb565(pixel: Tuple[int, int, int]) -> int:
     r, g, b = pixel
-    return (b >> 3) << 11 | (r >> 2) << 5 | (b >> 3)
+    return (b >> 3) << 11 | (r >> 2) << 5 | (g >> 3)
     # return (r >> 3) << 11 | (g >> 2) << 5 | (b >> 3)
 
 
