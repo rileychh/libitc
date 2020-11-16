@@ -11,15 +11,13 @@ entity seg_test is
 		-- system
 		clk, rst_n : in std_logic;
 		-- sw
-		sw : in u8_t;
+		sw : in u8r_t;
 		-- seg
 		seg_led, seg_com : out u8r_t
 	);
 end seg_test;
 
 architecture arch of seg_test is
-
-	signal sw_i : u8_t;
 
 	signal clocks : u8r_t;
 	signal clk_cnt : std_logic;
@@ -40,14 +38,6 @@ begin
 			);
 	end generate clk_gen;
 
-	sw_inst : entity work.sw(arch)
-		port map(
-			clk    => clk,
-			rst_n  => rst_n,
-			sw     => sw,
-			sw_out => sw_i
-		);
-
 	seg_inst : entity work.seg(arch)
 		port map(
 			clk     => clk,
@@ -57,13 +47,13 @@ begin
 			data    => to_string(cnt, cnt'high, base, 8),
 			dot => (others => '0')
 		);
-	with to_integer(sw_i(7 downto 6)) select base <=
+	with to_integer(reverse(sw(0 to 1))) select base <=
 	2 when 0,
 	8 when 1,
 	10 when 2,
 	16 when others; -- 3
 
-	clk_cnt <= clocks(to_integer(sw_i(2 downto 0)));
+	clk_cnt <= clocks(to_integer(reverse(sw(5 to 7))));
 
 	process (clk_cnt, rst_n) begin
 		if rst_n = '0' then

@@ -13,7 +13,7 @@ entity dot_test is
 		-- dot
 		dot_r, dot_g, dot_s : out u8r_t;
 		-- sw 
-		sw : in u8_t
+		sw : in u8r_t
 	);
 end dot_test;
 
