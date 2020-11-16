@@ -5,10 +5,14 @@ from pathlib import Path
 from typing import Tuple
 from PIL import Image
 
+frame_size = (128, 160)
+mode = 'fill'
+bg_color = (0, 0, 0)
 
-def fill(im: Image.Image, width: int, height: int) -> Image.Image:
+
+def fill(im: Image.Image, size: Tuple[int, int]) -> Image.Image:
     aspect = im.width / im.height
-    new_aspect = width / height
+    new_aspect = size[0] / size[1]
 
     if aspect > new_aspect:
         # Then crop the left and right edges:
@@ -21,7 +25,16 @@ def fill(im: Image.Image, width: int, height: int) -> Image.Image:
         offset = (im.height - target_height) / 2
         new_box = (0, offset, im.width, im.height - offset)
 
-    return im.crop(new_box).resize((width, height))
+    return im.crop(new_box).resize(size)
+
+
+def fit(im: Image.Image, size: Tuple[int, int], fill_color: Tuple[int, int, int]) -> Image.Image:
+    resized = im.copy()
+    resized.thumbnail(size)
+    res = Image.new('RGB', size, fill_color)
+    res.paste(resized, (int((size[0] - resized.width) / 2),
+                        int((size[1] - resized.height) / 2)))
+    return res
 
 
 def pack(pixel: Tuple[int, int, int]) -> int:
@@ -34,8 +47,13 @@ parser.add_argument('input_path', type=Path)
 parser.add_argument('output_path', type=Path)
 args = parser.parse_args()
 
-im = fill(Image.open(args.input_path), 128, 160).convert('RGB')
-# im.show()
+im = Image.open(args.input_path).convert('RGB')
+
+if mode == 'fill':
+    im = fill(im, frame_size)
+elif mode == 'fit':
+    im = fit(im, frame_size, bg_color)
+
 pixels = list(im.getdata())
 
 mif_header = '''\
