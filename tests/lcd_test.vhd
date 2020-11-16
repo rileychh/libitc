@@ -24,8 +24,6 @@ architecture arch of lcd_test is
 
 begin
 
-	dbg_a <= clk & rst_n & lcd_sclk & lcd_mosi & lcd_ss_n & lcd_dc & lcd_rst_n & '0';
-
 	lcd_inst : entity work.lcd(arch)
 		port map(
 			clk        => clk,
@@ -39,8 +37,7 @@ begin
 			brightness => x"ff",
 			wr_ena     => wr_ena,
 			pixel_addr => pixel_addr,
-			pixel_data => unsigned(pixel_data),
-			dbg        => dbg_b
+			pixel_data => unsigned(pixel_data)
 		);
 
 	image_inst : entity work.image(syn)
@@ -58,8 +55,10 @@ begin
 			if wr_ena = '0' then
 				if pixel_addr < lcd_pixel_cnt - 1 then
 					pixel_addr <= pixel_addr + 1;
+					wr_ena <= '1';
+				else
+					wr_ena <= '0';
 				end if;
-				wr_ena <= '1';
 			else
 				wr_ena <= '0';
 			end if;

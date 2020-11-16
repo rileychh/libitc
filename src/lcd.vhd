@@ -15,9 +15,7 @@ entity lcd is
 		brightness : in u8_t;
 		wr_ena     : in std_logic;
 		pixel_addr : in integer range 0 to lcd_pixel_cnt - 1;
-		pixel_data : in u16_t;
-		-- debug
-		dbg : out u8r_t
+		pixel_data : in u16_t
 	);
 end lcd;
 
@@ -32,14 +30,14 @@ architecture arch of lcd is
 
 	type spi_state_t is (idle, send);
 	signal spi_state : spi_state_t;
-	type lcd_state_t is (wake, wake_wait, init, draw);
+	type lcd_state_t is (rst_wait, wake, wake_wait, init, draw);
 	signal lcd_state : lcd_state_t;
 
 begin
 
 	lcd_rst_n <= rst_n;
 	buffer_data <= unsigned(buffer_data_i);
-	dbg(0 to 4) <= spi_busy & spi_ena & reverse(to_unsigned(spi_state_t'pos(spi_state), 3));
+	-- dbg(0 to 4) <= spi_busy & spi_ena & reverse(to_unsigned(spi_state_t'pos(spi_state), 3));
 
 	framebuffer_inst : entity work.framebuffer(syn)
 		port map(
@@ -57,7 +55,7 @@ begin
 
 	clk_inst : entity work.clk(arch)
 		generic map(
-			freq => 12_500_000 * 2
+			freq => 4_000_000 * 2
 		)
 		port map(
 			clk_in  => clk,
@@ -65,10 +63,9 @@ begin
 			clk_out => clk_spi
 		);
 
-	process (all)
+	process (clk_spi, rst_n)
 		variable bit_cnt : integer range 7 downto 0;
 	begin
-		dbg(5 to 7) <= reverse(to_unsigned(bit_cnt, 3));
 		if rst_n = '0' then
 			lcd_sclk <= '0';
 			lcd_ss_n <= '1';
@@ -127,12 +124,20 @@ begin
 	begin
 		if rst_n = '0' then
 			spi_ena <= '0';
-			lcd_state <= wake;
+			lcd_state <= rst_wait;
 			buffer_addr <= 0;
 			timer := 0;
 		elsif rising_edge(clk) then
 			case lcd_state is
-				when wake => -- sen SLPOUT command
+				when rst_wait => -- wait for reset (120ms)
+					if timer = timer'high then
+						timer := 0;
+						lcd_state <= wake;
+					else
+						timer := timer + 1;
+					end if;
+
+				when wake => -- send SLPOUT command
 					lcd_dc <= '0';
 					spi_data <= lcd_slpout;
 					spi_ena <= '1';
