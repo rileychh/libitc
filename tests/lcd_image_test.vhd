@@ -52,12 +52,12 @@ begin
 			wr_ena <= '0';
 			pixel_addr <= 0;
 		elsif rising_edge(clk) then
-			if wr_ena = '0' then
-				if pixel_addr < lcd_pixel_cnt - 1 then
-					pixel_addr <= pixel_addr + 1;
+			if pixel_addr < lcd_pixel_cnt - 1 then
+				if wr_ena = '0' then
 					wr_ena <= '1';
 				else
 					wr_ena <= '0';
+					pixel_addr <= pixel_addr + 1;
 				end if;
 			else
 				wr_ena <= '0';
