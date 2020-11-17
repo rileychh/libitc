@@ -146,6 +146,10 @@ if {$make_assignments} {
 	set_location_assignment PIN_118 -to mot_ch[2]
 	set_location_assignment PIN_126 -to mot_ch[3]
 
+	# UART_{TX,RX} (green, white)
+	set_location_assignment PIN_231 -to uart_rx
+	set_location_assignment PIN_232 -to uart_tx
+
 	# Debug ports
 	set_location_assignment PIN_196 -to dbg_a[0]
 	set_location_assignment PIN_194 -to dbg_a[1]

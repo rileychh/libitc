@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.0.0]
 
 ### Added
 
@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for SM178B text-to-speech module
 - Support for ST7735 TFT LCD module
 - Support for TSL2561 light sensor (`tsl.vhd`)
+- Support for UART interface (9600 8N1)
 - I2C interface (`i2c.vhd`)
 - Edge detector `edge`
 - Useful functions

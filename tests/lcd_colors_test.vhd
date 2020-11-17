@@ -82,7 +82,7 @@ begin
 				pixel_addr <= pixel_addr + 1;
 			end if;
 
-			if sw(7) = '1' then
+			if sw(0) = '1' then
 				color_sel <= pixel_addr / 2560;
 			else
 				if timer = timer'high then
@@ -93,7 +93,12 @@ begin
 				end if;
 			end if;
 
-			pixel_data <= colors_std(color_sel);
+			case to_integer(reverse(sw(6 to 7))) is
+				when 0 => pixel_data <= colors_std(color_sel);
+				when 1 => pixel_data <= colors_gray(color_sel);
+				when 2 => pixel_data <= colors_gruvbox(color_sel);
+				when others => pixel_data <= (others => '0');
+			end case;
 			wr_ena <= '1';
 		end if;
 	end process;
