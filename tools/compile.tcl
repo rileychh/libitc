@@ -65,8 +65,8 @@ if {$make_assignments} {
 	set_global_assignment -name VHDL_FILE tests/seg_test.vhd
 	set_global_assignment -name VHDL_FILE tests/tsl_test.vhd
 	set_global_assignment -name VHDL_FILE tests/tts_test.vhd
-	set_global_assignment -name VHDL_FILE tests/uart_test.vhd
 	set_global_assignment -name VHDL_FILE tests/uart_dino_test.vhd
+	set_global_assignment -name VHDL_FILE tests/uart_echo_test.vhd
 	set_global_assignment -name QIP_FILE tests/res/image.qip
 	set_global_assignment -name MIF_FILE tests/res/image.mif
 	set_global_assignment -name VHDL_FILE src/dht.vhd

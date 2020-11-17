@@ -4,19 +4,17 @@ use ieee.numeric_std.all;
 
 use work.itc.all;
 
-entity uart_test is
+entity uart_echo_test is
 	port (
 		-- sys
 		clk, rst_n : in std_logic;
 		-- UART
-		uart_rx : in std_logic;  -- receive pin
-		uart_tx : out std_logic; -- transmit pin
-		-- debug
-		dbg_a, dbg_b : out u8r_t
+		uart_rx : in std_logic; -- receive pin
+		uart_tx : out std_logic -- transmit pin
 	);
-end uart_test;
+end uart_echo_test;
 
-architecture arch of uart_test is
+architecture arch of uart_echo_test is
 
 	signal tx_ena, tx_busy, rx_busy, rx_err : std_logic;
 	signal tx_data, rx_data : u8_t;
@@ -26,9 +24,6 @@ architecture arch of uart_test is
 	signal buf_cnt : integer range buf'range;
 
 begin
-
-	dbg_a(0 to 1) <= uart_rx & uart_tx;
-	dbg_b <= reverse(to_unsigned(buf_cnt, 8));
 
 	uart_inst : entity work.uart(arch)
 		generic map(
