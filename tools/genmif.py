@@ -6,8 +6,10 @@ from typing import Tuple
 from PIL import Image
 
 frame_size = (128, 160)
-mode = 'fill'
-bg_color = (0, 0, 0)
+mode = 'fit'
+# mode = 'fit'
+bg_color = (255, 255, 255)
+colored = False
 
 
 def fill(im: Image.Image, size: Tuple[int, int]) -> Image.Image:
@@ -54,10 +56,26 @@ if mode == 'fill':
 elif mode == 'fit':
     im = fit(im, frame_size, bg_color)
 
-pixels = list(im.getdata())
 
-mif_header = '''\
-WIDTH=24;
+if colored:
+    mif_header = '''\
+    WIDTH=24;
+    DEPTH=20480;
+
+    ADDRESS_RADIX=UNS;
+    DATA_RADIX=HEX;
+
+    CONTENT BEGIN
+    '''
+
+    pixels = list(im.getdata())
+
+    mif_data = ''.join(
+        f'\t{i}: {"{:x}".format(pack(p))};\n' for i, p in enumerate(pixels))
+
+else:
+    mif_header = '''\
+WIDTH=1;
 DEPTH=20480;
 
 ADDRESS_RADIX=UNS;
@@ -66,11 +84,14 @@ DATA_RADIX=HEX;
 CONTENT BEGIN
 '''
 
+    im = im.convert('1')
+    pixels = list(im.getdata())
+
+    mif_data = ''.join(
+        f'\t{i}: {"0" if p == 0 else "1"};\n' for i, p in enumerate(pixels))
+
 mif_footer = '''\
 END;
 '''
-
-mif_data = ''.join(
-    f'\t{i}: {"{:x}".format(pack(p))};\n' for i, p in enumerate(pixels))
 
 args.output_path.write_text(mif_header + mif_data + mif_footer)

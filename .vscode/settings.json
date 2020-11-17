@@ -21,6 +21,7 @@
 	"vhdl.formatter.newline.else": "None",
 	"vhdl.formatter.insertFinalNewline": true,
 	// Modern VHDL
+	"editor.formatOnType": true,
 	"vhdl.suggestLibraryCase": "lower",
 	"vhdl.enableStutterComments": true,
 	"vhdl.enableStutterDelimiters": true,

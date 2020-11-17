@@ -1,24 +1,24 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
---
+
 use work.itc.all;
 use work.itc_lcd.all;
 
-entity lcd_image_test is
+entity lcd_image_test_bicolor is
 	port (
-		-- --sys
+		--sys
 		clk, rst_n : in std_logic;
 		-- lcd
 		lcd_sclk, lcd_mosi, lcd_ss_n, lcd_dc, lcd_bl, lcd_rst_n : out std_logic
 	);
-end lcd_image_test;
+end lcd_image_test_bicolor;
 
-architecture arch of lcd_image_test is
+architecture arch of lcd_image_test_bicolor is
 
 	signal wr_ena : std_logic;
 	signal pixel_addr : integer range 0 to lcd_pixel_cnt - 1;
-	signal pixel_data_i : std_logic_vector(23 downto 0);
+	signal pixel_data_i : std_logic_vector(0 downto 0);
 	signal pixel_data : lcd_pixel_t;
 
 begin
@@ -39,13 +39,13 @@ begin
 			pixel_data => pixel_data
 		);
 
-	image_inst : entity work.image(syn)
+	image_bicolor_inst : entity work.image_bicolor(syn)
 		port map(
 			address => std_logic_vector(to_unsigned(pixel_addr, 15)),
 			clock   => clk,
-			q       => pixel_data_i
+			q       => pixel_data_i -- {{ i => inner }}
 		);
-	pixel_data <= unsigned(pixel_data_i);
+	pixel_data <= x"000000" when pixel_data_i = "0" else x"ffffff";
 
 	process (clk, rst_n) begin
 		if rst_n = '0' then
