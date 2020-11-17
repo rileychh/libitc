@@ -16,7 +16,7 @@
 				"set -o pipefail;",
 				"rm libitc.qsf;",
 				"(",
-				"quartus_sh -t tools/assign.tcl &&",
+				"quartus_sh -t tools/assign_chenghsuan.tcl &&",
 				"quartus_sh -t tools/compile.tcl",
 				") | sed -e 's/^\\s*//g' -e '/^Info/d'"
 			],
@@ -33,7 +33,7 @@
 				"set -o pipefail;",
 				"rm libitc.qsf;",
 				"(",
-				"quartus_sh -t tools/assign.tcl &&",
+				"quartus_sh -t tools/assign_chenghsuan.tcl &&",
 				"quartus_sh -t tools/compile.tcl &&",
 				"quartus_pgm -c 'USB-Blaster [USB-0]' output_files/libitc.cdf",
 				") | sed -e 's/^\\s*//g' -e '/^Info/d'"
