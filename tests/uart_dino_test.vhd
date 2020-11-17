@@ -8,7 +8,7 @@ entity uart_dino_test is
 	port (
 		-- sys
 		clk, rst_n : in std_logic;
-		-- UART
+		-- uart
 		uart_rx : in std_logic;  -- receive pin
 		uart_tx : out std_logic; -- transmit pin
 		-- key
