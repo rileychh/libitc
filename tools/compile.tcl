@@ -53,7 +53,7 @@ if {$make_assignments} {
 
 	# source files
 	set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
-	set_global_assignment -name TOP_LEVEL_ENTITY uart_test
+	set_global_assignment -name TOP_LEVEL_ENTITY uart_dino_test
 
 	set_global_assignment -name VHDL_FILE tests/dht_test.vhd
 	set_global_assignment -name VHDL_FILE tests/dot_test.vhd
@@ -66,6 +66,7 @@ if {$make_assignments} {
 	set_global_assignment -name VHDL_FILE tests/tsl_test.vhd
 	set_global_assignment -name VHDL_FILE tests/tts_test.vhd
 	set_global_assignment -name VHDL_FILE tests/uart_test.vhd
+	set_global_assignment -name VHDL_FILE tests/uart_dino_test.vhd
 	set_global_assignment -name QIP_FILE tests/res/image.qip
 	set_global_assignment -name MIF_FILE tests/res/image.mif
 	set_global_assignment -name VHDL_FILE src/dht.vhd
