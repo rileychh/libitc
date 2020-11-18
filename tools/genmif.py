@@ -3,12 +3,11 @@
 from argparse import ArgumentParser, FileType
 from io import BytesIO
 from sys import stdin, stdout
+from typing import Union
 from PIL import Image
+from PIL.ImageColor import getcolor
 
 frame_size = (128, 160)
-mode = 'fill'  # fill or fit
-bg_color = (255, 255, 255)
-colored = True
 
 
 def fill(im: Image.Image, size: tuple[int, int]) -> Image.Image:
@@ -38,16 +37,12 @@ def fit(im: Image.Image, size: tuple[int, int], fill_color: tuple[int, int, int]
     return res
 
 
-def pack(pixel: tuple[int, int, int]) -> int:
-    r, g, b = pixel
-    return r << 16 | g << 8 | b
-
-
 parser = ArgumentParser()
 parser.add_argument('input_file', nargs='?', default='-')
 parser.add_argument('output_file', nargs='?',
                     type=FileType('w'), default=stdout)
-parser.add_argument('-m', '--mode')
+parser.add_argument('-f', '--fit', nargs='?', const='ffffff', default='')
+parser.add_argument('-b', '--bicolor', action='store_true', default=False)
 args = parser.parse_args()
 
 buffer = BytesIO()
@@ -57,31 +52,27 @@ else:
     buffer.write(open(args.input_file, 'rb').read())
 im = Image.open(buffer).convert('RGB')
 
-if mode == 'fill':
-    im = fill(im, frame_size)
-elif mode == 'fit':
-    im = fit(im, frame_size, bg_color)
-
-
-if colored:
-    mif_header = '''\
-    WIDTH=24;
-    DEPTH=20480;
-
-    ADDRESS_RADIX=UNS;
-    DATA_RADIX=HEX;
-
-    CONTENT BEGIN
-    '''
-
-    pixels = list(im.getdata())
-
-    mif_data = ''.join(
-        f'\t{i}: {"{:x}".format(pack(p))};\n' for i, p in enumerate(pixels))
-
+if args.fit:
+    im = fit(im, frame_size, getcolor(args.fit, "RGB"))
 else:
-    mif_header = '''\
-WIDTH=1;
+    im = fill(im, frame_size)
+
+if args.bicolor:
+    im = im.convert('1')
+
+pixels = list(im.getdata())
+
+
+def format_pixel(bicolor: bool, pixel: Union[tuple[int, int, int], int]) -> str:
+    if args.bicolor:
+        return '0' if pixel else '1'
+    else:
+        r, g, b = pixel
+        return '{:x}'.format(r << 16 | g << 8 | b)
+
+
+mif_header = f'''\
+WIDTH={'1' if args.bicolor else '24'};
 DEPTH=20480;
 
 ADDRESS_RADIX=UNS;
@@ -90,14 +81,11 @@ DATA_RADIX=HEX;
 CONTENT BEGIN
 '''
 
-    im = im.convert('1')
-    pixels = list(im.getdata())
-
-    mif_data = ''.join(
-        f'\t{i}: {"0" if p == 0 else "1"};\n' for i, p in enumerate(pixels))
-
 mif_footer = '''\
 END;
 '''
+
+mif_data = ''.join(
+    f'\t{i}: {format_pixel(args.bicolor, p)};\n' for i, p in enumerate(pixels))
 
 args.output_file.write(mif_header + mif_data + mif_footer)
