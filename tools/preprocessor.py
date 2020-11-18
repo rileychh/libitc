@@ -50,7 +50,7 @@ parser = ArgumentParser()
 parser.add_argument('input_file', type=FileType('r'))
 parser.add_argument('output_file', nargs='?',
                     type=FileType('w'), default=stdout)
-args = parser.parse_args(['src/sw.vhd', 'src/libitc.min.vhd'])
+args = parser.parse_args()
 
 vhd = args.input_file.readlines()
 
