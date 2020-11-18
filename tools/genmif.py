@@ -1,18 +1,17 @@
 #!/usr/bin/env python
 
-from argparse import ArgumentParser
-from pathlib import Path
-from typing import Tuple
+from argparse import ArgumentParser, FileType
+from io import BytesIO
+from sys import stdin, stdout
 from PIL import Image
 
 frame_size = (128, 160)
-mode = 'fit'
-# mode = 'fit'
+mode = 'fill'  # fill or fit
 bg_color = (255, 255, 255)
-colored = False
+colored = True
 
 
-def fill(im: Image.Image, size: Tuple[int, int]) -> Image.Image:
+def fill(im: Image.Image, size: tuple[int, int]) -> Image.Image:
     aspect = im.width / im.height
     new_aspect = size[0] / size[1]
 
@@ -30,7 +29,7 @@ def fill(im: Image.Image, size: Tuple[int, int]) -> Image.Image:
     return im.crop(new_box).resize(size)
 
 
-def fit(im: Image.Image, size: Tuple[int, int], fill_color: Tuple[int, int, int]) -> Image.Image:
+def fit(im: Image.Image, size: tuple[int, int], fill_color: tuple[int, int, int]) -> Image.Image:
     resized = im.copy()
     resized.thumbnail(size)
     res = Image.new('RGB', size, fill_color)
@@ -39,17 +38,24 @@ def fit(im: Image.Image, size: Tuple[int, int], fill_color: Tuple[int, int, int]
     return res
 
 
-def pack(pixel: Tuple[int, int, int]) -> int:
+def pack(pixel: tuple[int, int, int]) -> int:
     r, g, b = pixel
     return r << 16 | g << 8 | b
 
 
 parser = ArgumentParser()
-parser.add_argument('input_path', type=Path)
-parser.add_argument('output_path', type=Path)
+parser.add_argument('input_file', nargs='?', default='-')
+parser.add_argument('output_file', nargs='?',
+                    type=FileType('w'), default=stdout)
+parser.add_argument('-m', '--mode')
 args = parser.parse_args()
 
-im = Image.open(args.input_path).convert('RGB')
+buffer = BytesIO()
+if args.input_file == '-':
+    buffer.write(stdin.buffer.read())
+else:
+    buffer.write(open(args.input_file, 'rb').read())
+im = Image.open(buffer).convert('RGB')
 
 if mode == 'fill':
     im = fill(im, frame_size)
@@ -94,4 +100,4 @@ mif_footer = '''\
 END;
 '''
 
-args.output_path.write_text(mif_header + mif_data + mif_footer)
+args.output_file.write(mif_header + mif_data + mif_footer)
