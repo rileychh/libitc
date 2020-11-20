@@ -72,3 +72,17 @@ mot_inst : entity work.mot(arch)
 		dir     => dir,
 		speed   => speed
 	);
+
+bg_inst : entity work.bg(syn)
+	port map(
+		address => std_logic_vector(to_unsigned(bg_addr, 15)),
+		clock   => clk,
+		q       => bg_data_i
+	);
+
+icon_inst : entity work.icon(syn)
+	port map(
+		address => std_logic_vector(to_unsigned(icon_addr, 10)),
+		clock   => clk,
+		q       => icon_data_i
+	);

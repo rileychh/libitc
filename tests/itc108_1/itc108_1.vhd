@@ -48,17 +48,23 @@ architecture arch of itc108_1 is
 	signal key : i4_t;
 	signal brightness : integer range 0 to 100;
 	signal lcd_wr_ena : std_logic;
-	signal pixel_addr : integer range 0 to lcd_pixel_cnt - 1;
-	signal pixel_data : lcd_pixel_t;
+	signal pixel_addr : integer range 0 to l_px_cnt - 1;
+	signal pixel_data : l_px_t;
 	signal seg_data : string(1 to 8) := (others => ' ');
 	signal seg_dot : u8r_t;
 	signal temp : integer range 0 to 99;
 	signal dir : std_logic;
 	signal speed : i8_t;
+	signal bg_addr, icon_addr : integer range 0 to l_px_cnt - 1;
+	signal bg_data_i, icon_data_i : std_logic_vector(0 downto 0);
+	signal bg_data, icon_data : std_logic;
 
 begin
 
 	--!inc inst.vhd
+
+	bg_data <= bg_data_i(0);
+	icon_data <= icon_data_i(0);
 
 	process (clk, rst_n) begin
 		if rst_n = '0' then
@@ -173,6 +179,10 @@ begin
 					seg_dot <= "00110000";
 
 				when tsl =>
+					-- case pixel_addr is
+					-- 	when =>
+
+					-- end case;
 				when full =>
 			end case;
 		end if;

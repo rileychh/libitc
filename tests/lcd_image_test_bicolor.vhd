@@ -17,9 +17,9 @@ end lcd_image_test_bicolor;
 architecture arch of lcd_image_test_bicolor is
 
 	signal wr_ena : std_logic;
-	signal pixel_addr : integer range 0 to lcd_pixel_cnt - 1;
+	signal pixel_addr : integer range 0 to l_px_cnt - 1;
 	signal pixel_data_i : std_logic_vector(0 downto 0);
-	signal pixel_data : lcd_pixel_t;
+	signal pixel_data : l_px_t;
 
 begin
 
@@ -53,7 +53,7 @@ begin
 			pixel_addr <= 0;
 		elsif rising_edge(clk) then
 			if wr_ena = '0' then
-				if pixel_addr < lcd_pixel_cnt - 1 then
+				if pixel_addr < l_px_cnt - 1 then
 					pixel_addr <= pixel_addr + 1;
 					wr_ena <= '1';
 				else

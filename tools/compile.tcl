@@ -73,6 +73,10 @@ if {$make_assignments} {
 	set_global_assignment -name QIP_FILE tests/res/image_bicolor.qip
 	set_global_assignment -name MIF_FILE tests/res/image_bicolor.mif
 	set_global_assignment -name VHDL_FILE dist/itc108_1.pp.vhd
+	set_global_assignment -name QIP_FILE tests/itc108_1/res/bg.qip
+	set_global_assignment -name MIF_FILE tests/itc108_1/res/bg.mif
+	set_global_assignment -name QIP_FILE tests/itc108_1/res/icon.qip
+	set_global_assignment -name MIF_FILE tests/itc108_1/res/arrow_circle.mif
 	set_global_assignment -name VHDL_FILE src/dht.vhd
 	set_global_assignment -name VHDL_FILE src/dot.vhd
 	set_global_assignment -name VHDL_FILE src/key.vhd
@@ -84,7 +88,7 @@ if {$make_assignments} {
 	set_global_assignment -name VHDL_FILE src/tsl.vhd
 	set_global_assignment -name VHDL_FILE src/tts.vhd
 	set_global_assignment -name VHDL_FILE src/util/itc_pkg.vhd
-	set_global_assignment -name VHDL_FILE src/util/itc_lcd_pkg.vhd
+	set_global_assignment -name VHDL_FILE dist/itc_lcd_pkg.pp.vhd
 	set_global_assignment -name VHDL_FILE src/util/clk.vhd
 	set_global_assignment -name VHDL_FILE src/util/debounce.vhd
 	set_global_assignment -name VHDL_FILE src/util/edge.vhd

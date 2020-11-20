@@ -14,8 +14,8 @@ entity lcd is
 		-- user logic
 		brightness : in integer range 0 to 100;
 		wr_ena     : in std_logic;
-		pixel_addr : in integer range 0 to lcd_pixel_cnt - 1;
-		pixel_data : in lcd_pixel_t
+		pixel_addr : in integer range 0 to l_px_cnt - 1;
+		pixel_data : in l_px_t
 	);
 end lcd;
 
@@ -23,11 +23,11 @@ architecture arch of lcd is
 
 	signal clk_spi : std_logic;
 	signal spi_ena, spi_busy, spi_done : std_logic;
-	signal spi_width : integer range 0 to lcd_pixel_t'length;
-	signal spi_data : lcd_pixel_t;
-	signal buffer_addr : integer range 0 to lcd_pixel_cnt - 1;
-	signal buffer_data_i : std_logic_vector(23 downto 0);
-	signal buffer_data : lcd_pixel_t;
+	signal spi_width : integer range 0 to l_px_t'length;
+	signal spi_data : l_px_t;
+	signal buffer_addr : integer range 0 to l_px_cnt - 1;
+	signal buffer_data_i : std_logic_vector(l_px_t'range);
+	signal buffer_data : l_px_t;
 
 	type spi_state_t is (idle, send);
 	signal spi_state : spi_state_t;
@@ -64,7 +64,7 @@ begin
 		);
 
 	process (clk_spi, rst_n)
-		variable bit_cnt : integer range lcd_pixel_t'length - 1 downto 0;
+		variable bit_cnt : integer range l_px_t'length - 1 downto 0;
 	begin
 		if rst_n = '0' then
 			lcd_sclk <= '0';
@@ -140,7 +140,7 @@ begin
 				when wake => -- send SLPOUT command
 					lcd_dc <= '0';
 					spi_width <= 8;
-					spi_data(7 downto 0) <= lcd_slpout;
+					spi_data(7 downto 0) <= l_slpout;
 					spi_ena <= '1';
 
 					if spi_done = '1' then
@@ -156,12 +156,12 @@ begin
 					end if;
 
 				when init =>
-					lcd_dc <= lcd_init_dc(buffer_addr);
-					spi_data(7 downto 0) <= lcd_init(buffer_addr);
+					lcd_dc <= l_init_dc(buffer_addr);
+					spi_data(7 downto 0) <= l_init(buffer_addr);
 					spi_ena <= '1';
 
 					if spi_done = '1' then
-						if buffer_addr = lcd_init'high then
+						if buffer_addr = l_init'high then
 							buffer_addr <= 0;
 							lcd_state <= draw;
 						else

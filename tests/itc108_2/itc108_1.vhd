@@ -47,8 +47,8 @@ architecture arch of itc108_1 is
 	signal key : i4_t;
 	signal brightness : integer range 0 to 100;
 	signal lcd_wr_ena : std_logic;
-	signal pixel_addr : integer range 0 to lcd_pixel_cnt - 1;
-	signal pixel_data : lcd_pixel_t;
+	signal pixel_addr : integer range 0 to l_px_cnt - 1;
+	signal pixel_data : l_px_t;
 	signal seg_data : string(1 to 8) := (others => ' ');
 	signal seg_dot : u8r_t;
 	signal temp : integer range 0 to 99;

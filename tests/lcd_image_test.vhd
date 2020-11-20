@@ -17,9 +17,9 @@ end lcd_image_test;
 architecture arch of lcd_image_test is
 
 	signal wr_ena : std_logic;
-	signal pixel_addr : integer range 0 to lcd_pixel_cnt - 1;
+	signal pixel_addr : integer range 0 to l_px_cnt - 1;
 	signal pixel_data_i : std_logic_vector(23 downto 0);
-	signal pixel_data : lcd_pixel_t;
+	signal pixel_data : l_px_t;
 
 begin
 
@@ -52,7 +52,7 @@ begin
 			wr_ena <= '0';
 			pixel_addr <= 0;
 		elsif rising_edge(clk) then
-			if pixel_addr < lcd_pixel_cnt - 1 then
+			if pixel_addr < l_px_cnt - 1 then
 				if wr_ena = '0' then
 					wr_ena <= '1';
 				else
