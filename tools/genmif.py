@@ -5,7 +5,7 @@ from io import BytesIO
 from sys import stdin, stdout
 from typing import Union
 from PIL import Image
-from PIL.ImageColor import getcolor
+from PIL.ImageColor import getrgb
 
 frame_size = (128, 160)
 
@@ -55,7 +55,7 @@ else:
 im = Image.open(buffer).convert('RGB')
 
 if args.fit:
-    im = fit(im, frame_size, getcolor(args.fit, "RGB"))
+    im = fit(im, frame_size, getrgb(args.fit))
 elif not args.icon:
     im = fill(im, frame_size)
 
