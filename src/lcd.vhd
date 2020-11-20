@@ -12,7 +12,7 @@ entity lcd is
 		-- lcd
 		lcd_sclk, lcd_mosi, lcd_ss_n, lcd_dc, lcd_bl, lcd_rst_n : out std_logic;
 		-- user logic
-		brightness : in u8_t;
+		brightness : in integer range 0 to 100;
 		wr_ena     : in std_logic;
 		pixel_addr : in integer range 0 to lcd_pixel_cnt - 1;
 		pixel_data : in lcd_pixel_t
@@ -196,7 +196,7 @@ begin
 		port map(
 			clk     => clk,
 			rst_n   => rst_n,
-			duty    => brightness,
+			duty    => to_unsigned(brightness * 100 / 256, 8),
 			pwm_out => lcd_bl
 		);
 

@@ -33,7 +33,7 @@ begin
 			lcd_dc     => lcd_dc,
 			lcd_bl     => lcd_bl,
 			lcd_rst_n  => lcd_rst_n,
-			brightness => x"ff",
+			brightness => 100,
 			wr_ena     => wr_ena,
 			pixel_addr => pixel_addr,
 			pixel_data => pixel_data
