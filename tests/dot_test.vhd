@@ -11,7 +11,7 @@ entity dot_test is
 		-- seg
 		seg_led, seg_com : out u8r_t;
 		-- dot
-		dot_r, dot_g, dot_s : out u8r_t;
+		dot_red, dot_green, dot_com : out u8r_t;
 		-- sw 
 		sw : in u8r_t
 	);
@@ -28,13 +28,13 @@ begin
 
 	dot_inst : entity work.dot(arch)
 		port map(
-			clk    => clk,
-			rst_n  => rst_n,
-			dot_r  => dot_r,
-			dot_g  => dot_g,
-			dot_s  => dot_s,
-			data_r => dot_data_r,
-			data_g => dot_data_g
+			clk       => clk,
+			rst_n     => rst_n,
+			dot_red   => dot_red,
+			dot_green => dot_green,
+			dot_com   => dot_com,
+			data_r    => dot_data_r,
+			data_g    => dot_data_g
 		);
 
 	seg_inst : entity work.seg(arch)
