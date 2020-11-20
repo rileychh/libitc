@@ -108,13 +108,13 @@ begin
 				when send =>
 					if i2c_done = '1' then -- interface is ready for next byte
 						if txt_cnt = 0 then
-							i2c_in <= x"00"; -- set MO[0..2] = 000
+							i2c_in <= x"00"; -- set MO[2..0] = 000
 						elsif txt_cnt >= 1 and txt_cnt <= txt_len then
 							i2c_in <= txt(txt_cnt - 1);
 						elsif txt_cnt = txt_len + 1 then
 							i2c_in <= tts_set_mo;
 						else
-							i2c_in <= x"04"; -- set MO[0..2] = 100
+							i2c_in <= x"01"; -- set MO[2..0] = 001
 						end if;
 
 						if txt_cnt = txt_len + 2 then

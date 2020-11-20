@@ -65,8 +65,7 @@ architecture arch of tts_test is
 		x"b0", x"da"
 	);
 
-	constant datasheet_example : u8_arr_t(0 to 60) := (
-		x"8a", x"00", -- mo[0..2] = "000"
+	constant datasheet_example : u8_arr_t(0 to 58) := (
 		x"b5", x"be", x"ad", x"b5", x"ac", x"ec", x"a7", x"de", x"31", x"37", x"38", x"42", x"b4", x"fa", x"b8", x"d5", -- 翔音科技178b測試
 		x"86", x"e0", -- volume = 0xe0
 		x"83", x"14", -- speed = 120%
@@ -148,8 +147,8 @@ begin
 							len <= 2;
 
 						when 3 =>
-							txt(0 to 60) <= datasheet_example;
-							len <= 61;
+							txt(0 to 58) <= datasheet_example;
+							len <= 59;
 
 						when others => 
 							ena <= '0'; -- cancel enable

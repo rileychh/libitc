@@ -85,7 +85,7 @@ if {$make_assignments} {
 	set_location_assignment PIN_44 -to sw[6]
 	set_location_assignment PIN_41 -to sw[7]
 
-	# SCL1, SDA1, MO{0..2}, RES
+	# SCL1, SDA1, MO{2..0}, RES
 	set_location_assignment PIN_144 -to tts_scl
 	set_location_assignment PIN_143 -to tts_sda
 	set_location_assignment PIN_142 -to tts_mo[2]
