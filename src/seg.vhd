@@ -22,7 +22,7 @@ architecture arch of seg is
 	type lut_t is array(0 to 2 ** 7 - 1) of u8r_t;
 	constant lut : lut_t := (
 		-- HACK add additional characters between 0 to 31
-		x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00",
+		x"c6", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00",
 		x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00",
 		-- ASCII printable characters (SPC to DEL)
 		x"00", x"61", x"44", x"7e", x"b6", x"4b", x"62", x"04", x"94", x"d0", x"84", x"0e", x"08", x"02", x"01", x"4a",
