@@ -67,7 +67,7 @@ pixels = list(im.getdata())
 
 def format_pixel(pixel: Union[tuple[int, int, int], int]) -> str:
     if args.bicolor:
-        return '0' if pixel else '1'
+        return '1' if pixel else '0'
     else:
         r, g, b = pixel
         return '{:x}'.format(r << 16 | g << 8 | b)
