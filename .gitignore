@@ -4,6 +4,7 @@ output_files/
 simulation/
 tools/venv/
 docs/ref
+dist/
 *.qsf
 *.qws
 *.alc
