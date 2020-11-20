@@ -15,6 +15,19 @@ package itc_lcd is
 	type lcd_pixel_arr_t is array (integer range <>) of lcd_pixel_t;
 
 	--------------------------------------------------------------------------------
+	-- color constants
+	--------------------------------------------------------------------------------
+
+	constant black : lcd_pixel_t:= x"000000";
+	constant blue : lcd_pixel_t := x"0000ff";
+	constant red : lcd_pixel_t := x"ff0000";
+	constant magenta : lcd_pixel_t := x"ff00ff";
+	constant green : lcd_pixel_t := x"00ff00";
+	constant cyan : lcd_pixel_t := x"00ffff";
+	constant yellow : lcd_pixel_t := x"ffff00";
+	constant white : lcd_pixel_t := x"ffffff";
+
+	--------------------------------------------------------------------------------
 	-- command constants
 	-- only the used commands are listed here
 	--------------------------------------------------------------------------------

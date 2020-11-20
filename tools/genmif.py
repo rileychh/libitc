@@ -32,8 +32,8 @@ def fit(im: Image.Image, size: tuple[int, int], fill_color: tuple[int, int, int]
     resized = im.copy()
     resized.thumbnail(size)
     res = Image.new('RGB', size, fill_color)
-    res.paste(resized, (int((size[0] - resized.width) / 2),
-                        int((size[1] - resized.height) / 2)))
+    res.paste(resized, ((size[0] - resized.width) //
+                        2, (size[1] - resized.height) // 2))
     return res
 
 

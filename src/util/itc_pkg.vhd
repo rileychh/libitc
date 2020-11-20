@@ -33,6 +33,12 @@ package itc is
 	subtype i8_t is integer range 0 to 2 ** 8 - 1;
 	type i8_arr_t is array (integer range <>) of i8_t;
 
+	subtype i16_t is integer range 0 to 2 ** 16 - 1;
+	type i16_arr_t is array (integer range <>) of i16_t;
+
+	subtype i32_t is integer range 0 to integer'high;
+	type i32_arr_t is array (integer range <>) of i32_t;
+
 	--------------------------------------------------------------------------------
 	-- system constants
 	--------------------------------------------------------------------------------
@@ -78,6 +84,12 @@ package itc is
 		x"f7", x"f8", x"f8", x"f9", x"f9", x"fa", x"fa", x"fb", 
 		x"fb", x"fc", x"fc", x"fd", x"fd", x"fe", x"fe", x"ff"
 	);
+
+	--------------------------------------------------------------------------------
+	-- seg glyph constants
+	--------------------------------------------------------------------------------
+
+	constant seg_deg : character := character'val(0);
 
 	--------------------------------------------------------------------------------
 	-- tts command constants
