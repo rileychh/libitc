@@ -165,6 +165,7 @@ package itc is
 	-- logic/vector: std_logic/vector to repeat
 	-- num: number of times to repeat
 	function repeat(logic : std_logic; num : integer) return std_logic_vector;
+	function repeat(logic : std_logic; num : integer) return unsigned;
 	function repeat(vector : std_logic_vector; num : integer) return std_logic_vector;
 	function repeat(vector : unsigned; num : integer) return unsigned;
 
@@ -216,6 +217,16 @@ package body itc is
 
 	function repeat(logic : std_logic; num : integer) return std_logic_vector is
 		variable result : std_logic_vector(0 to num - 1);
+	begin
+		for i in result'range loop
+			result(i) := logic;
+		end loop;
+
+		return result;
+	end function;
+
+	function repeat(logic : std_logic; num : integer) return unsigned is
+		variable result : unsigned(0 to num - 1);
 	begin
 		for i in result'range loop
 			result(i) := logic;
