@@ -64,8 +64,8 @@ begin
 		end if;
 	end process;
 
-	seg_com <= ("01111111" ror digit) xor unsigned(repeat(common_anode, 8)); -- rotates '0' because common cathode
+	seg_com <= ("01111111" ror digit) xor repeat(common_anode, 8); -- rotates '0' because common cathode
 	-- get the digit, then look up from table, then or the dot segment (both LUT and dot port can control the dot segment)
-	seg_led <= (lut(character'pos(data(digit + 1))) or (0 to 6 => '0', 7 => dot(digit))) xor unsigned(repeat(common_anode, 8));
+	seg_led <= (lut(character'pos(data(digit + 1))) or (0 to 6 => '0', 7 => dot(digit))) xor repeat(common_anode, 8);
 
 end arch;

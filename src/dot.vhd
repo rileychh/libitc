@@ -47,8 +47,8 @@ begin
 		end if;
 	end process;
 
-	dot_com <= ("01111111" ror row) xor unsigned(repeat(common_anode, 8)); -- use xor to invert the output
-	dot_red <= data_r(row) xor unsigned(repeat(common_anode, 8));
-	dot_green <= data_g(row) xor unsigned(repeat(common_anode, 8));
+	dot_com <= ("01111111" ror row) xor repeat(common_anode, 8); -- use xor to invert the output
+	dot_red <= data_r(row) xor repeat(common_anode, 8);
+	dot_green <= data_g(row) xor repeat(common_anode, 8);
 
 end arch;
