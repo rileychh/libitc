@@ -14,8 +14,8 @@ entity lcd is
 		-- user logic
 		brightness : in integer range 0 to 100;
 		wr_ena     : in std_logic;
-		pixel_addr : in integer range 0 to l_px_cnt - 1;
-		pixel_data : in l_px_t
+		addr       : in l_addr_t;
+		data       : in l_px_t
 	);
 end lcd;
 
@@ -42,8 +42,8 @@ begin
 		port map(
 			clock     => clk,
 			wren      => wr_ena,
-			wraddress => std_logic_vector(to_unsigned(pixel_addr, 15)),
-			data      => std_logic_vector(pixel_data),
+			wraddress => std_logic_vector(to_unsigned(addr, 15)),
+			data      => std_logic_vector(data),
 			rdaddress => std_logic_vector(to_unsigned(buffer_addr, 15)),
 			q         => buffer_data_i
 		);
@@ -196,7 +196,7 @@ begin
 		port map(
 			clk     => clk,
 			rst_n   => rst_n,
-			duty    => to_unsigned(brightness * 100 / 256, 8),
+			duty    => to_unsigned(brightness * 256 / 100, 8),
 			pwm_out => lcd_bl
 		);
 

@@ -17,9 +17,9 @@ end lcd_image_test;
 architecture arch of lcd_image_test is
 
 	signal wr_ena : std_logic;
-	signal pixel_addr : integer range 0 to l_px_cnt - 1;
-	signal pixel_data_i : std_logic_vector(23 downto 0);
-	signal pixel_data : l_px_t;
+	signal l_addr : l_addr_t;
+	signal l_addr_i : std_logic_vector(23 downto 0);
+	signal l_data : l_px_t;
 
 begin
 
@@ -35,29 +35,29 @@ begin
 			lcd_rst_n  => lcd_rst_n,
 			brightness => 100,
 			wr_ena     => wr_ena,
-			pixel_addr => pixel_addr,
-			pixel_data => pixel_data
+			addr       => l_addr,
+			data       => l_data
 		);
 
 	image_inst : entity work.image(syn)
 		port map(
-			address => std_logic_vector(to_unsigned(pixel_addr, 15)),
+			address => std_logic_vector(to_unsigned(l_addr, 15)),
 			clock   => clk,
-			q       => pixel_data_i
+			q       => l_addr_i
 		);
-	pixel_data <= unsigned(pixel_data_i);
+	l_data <= unsigned(l_addr_i);
 
 	process (clk, rst_n) begin
 		if rst_n = '0' then
 			wr_ena <= '0';
-			pixel_addr <= 0;
+			l_addr <= 0;
 		elsif rising_edge(clk) then
-			if pixel_addr < l_px_cnt - 1 then
+			if l_addr < l_px_cnt - 1 then
 				if wr_ena = '0' then
 					wr_ena <= '1';
 				else
 					wr_ena <= '0';
-					pixel_addr <= pixel_addr + 1;
+					l_addr <= l_addr + 1;
 				end if;
 			else
 				wr_ena <= '0';

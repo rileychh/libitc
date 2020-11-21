@@ -1,4 +1,5 @@
 --!pp on
+--!min cte
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -36,6 +37,35 @@ package itc_lcd is
 	constant cyan : l_px_t := x"00ffff";
 	constant yellow : l_px_t := x"ffff00";
 	constant white : l_px_t := x"ffffff";
+
+	--------------------------------------------------------------------------------
+	-- functions
+	--------------------------------------------------------------------------------
+
+	-- to_coord, to_addr: returns coordinate/address of address/coordinate
+	-- addr/coord: address/coordinate of the pixel
+	-- p_width: width of the picture. If not given, l_width is used
+	function to_coord(addr : l_addr_t; p_width : integer) return l_coord_t;
+	function to_coord(addr : l_addr_t) return l_coord_t;
+	function to_addr(coord: l_coord_t; p_width : integer) return l_addr_t;
+	function to_addr(coord: l_coord_t) return l_addr_t;
+
+	-- to_addr, to_data: returns unpacked address/data
+	-- pack: packed value to unpack
+	function to_addr(pack : l_pack_t) return l_addr_t;
+	function to_data(pack: l_pack_t) return l_px_t;
+
+	-- l_rotate: returns the rotated pixel address of a picture
+	-- addr: the original address
+	-- angle: degrees clockwise to rotate. can be +/- 0, 90, 180, 270
+	-- p_width, p_height: the original width and height of picture
+	function l_rotate(addr, angle, p_width, p_height : integer) return l_addr_t; 
+
+	-- l_paste
+	function l_paste(p_coord : l_coord_t;
+					 p_width, p_height : integer;
+					 l_addr : l_addr_t;
+					 l_data, p_data : l_px_t) return l_pack_t;
 
 	--------------------------------------------------------------------------------
 	-- command constants
@@ -83,34 +113,6 @@ package itc_lcd is
 		l_ramwr
 	);
 	constant l_init_dc : std_logic_vector(0 to 79) := "01110111011111101110101101101101011111111111111110111111111111111101011110111100";
-
-	--------------------------------------------------------------------------------
-	-- functions
-	--------------------------------------------------------------------------------
-
-	-- to_coord, to_addr: returns coordinate/address of address/coordinate
-	-- addr/coord: address/coordinate of the pixel
-	-- p_width: width of the picture. If not given, l_width is used
-	function to_coord(addr : l_addr_t; p_width : integer) return l_coord_t;
-	function to_coord(addr : l_addr_t) return l_coord_t;
-	function to_addr(coord: l_coord_t; p_width : integer) return l_addr_t;
-	function to_addr(coord: l_coord_t) return l_addr_t;
-
-	-- to_addr, to_data: returns unpacked address/data
-	-- pack: pack to unpack
-	function to_addr(pack : l_pack_t) return l_addr_t;
-	function to_data(pack: l_pack_t) return l_px_t;
-
-	-- l_rotate: returns the rotated pixel address of a picture
-	-- addr: the original address
-	-- angle: degrees clockwise to rotate. can be +/- 0, 90, 180, 270
-	-- p_width, p_height: the original width and height of picture
-	function l_rotate(addr, angle, p_width, p_height : integer) return integer; 
-
-	-- l_paste
-	function l_paste(c_start, c_end : l_coord_t;
-					 l_addr : l_addr_t;
-					 l_data, p_data : l_px_t) return l_pack_t;
 
 	--------------------------------------------------------------------------------
 	-- font
@@ -246,7 +248,7 @@ package body itc_lcd is
 		return pack(l_px_t'range);
 	end function;
 
-	function l_rotate(addr, angle, p_width, p_height : integer) return integer is 
+	function l_rotate(addr : l_addr_t; angle, p_width, p_height : integer) return l_addr_t is 
 		constant row : integer := to_coord(addr, p_width)(0);
 		constant col : integer := to_coord(addr, p_width)(1);
 	begin
@@ -262,16 +264,18 @@ package body itc_lcd is
 		end case; 
 	end function;
 
-	function l_paste(c_start, c_end : l_coord_t;
+	function l_paste(p_coord : l_coord_t;
+					 p_width, p_height : integer;
 					 l_addr : l_addr_t;
 					 l_data, p_data : l_px_t) return l_pack_t is
-		constant c_curr : l_coord_t := to_coord(l_addr);
+		constant l_coord : l_coord_t := to_coord(l_addr);
+		constant p_coord_end : l_coord_t := (p_coord(0) + p_height, p_coord(1) + p_width);
 	begin
-		if c_start(0) < c_curr(0) and c_curr(0) > c_end(0) and  -- check row
-		   c_start(1) < c_curr(1) and c_curr(1) > c_end(1) then -- check column
-			return to_unsigned(to_addr(l_coord_t'(c_curr(0) - c_start(0), c_curr(1) - c_start(1))), l_addr_width) & p_data;
+		if p_coord(0) < l_coord(0) and l_coord(0) < p_coord_end(0) and  -- check row
+		   p_coord(1) < l_coord(1) and l_coord(1) < p_coord_end(1) then -- check column
+			return to_unsigned(to_addr(l_coord_t'(l_coord(0) - p_coord(0), l_coord(1) - p_coord(1))), l_addr_width) & p_data;
 		else
-			return to_unsigned(to_addr(l_coord_t'(0, 0)), l_addr_width) & l_data;
+			return to_unsigned(0, l_addr_width) & l_data;
 		end if;
 	end function;
 end package body;

@@ -38,8 +38,8 @@ lcd_inst : entity work.lcd(arch)
 		lcd_rst_n  => lcd_rst_n,
 		brightness => brightness,
 		wr_ena     => lcd_wr_ena,
-		pixel_addr => pixel_addr,
-		pixel_data => pixel_data
+		addr       => pixel_addr,
+		data       => pixel_data
 	);
 
 seg_inst : entity work.seg(arch)

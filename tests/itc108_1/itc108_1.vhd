@@ -47,9 +47,9 @@ architecture arch of itc108_1 is
 	signal pressed, key_on_press : std_logic;
 	signal key : i4_t;
 	signal brightness : integer range 0 to 100;
-	signal lcd_wr_ena : std_logic;
-	signal pixel_addr : integer range 0 to l_px_cnt - 1;
-	signal pixel_data : l_px_t;
+	signal l_wr_ena : std_logic;
+	signal l_addr : l_addr_t;
+	signal l_data : l_px_t;
 	signal seg_data : string(1 to 8) := (others => ' ');
 	signal seg_dot : u8r_t;
 	signal temp : integer range 0 to 99;
@@ -57,14 +57,14 @@ architecture arch of itc108_1 is
 	signal speed : i8_t;
 	signal bg_addr, icon_addr : integer range 0 to l_px_cnt - 1;
 	signal bg_data_i, icon_data_i : std_logic_vector(0 downto 0);
-	signal bg_data, icon_data : std_logic;
+	signal bg_data, icon_data : l_px_t;
 
 begin
 
 	--!inc inst.vhd
 
-	bg_data <= bg_data_i(0);
-	icon_data <= icon_data_i(0);
+	bg_data <= white when bg_data_i(0) = '1' else black;
+	icon_data <= white when icon_data_i(0) = '1' else blue;
 
 	process (clk, rst_n) begin
 		if rst_n = '0' then
@@ -116,39 +116,39 @@ begin
 					case msec / 1000 is
 						when 0 =>
 							timer_ena <= '1';
-							if pixel_addr < pixel_addr'high then
-								lcd_wr_ena <= '1';
-								pixel_data <= white;
-								pixel_addr <= pixel_addr + 1;
+							if l_addr < l_addr'high then
+								l_wr_ena <= '1';
+								l_data <= white;
+								l_addr <= l_addr + 1;
 							end if;
 							brightness <= 100;
 						when 1 to 4 => -- col0-49 blue, 50-99 green, 100-159 red, bl 20%
 							timer_ena <= '1';
-							if pixel_addr < pixel_addr'high then
-								lcd_wr_ena <= '1';
-								case pixel_addr / 128 is
+							if l_addr < l_addr'high then
+								l_wr_ena <= '1';
+								case to_coord(l_addr)(1) is
 									when 0 to 49 =>
-										pixel_data <= blue;
+										l_data <= blue;
 									when 50 to 99 =>
-										pixel_data <= green;
+										l_data <= green;
 									when others =>
-										pixel_data <= red;
+										l_data <= red;
 								end case;
-								pixel_addr <= pixel_addr + 1;
+								l_addr <= l_addr + 1;
 							end if;
 							--!def second (msec / 1000)
 							brightness <= 20 + 20 * (second - 1);
 						when 5 to 9 =>
 							brightness <= 100 - 20 * (second - 5);
 						when 10 =>
-							pixel_addr <= 0;
+							l_addr <= 0;
 							timer_load <= 0;
 							timer_ena <= '0'; -- loop back to 0
 						when others => null;
 					end case;
 
 					if msec mod 1000 = 1 then -- on every second (can't be .0sec)
-						pixel_addr <= 0; -- reset pixel address for next frame
+						l_addr <= 0; -- reset pixel address for next frame
 					end if;
 
 				when dht =>
@@ -179,10 +179,18 @@ begin
 					seg_dot <= "00110000";
 
 				when tsl =>
-					-- case pixel_addr is
-					-- 	when =>
+					l_wr_ena <= '1';
+					brightness <= 100;
+					if l_addr < l_addr'high then
+						l_addr <= l_addr + 1;
+					else
+						l_addr <= 0;
+					end if;
+					bg_addr <= l_addr;
 
-					-- end case;
+					--!def lp_icon l_paste((20, 20), 32, 32, l_addr, bg_data, icon_data)
+					l_data <= to_data(lp_icon);
+					icon_addr <= to_addr(lp_icon);
 				when full =>
 			end case;
 		end if;
