@@ -5,6 +5,9 @@ use ieee.numeric_std.all;
 use work.itc.all;
 
 entity dot is
+	generic (
+		common_anode : std_logic := '0'
+	);
 	port (
 		-- system
 		clk, rst_n : in std_logic;
@@ -44,8 +47,8 @@ begin
 		end if;
 	end process;
 
-	dot_com <= "01111111" ror row; -- rotates '0' because common cathode
-	dot_red <= data_r(row);
-	dot_green <= data_g(row);
+	dot_com <= ("01111111" ror row) xor unsigned(repeat(common_anode, 8)); -- use xor to invert the output
+	dot_red <= data_r(row) xor unsigned(repeat(common_anode, 8));
+	dot_green <= data_g(row) xor unsigned(repeat(common_anode, 8));
 
 end arch;
