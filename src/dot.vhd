@@ -44,8 +44,8 @@ begin
 		end if;
 	end process;
 
-	dot_com <= "01111111" ror row; -- rotates '0' because common cathode
-	dot_red <= data_r(row);
-	dot_green <= data_g(row);
+	dot_com <= not "01111111" ror row; -- rotates '0' because common cathode
+	dot_red <= not data_r(row);
+	dot_green <= not data_g(row);
 
 end arch;

@@ -53,30 +53,42 @@ if {$make_assignments} {
 
 	# source files
 	set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
-	set_global_assignment -name TOP_LEVEL_ENTITY itc108_1
+	set_global_assignment -name TOP_LEVEL_ENTITY dot_test
 
 	set_global_assignment -name VHDL_FILE tests/dht_test.vhd
 	set_global_assignment -name VHDL_FILE tests/dot_test.vhd
 	set_global_assignment -name VHDL_FILE tests/key_test.vhd
-	set_global_assignment -name VHDL_FILE tests/lcd_colors_test.vhd
-	set_global_assignment -name VHDL_FILE tests/lcd_image_test.vhd
-	set_global_assignment -name VHDL_FILE tests/lcd_image_test_bicolor.vhd
-	set_global_assignment -name VHDL_FILE tests/mot_test.vhd
-	set_global_assignment -name VHDL_FILE tests/rgb_test.vhd
-	set_global_assignment -name VHDL_FILE tests/seg_test.vhd
-	set_global_assignment -name VHDL_FILE tests/tsl_test.vhd
-	set_global_assignment -name VHDL_FILE tests/tts_test.vhd
-	set_global_assignment -name VHDL_FILE tests/uart_dino_test.vhd
-	set_global_assignment -name VHDL_FILE tests/uart_echo_test.vhd
-	set_global_assignment -name QIP_FILE tests/res/image.qip
-	set_global_assignment -name MIF_FILE tests/res/image.mif
-	set_global_assignment -name QIP_FILE tests/res/image_bicolor.qip
-	set_global_assignment -name MIF_FILE tests/res/image_bicolor.mif
-	set_global_assignment -name VHDL_FILE dist/itc108_1.pp.vhd
-	set_global_assignment -name QIP_FILE tests/itc108_1/res/bg.qip
-	set_global_assignment -name MIF_FILE tests/itc108_1/res/bg.mif
-	set_global_assignment -name QIP_FILE tests/itc108_1/res/icon.qip
-	set_global_assignment -name MIF_FILE tests/itc108_1/res/arrow_circle.mif
+	
+	# <start> lcd unitest target files
+	# set_global_assignment -name VHDL_FILE tests/lcd_colors_test.vhd
+	# set_global_assignment -name VHDL_FILE tests/lcd_image_test.vhd
+	# set_global_assignment -name VHDL_FILE tests/lcd_image_test_bicolor.vhd
+	# <end> lcd unitest target files
+
+	# set_global_assignment -name VHDL_FILE tests/mot_test.vhd
+	# set_global_assignment -name VHDL_FILE tests/rgb_test.vhd
+	# set_global_assignment -name VHDL_FILE tests/seg_test.vhd
+	# set_global_assignment -name VHDL_FILE tests/tsl_test.vhd
+	# set_global_assignment -name VHDL_FILE tests/tts_test.vhd
+	# set_global_assignment -name VHDL_FILE tests/uart_dino_test.vhd
+	# set_global_assignment -name VHDL_FILE tests/uart_echo_test.vhd
+	# set_global_assignment -name QIP_FILE tests/res/image.qip
+	# set_global_assignment -name MIF_FILE tests/res/image.mif
+	# set_global_assignment -name QIP_FILE tests/res/image_bicolor.qip
+	# set_global_assignment -name MIF_FILE tests/res/image_bicolor.mif
+
+	# <start>108th Section1 target files
+	# set_global_assignment -name VHDL_FILE dist/itc108_1.pp.vhd
+	# set_global_assignment -name QIP_FILE tests/itc108_1/res/bg.qip
+	# set_global_assignment -name MIF_FILE tests/itc108_1/res/bg.mif
+	# set_global_assignment -name QIP_FILE tests/itc108_1/res/icon.qip
+	# set_global_assignment -name MIF_FILE tests/itc108_1/res/arrow_circle.mif
+	# <end>108th Section1 target files
+
+	# <start>108th Section2 target files
+	# set_global_assignment -name VHDL_FILE dist/itc108_2.pp.vhd
+	# <end>108th Section2 target filess
+
 	set_global_assignment -name VHDL_FILE src/dht.vhd
 	set_global_assignment -name VHDL_FILE src/dot.vhd
 	set_global_assignment -name VHDL_FILE src/key.vhd
