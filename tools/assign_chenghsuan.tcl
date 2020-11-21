@@ -109,7 +109,7 @@ if {$make_assignments} {
 	set_location_assignment PIN_146 -to dht_data
 
 	# DOT_G{4,3,2,1,5,6,7,8} (G stands for red)
-	set_location_assignment PIN_111 -to dot_red[0]
+	set_location_assignment PIN_107 -to dot_red[0]
 	set_location_assignment PIN_95 -to dot_red[1]
 	set_location_assignment PIN_83 -to dot_red[2]
 	set_location_assignment PIN_73 -to dot_red[3]
@@ -119,7 +119,7 @@ if {$make_assignments} {
 	set_location_assignment PIN_106 -to dot_red[7]
 
 	# DOT_R{4,3,2,1,5,6,7,8} (R stands for green)
-	set_location_assignment PIN_113  -to dot_green[0]
+	set_location_assignment PIN_111  -to dot_green[0]
 	set_location_assignment PIN_99 -to dot_green[1]
 	set_location_assignment PIN_87 -to dot_green[2]
 	set_location_assignment PIN_78 -to dot_green[3]

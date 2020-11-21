@@ -43,7 +43,7 @@ begin
 			rst_n   => rst_n,
 			seg_led => seg_led,
 			seg_com => seg_com,
-			data    => 'X' & to_string(x_pos, x_pos'high, 10, 3) & 'Y' & to_string(y_pos, y_pos'high, 10, 3),
+			data    => "rOW" & to_string(y_pos, y_pos'high, 10, 1) & "COL" & to_string(x_pos, x_pos'high, 10, 1),
 			dot => (others => '0')
 		);
 

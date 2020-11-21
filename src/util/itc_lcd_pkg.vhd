@@ -246,16 +246,19 @@ package body itc_lcd is
 		return pack(l_px_t'range);
 	end function;
 
-	function l_rotate(addr, angle, p_width, p_height : integer) return integer is begin
+	function l_rotate(addr, angle, p_width, p_height : integer) return integer is 
+		constant row : integer := to_coord(addr, p_width)(0);
+		constant col : integer := to_coord(addr, p_width)(1);
+	begin
 		case angle is
 			when 0 =>
-				return addr; -- or l_row(addr, p_width) * p_width + l_col(addr, p_width)
+				return addr; -- or row * p_width + col
 			when 90 | -270 =>
-				return l_col(addr, p_width) * p_height + (p_height - l_row(addr, p_width) - 1);
+				return col * p_height + (p_height - row - 1);
 			when 180 | -180 =>
 				return p_width * p_height - addr - 1; -- reverse
 			when 270 | -90 =>
-				return (p_width - l_col(addr, p_width) - 1) * p_height + l_row(addr, p_width);
+				return (p_width - col - 1) * p_height + row;
 		end case; 
 	end function;
 
