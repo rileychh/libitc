@@ -132,7 +132,7 @@ begin
 		elsif rising_edge(clk) then
 			case tx_state is
 				when idle => -- idle state
-					if (tx_ena = '1') then -- new transaction latched in
+					if tx_ena = '1' then -- new transaction latched in
 						tx_buffer(9 downto 0) <= tx_data & '0' & '1'; -- latch in data for transmission and start/stop bits
 						tx_busy <= '1'; -- assert transmit busy flag
 						tx_count := 0; -- clear transmit bit count

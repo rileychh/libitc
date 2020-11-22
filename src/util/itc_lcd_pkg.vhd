@@ -282,7 +282,7 @@ package body itc_lcd is
 		constant row : integer := to_coord(addr, p_width)(0);
 		constant col : integer := to_coord(addr, p_width)(1);
 	begin
-		case angle is
+		case angle mod 4 is
 			when 0 =>
 				return addr; -- or row * p_width + col
 			when 1 =>

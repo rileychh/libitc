@@ -19,7 +19,7 @@ end tsl_test;
 
 architecture arch of tsl_test is
 
-	signal tsl_lux : integer range 0 to 40000;
+	signal tsl_lux : i16_t;
 
 begin
 

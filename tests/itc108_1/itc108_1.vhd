@@ -20,6 +20,8 @@ entity itc108_1 is
 		key_col : out u4r_t;
 		-- dht
 		dht_data : inout std_logic;
+		-- tsl
+		tsl_scl, tsl_sda : inout std_logic;
 		-- lcd
 		lcd_sclk, lcd_mosi, lcd_ss_n, lcd_dc, lcd_bl, lcd_rst_n : out std_logic;
 		-- seg
@@ -40,6 +42,8 @@ architecture arch of itc108_1 is
 
 	signal speed_level : integer range 1 to 3;
 	signal prev_temp : integer range 0 to 99;
+	signal icon_color : l_px_t;
+	signal icon_angle : integer range 0 to 3;
 
 	signal timer_ena : std_logic;
 	signal timer_load, msec : i32_t;
@@ -57,6 +61,7 @@ architecture arch of itc108_1 is
 	signal bg_addr, icon_addr : integer range 0 to l_px_cnt - 1;
 	signal bg_data_i, icon_data_i : std_logic_vector(0 downto 0);
 	signal bg_data, icon_data : l_px_t;
+	signal lux : i16_t;
 
 begin
 
@@ -180,8 +185,26 @@ begin
 					seg_dot <= "00110000";
 
 				when tsl =>
-					l_wr_ena <= '1';
+					if msec mod 2000 = 1 then
+						if lux > 15 then
+							dir <= '1';
+							icon_color <= black;
+						else
+							dir <= '0';
+							icon_color <= blue;
+						end if;
+					end if;
+
+					if msec mod 500 = 1 then
+						if dir <= '1' then
+							icon_angle <= icon_angle + 1;
+						else
+							icon_angle <= icon_angle - 1;
+						end if;
+					end if;
+
 					brightness <= 100;
+					l_wr_ena <= '1';
 					if l_addr < l_addr'high then
 						l_addr <= l_addr + 1;
 					else
@@ -189,8 +212,8 @@ begin
 					end if;
 					bg_addr <= l_addr;
 					--!def lp_icon l_paste(l_addr, bg_data, icon_data, (108, 76), 32, 32)
-					l_data <= to_data(lp_icon);
-					icon_addr <= l_rotate(to_addr(lp_icon), (msec / 500) mod 4, 32, 32);
+					l_data <= l_map(to_data(lp_icon), black, icon_color);
+					icon_addr <= l_rotate(to_addr(lp_icon), icon_angle, 32, 32);
 				when full =>
 			end case;
 		end if;

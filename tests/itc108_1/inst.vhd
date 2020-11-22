@@ -63,6 +63,15 @@ dht_inst : entity work.dht(arch)
 		hum_dec  => open
 	);
 
+tsl_inst : entity work.tsl(arch)
+	port map(
+		tsl_scl => tsl_scl,
+		tsl_sda => tsl_sda,
+		clk     => clk,
+		rst_n   => rst_n,
+		lux     => lux
+	);
+
 mot_inst : entity work.mot(arch)
 	port map(
 		clk     => clk,

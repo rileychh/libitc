@@ -12,7 +12,7 @@ entity tsl is
 		clk   : in std_logic;
 		rst_n : in std_logic;
 		-- user logic
-		lux : out integer range 0 to 40000 -- calculated illuminance from sensors
+		lux : out i16_t -- calculated illuminance from sensors
 	);
 end tsl;
 

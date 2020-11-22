@@ -100,5 +100,13 @@
 		".*'.*" // VHDL attributes, e.g. "key_row'range"
 	],
 	// Todo tree
-	"todo-tree.regex.regex": "((//|#|<!--|;|/\\*|^|--)\\s*($TAGS)|^\\s*- \\[ \\])"
+	"todo-tree.regex.regex": "((//|#|<!--|;|/\\*|^|--)\\s*($TAGS)|^\\s*- \\[ \\])",
+	"filewatcher.commands": [
+		{
+			"match": "(src|tests)\\\\.*\\.vhd",
+			"isAsync": true,
+			"cmd": "python ${workspaceRoot}/tools/pp.py ${file} ${workspaceRoot}/dist/${fileBasenameNoExt}.pp.vhd",
+			"event": "onFileChange"
+		}
+	]
 }
