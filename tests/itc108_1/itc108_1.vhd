@@ -188,7 +188,6 @@ begin
 						l_addr <= 0;
 					end if;
 					bg_addr <= l_addr;
-					--!<text>123123</text><img:src=""><text>123454</text>
 					--!def lp_icon l_paste(l_addr, bg_data, icon_data, (108, 76), 32, 32)
 					l_data <= to_data(lp_icon);
 					icon_addr <= l_rotate(to_addr(lp_icon), (msec / 500) mod 4, 32, 32);
