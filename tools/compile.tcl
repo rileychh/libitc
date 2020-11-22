@@ -76,7 +76,7 @@ if {$make_assignments} {
 	set_global_assignment -name QIP_FILE tests/itc108_1/res/bg.qip
 	set_global_assignment -name MIF_FILE tests/itc108_1/res/bg.mif
 	set_global_assignment -name QIP_FILE tests/itc108_1/res/icon.qip
-	set_global_assignment -name MIF_FILE tests/itc108_1/res/arrow_circle.mif
+	set_global_assignment -name MIF_FILE tests/itc108_1/res/icon.mif
 	set_global_assignment -name VHDL_FILE src/dht.vhd
 	set_global_assignment -name VHDL_FILE src/dot.vhd
 	set_global_assignment -name VHDL_FILE src/key.vhd

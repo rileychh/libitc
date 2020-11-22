@@ -36,7 +36,8 @@ architecture arch of mot_test is
 	signal pressed : std_logic;
 	signal key : i4_t;
 	signal dir : u2r_t;
-	signal speed : i8_arr_t(0 to 1);
+	type speed_t is array (0 to 1) of integer range 0 to 100;
+	signal speed : speed_t;
 
 	signal mot_disp : integer range 0 to 1;
 	signal dir_disp : u2r_t;
@@ -117,7 +118,7 @@ begin
 					end if;
 				when 13 => -- OK
 					for i in 0 to 1 loop
-						speed(i) <= speed_disp(i) * (i8_t'high + 1) / 10;
+						speed(i) <= speed_disp(i) * 10;
 					end loop;
 					dir <= dir_disp;
 				when others => null;

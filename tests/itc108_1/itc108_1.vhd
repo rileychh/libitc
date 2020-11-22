@@ -38,7 +38,6 @@ architecture arch of itc108_1 is
 	type state_t is (idle, execute);
 	signal state : state_t;
 
-	signal rst_i : std_logic;
 	signal speed_level : integer range 1 to 3;
 	signal prev_temp : integer range 0 to 99;
 
@@ -54,7 +53,7 @@ architecture arch of itc108_1 is
 	signal seg_dot : u8r_t;
 	signal temp : integer range 0 to 99;
 	signal dir : std_logic;
-	signal speed : i8_t;
+	signal speed : integer range 0 to 100;
 	signal bg_addr, icon_addr : integer range 0 to l_px_cnt - 1;
 	signal bg_data_i, icon_data_i : std_logic_vector(0 downto 0);
 	signal bg_data, icon_data : l_px_t;
@@ -64,21 +63,22 @@ begin
 	--!inc inst.vhd
 
 	bg_data <= white when bg_data_i(0) = '1' else black;
-	icon_data <= white when icon_data_i(0) = '1' else blue;
+	icon_data <= white when icon_data_i(0) = '1' else black;
 
 	process (clk, rst_n) begin
 		if rst_n = '0' then
 			mode <= idle;
 			timer_ena <= '0';
 			timer_load <= 0;
+			brightness <= 0;
 			seg_data <= (others => ' ');
 			seg_dot <= (others => '0');
+			speed <= 0;
 		elsif rising_edge(clk) then
 			if key_on_press = '1' then
 				case key is
 					when key_start =>
 						timer_ena <= '1';
-						rst_i <= '0';
 						case to_integer(sw) is
 							when 0 =>
 								mode <= tft;
@@ -100,20 +100,22 @@ begin
 						timer_load <= 0;
 						timer_ena <= '0';
 						mode <= idle;
-						rst_i <= '1';
 					when others => null;
 				end case;
 			end if;
 
 			case mode is
 				when idle =>
-					if rst_i = '1' then -- start reset
+					if msec = 0 then -- reset
 						brightness <= 0;
+						seg_data <= (others => ' ');
+						seg_dot <= (others => '0');
 					end if;
 					speed <= 0;
 
 				when tft =>
-					case msec / 1000 is
+					--!def second (msec / 1000)
+					case second is
 						when 0 =>
 							timer_ena <= '1';
 							if l_addr < l_addr'high then
@@ -122,11 +124,11 @@ begin
 								l_addr <= l_addr + 1;
 							end if;
 							brightness <= 100;
-						when 1 to 4 => -- col0-49 blue, 50-99 green, 100-159 red, bl 20%
+						when 1 to 4 => -- row 0-49 blue, 50-99 green, 100-159 red, bl 20%
 							timer_ena <= '1';
 							if l_addr < l_addr'high then
 								l_wr_ena <= '1';
-								case to_coord(l_addr)(1) is
+								case to_coord(l_addr)(0) is
 									when 0 to 49 =>
 										l_data <= blue;
 									when 50 to 99 =>
@@ -136,8 +138,7 @@ begin
 								end case;
 								l_addr <= l_addr + 1;
 							end if;
-							--!def second (msec / 1000)
-							brightness <= 20 + 20 * (second - 1);
+							brightness <= 20 * second;
 						when 5 to 9 =>
 							brightness <= 100 - 20 * (second - 5);
 						when 10 =>
@@ -173,7 +174,7 @@ begin
 						prev_temp <= temp;
 					end if;
 
-					speed <= 50 + speed_level * 60;
+					speed <= 25 + speed_level * 25;
 					seg_data <= to_string(speed_level, speed_level'high, 10, 2) & "SP" &
 						to_string(temp, temp'high, 10, 2) & seg_deg & 'C';
 					seg_dot <= "00110000";
@@ -188,9 +189,9 @@ begin
 					end if;
 					bg_addr <= l_addr;
 
-					--!def lp_icon l_paste((20, 20), 32, 32, l_addr, bg_data, icon_data)
+					--!def lp_icon l_paste(l_addr, bg_data, icon_data, (108, 76), 32, 32)
 					l_data <= to_data(lp_icon);
-					icon_addr <= to_addr(lp_icon);
+					icon_addr <= l_rotate(to_addr(lp_icon), (msec / 500) mod 4, 32, 32);
 				when full =>
 			end case;
 		end if;

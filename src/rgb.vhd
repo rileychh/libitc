@@ -29,7 +29,7 @@ begin
 			port map(
 				clk     => clk,
 				rst_n   => rst_n,
-				duty    => repeat(color((2 - i) * 4 + 3 downto (2 - i) * 4), 2),
+				duty    => to_integer(color((2 - i) * 4 + 3 downto (2 - i) * 4)) * 100 / 16,
 				pwm_out => rgb(i)
 			);
 	end generate pwm_gen;

@@ -196,7 +196,7 @@ begin
 		port map(
 			clk     => clk,
 			rst_n   => rst_n,
-			duty    => to_unsigned(brightness * 256 / 100, 8),
+			duty    => brightness,
 			pwm_out => lcd_bl
 		);
 

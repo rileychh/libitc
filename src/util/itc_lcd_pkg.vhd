@@ -45,27 +45,45 @@ package itc_lcd is
 	-- to_coord, to_addr: returns coordinate/address of address/coordinate
 	-- addr/coord: address/coordinate of the pixel
 	-- p_width: width of the picture. If not given, l_width is used
-	function to_coord(addr : l_addr_t; p_width : integer) return l_coord_t;
-	function to_coord(addr : l_addr_t) return l_coord_t;
-	function to_addr(coord: l_coord_t; p_width : integer) return l_addr_t;
-	function to_addr(coord: l_coord_t) return l_addr_t;
+	function to_coord(addr, p_width : integer) return l_coord_t;
+	function to_coord(addr : integer) return l_coord_t;
+	function to_addr(coord: l_coord_t; p_width : integer) return integer;
+	function to_addr(coord: l_coord_t) return integer;
 
 	-- to_addr, to_data: returns unpacked address/data
 	-- pack: packed value to unpack
-	function to_addr(pack : l_pack_t) return l_addr_t;
+	function to_addr(pack : l_pack_t) return integer;
 	function to_data(pack: l_pack_t) return l_px_t;
+
+	-- l_paste: paste a picture on top of the frame
+	-- l_addr: background address
+	-- l_data: background data
+	-- p_data: picture data
+	-- p_coord: where the top-left corner of the picture is
+	-- p_width, p_height: size of picture
+	-- returns: packed picture address and framebuffer data
+	-- example, pasting a 16x32 icon at the middle of screen: 
+	--     PACK <= l_paste((56, 64), 16, 32, <lcd_addr|bg_addr>, bg_data, icon_data);
+	--     lcd_data <= to_data(PACK);
+	--     icon_addr <= to_addr(PACK);
+	-- the function can be nested to paste multiple pictures
+	function l_paste(l_addr : integer;
+					 l_data, p_data : l_px_t;
+					 p_coord : l_coord_t;
+					 p_width, p_height : integer) return l_pack_t;
 
 	-- l_rotate: returns the rotated pixel address of a picture
 	-- addr: the original address
-	-- angle: degrees clockwise to rotate. can be +/- 0, 90, 180, 270
+	-- angle: 90 degrees clockwise to rotate. can be 0, 1, 2, 3
 	-- p_width, p_height: the original width and height of picture
-	function l_rotate(addr, angle, p_width, p_height : integer) return l_addr_t; 
+	function l_rotate(addr, angle, p_width, p_height : integer) return integer;
 
-	-- l_paste
-	function l_paste(p_coord : l_coord_t;
-					 p_width, p_height : integer;
-					 l_addr : l_addr_t;
-					 l_data, p_data : l_px_t) return l_pack_t;
+	-- l_map: change one color to another
+	-- data: current picture data
+	-- o_color: color that will be changed
+	-- n_color: color that old_color will be changed into
+	-- returns: mapped data
+	function l_map(data, o_color, n_color: l_px_t) return l_px_t;
 
 	--------------------------------------------------------------------------------
 	-- command constants
@@ -224,6 +242,18 @@ package itc_lcd is
 end package;
 
 package body itc_lcd is
+	function "+"(left, right : l_coord_t) return l_coord_t is begin
+		return (left(0) + right(0), left(1) + right(1));
+	end function;
+	
+	function "-"(left, right : l_coord_t) return l_coord_t is begin
+		return (left(0) - right(0), left(1) - right(1));
+	end function;
+
+	function "*"(left : l_coord_t; right : integer) return l_coord_t is begin
+		return (left(0) * right, left(1) * right);
+	end function;
+
 	function to_coord(addr : l_addr_t; p_width : integer) return l_coord_t is begin
 		return (addr / p_width, addr mod p_width);
 	end function;
@@ -232,15 +262,15 @@ package body itc_lcd is
 		return to_coord(addr, l_width);
 	end function;
 
-	function to_addr(coord: l_coord_t; p_width : integer) return l_addr_t is begin
+	function to_addr(coord: l_coord_t; p_width : integer) return integer is begin
 		return coord(0) * p_width + coord(1);
 	end function;
 
-	function to_addr(coord: l_coord_t) return l_addr_t is begin
+	function to_addr(coord: l_coord_t) return integer is begin
 		return to_addr(coord, l_width);
 	end function;
 
-	function to_addr(pack : l_pack_t) return l_addr_t is begin
+	function to_addr(pack : l_pack_t) return integer is begin
 		return to_integer(pack srl l_px_t'length); -- right shift the data away
 	end function;
 
@@ -248,34 +278,50 @@ package body itc_lcd is
 		return pack(l_px_t'range);
 	end function;
 
-	function l_rotate(addr : l_addr_t; angle, p_width, p_height : integer) return l_addr_t is 
+	function l_rotate(addr, angle, p_width, p_height : integer) return integer is
 		constant row : integer := to_coord(addr, p_width)(0);
 		constant col : integer := to_coord(addr, p_width)(1);
 	begin
 		case angle is
 			when 0 =>
 				return addr; -- or row * p_width + col
-			when 90 | -270 =>
+			when 1 =>
 				return col * p_height + (p_height - row - 1);
-			when 180 | -180 =>
+			when 2 =>
 				return p_width * p_height - addr - 1; -- reverse
-			when 270 | -90 =>
+			when 3 =>
 				return (p_width - col - 1) * p_height + row;
+			when others => 
+				return addr;
 		end case; 
 	end function;
 
-	function l_paste(p_coord : l_coord_t;
-					 p_width, p_height : integer;
-					 l_addr : l_addr_t;
-					 l_data, p_data : l_px_t) return l_pack_t is
+	function l_map(data, o_color, n_color: l_px_t) return l_px_t is begin
+		if data = o_color then
+			return n_color;
+		else
+			return data;
+		end if;
+	end function;
+
+	function l_paste(l_addr : integer;
+					 l_data, p_data : l_px_t;
+					 p_coord : l_coord_t;
+					 p_width, p_height : integer) return l_pack_t is
 		constant l_coord : l_coord_t := to_coord(l_addr);
-		constant p_coord_end : l_coord_t := (p_coord(0) + p_height, p_coord(1) + p_width);
+		constant p_coord_end : l_coord_t := (p_coord(0) + p_height - 1, p_coord(1) + p_width - 1);
 	begin
-		if p_coord(0) < l_coord(0) and l_coord(0) < p_coord_end(0) and  -- check row
-		   p_coord(1) < l_coord(1) and l_coord(1) < p_coord_end(1) then -- check column
-			return to_unsigned(to_addr(l_coord_t'(l_coord(0) - p_coord(0), l_coord(1) - p_coord(1))), l_addr_width) & p_data;
+		if p_coord(0) <= l_coord(0) and l_coord(0) <= p_coord_end(0) and  -- check row
+		   p_coord(1) <= l_coord(1) and l_coord(1) <= p_coord_end(1) then -- check column
+			return to_unsigned(to_addr(l_coord - p_coord, p_width), l_addr_width) & p_data;
 		else
 			return to_unsigned(0, l_addr_width) & l_data;
 		end if;
+	end function;
+
+	function l_scale(addr, p_width, scale : integer) return integer is
+		constant coord : l_coord_t := to_coord(addr, p_width);
+	begin
+		return to_addr(coord * scale, p_width);
 	end function;
 end package body;
