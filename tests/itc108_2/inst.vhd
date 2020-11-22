@@ -37,9 +37,9 @@ lcd_inst : entity work.lcd(arch)
 		lcd_bl     => lcd_bl,
 		lcd_rst_n  => lcd_rst_n,
 		brightness => brightness,
-		wr_ena     => l_wr_ena,
-		addr       => l_addr,
-		data       => l_data
+		wr_ena     => lcd_wr_ena,
+		addr       => pixel_addr,
+		data       => pixel_data
 	);
 
 seg_inst : entity work.seg(arch)
@@ -50,17 +50,6 @@ seg_inst : entity work.seg(arch)
 		seg_com => seg_com,
 		data    => seg_data,
 		dot     => seg_dot
-	);
-
-dht_inst : entity work.dht(arch)
-	port map(
-		clk      => clk,
-		rst_n    => rst_n,
-		dht_data => dht_data,
-		temp_int => temp,
-		hum_int  => open,
-		temp_dec => open,
-		hum_dec  => open
 	);
 
 mot_inst : entity work.mot(arch)
@@ -85,4 +74,21 @@ icon_inst : entity work.icon(syn)
 		address => std_logic_vector(to_unsigned(icon_addr, 10)),
 		clock   => clk,
 		q       => icon_data_i
+	);
+--fuck this
+uart_inst : entity work.uart(arch)
+	generic map(
+		baud => 9600
+	)
+	port map(
+		clk     => clk,
+		rst_n   => rst_n,
+		uart_rx => uart_rx,
+		uart_tx => uart_tx,
+		tx_ena  => tx_ena,
+		tx_busy => tx_busy,
+		tx_data => tx_data,
+		rx_busy => rx_busy,
+		rx_err  => rx_err,
+		rx_data => rx_data
 	);

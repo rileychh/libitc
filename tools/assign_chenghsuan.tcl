@@ -85,7 +85,7 @@ if {$make_assignments} {
 	set_location_assignment PIN_44 -to sw[6]
 	set_location_assignment PIN_41 -to sw[7]
 
-	# SCL1, SDA1, MO{0..2}, RES
+	# SCL1, SDA1, MO{2..0}, RES
 	set_location_assignment PIN_144 -to tts_scl
 	set_location_assignment PIN_143 -to tts_sda
 	set_location_assignment PIN_142 -to tts_mo[2]
@@ -116,7 +116,7 @@ if {$make_assignments} {
 	set_location_assignment PIN_70 -to dot_red[4]
 	set_location_assignment PIN_82 -to dot_red[5]
 	set_location_assignment PIN_94 -to dot_red[6]
-	set_location_assignment PIN_106 -to dot_red[7]
+	set_location_assignment PIN_110 -to dot_red[7]
 
 	# DOT_R{4,3,2,1,5,6,7,8} (R stands for green)
 	set_location_assignment PIN_113  -to dot_green[0]
@@ -126,26 +126,26 @@ if {$make_assignments} {
 	set_location_assignment PIN_76 -to dot_green[4]
 	set_location_assignment PIN_84 -to dot_green[5]
 	set_location_assignment PIN_98 -to dot_green[6]
-	set_location_assignment PIN_110  -to dot_green[7]
+	set_location_assignment PIN_112  -to dot_green[7]
 
 	# DOT_S{4,3,2,1,5,6,7,8} (S stands for common, thank me later)
-	set_location_assignment PIN_113 -to dot_com[0]
-	set_location_assignment PIN_103 -to dot_com[1]
+	set_location_assignment PIN_117 -to dot_com[0]
+	set_location_assignment PIN_107 -to dot_com[1]
 	set_location_assignment PIN_93 -to dot_com[2]
 	set_location_assignment PIN_81 -to dot_com[3]
 	set_location_assignment PIN_80 -to dot_com[4]
 	set_location_assignment PIN_88 -to dot_com[5]
-	set_location_assignment PIN_100 -to dot_com[6]
-	set_location_assignment PIN_112 -to dot_com[7]
+	set_location_assignment PIN_106 -to dot_com[6]
+	set_location_assignment PIN_114 -to dot_com[7]
 
 	# PWM{1..2}, IN{1,2,3,4}
-	# set_location_assignment PIN_114 -to mot_ena[0]
-	# set_location_assignment PIN_117 -to mot_ena[1]
+	# set_location_assignment PIN_131 -to mot_ena[0]
+	# set_location_assignment PIN_132 -to mot_ena[1]
 	# set_location_assignment PIN_127 -to mot_ch[0]
 	# set_location_assignment PIN_128 -to mot_ch[1]
 	# set_location_assignment PIN_118 -to mot_ch[2]
 	# set_location_assignment PIN_126 -to mot_ch[3]
-	set_location_assignment PIN_114 -to mot_ena
+	set_location_assignment PIN_131 -to mot_ena
 	set_location_assignment PIN_127 -to mot_ch[0]
 	set_location_assignment PIN_128 -to mot_ch[1]
 

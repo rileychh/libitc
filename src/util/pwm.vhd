@@ -16,8 +16,8 @@ entity pwm is
 		-- system
 		clk, rst_n : in std_logic; -- system clock
 		-- user logic
-		duty    : in u8_t;      -- duty cycle
-		pwm_out : out std_logic -- pwm output
+		duty    : in integer range 0 to 100; -- duty cycle
+		pwm_out : out std_logic              -- pwm output
 	);
 end pwm;
 
@@ -41,7 +41,7 @@ begin
 		end if;
 	end process;
 
-	high_period <= period * to_integer(duty) / i8_t'high;
+	high_period <= period * duty / 100;
 	pwm_out <= '1' when cnt < high_period else '0';
 
 end arch;

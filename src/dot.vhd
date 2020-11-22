@@ -5,11 +5,14 @@ use ieee.numeric_std.all;
 use work.itc.all;
 
 entity dot is
+	generic (
+		common_anode : std_logic := '0'
+	);
 	port (
 		-- system
 		clk, rst_n : in std_logic;
 		-- dot
-		dot_r, dot_g, dot_s : out u8r_t;
+		dot_red, dot_green, dot_com : out u8r_t;
 		-- user logic
 		data_r, data_g : in u8r_arr_t(0 to 7)
 	);
@@ -24,7 +27,7 @@ begin
 
 	clk_inst : entity work.clk(arch)
 		generic map(
-			freq => 1_000_000
+			freq => 1_000
 		)
 		port map(
 			clk_in  => clk,
@@ -44,8 +47,8 @@ begin
 		end if;
 	end process;
 
-	dot_s <= "01111111" ror row; -- rotates '0' because common cathode
-	dot_r <= data_r(row);
-	dot_g <= data_g(row);
+	dot_com <= ("01111111" ror row) xor repeat(common_anode, 8); -- use xor to invert the output
+	dot_red <= data_r(row) xor repeat(common_anode, 8);
+	dot_green <= data_g(row) xor repeat(common_anode, 8);
 
 end arch;

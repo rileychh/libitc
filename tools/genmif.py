@@ -5,7 +5,7 @@ from io import BytesIO
 from sys import stdin, stdout
 from typing import Union
 from PIL import Image
-from PIL.ImageColor import getcolor
+from PIL.ImageColor import getrgb
 
 frame_size = (128, 160)
 
@@ -41,7 +41,9 @@ parser = ArgumentParser()
 parser.add_argument('input_file', nargs='?', default='-')
 parser.add_argument('output_file', nargs='?',
                     type=FileType('w'), default=stdout)
-parser.add_argument('-f', '--fit', nargs='?', const='ffffff', default='')
+mode_group = parser.add_mutually_exclusive_group()
+mode_group.add_argument('-i', '--icon', action='store_true')
+mode_group.add_argument('-f', '--fit', metavar='COLOR', default='', type=str)
 parser.add_argument('-b', '--bicolor', action='store_true', default=False)
 args = parser.parse_args()
 
@@ -53,8 +55,8 @@ else:
 im = Image.open(buffer).convert('RGB')
 
 if args.fit:
-    im = fit(im, frame_size, getcolor(args.fit, "RGB"))
-else:
+    im = fit(im, frame_size, getrgb(args.fit))
+elif not args.icon:
     im = fill(im, frame_size)
 
 if args.bicolor:
@@ -63,9 +65,9 @@ if args.bicolor:
 pixels = list(im.getdata())
 
 
-def format_pixel(bicolor: bool, pixel: Union[tuple[int, int, int], int]) -> str:
+def format_pixel(pixel: Union[tuple[int, int, int], int]) -> str:
     if args.bicolor:
-        return '0' if pixel else '1'
+        return '1' if pixel else '0'
     else:
         r, g, b = pixel
         return '{:x}'.format(r << 16 | g << 8 | b)
@@ -73,7 +75,7 @@ def format_pixel(bicolor: bool, pixel: Union[tuple[int, int, int], int]) -> str:
 
 mif_header = f'''\
 WIDTH={'1' if args.bicolor else '24'};
-DEPTH=20480;
+DEPTH={len(pixels)};
 
 ADDRESS_RADIX=UNS;
 DATA_RADIX=HEX;
@@ -86,6 +88,6 @@ END;
 '''
 
 mif_data = ''.join(
-    f'\t{i}: {format_pixel(args.bicolor, p)};\n' for i, p in enumerate(pixels))
+    f'\t{i}: {format_pixel(p)};\n' for i, p in enumerate(pixels))
 
 args.output_file.write(mif_header + mif_data + mif_footer)
