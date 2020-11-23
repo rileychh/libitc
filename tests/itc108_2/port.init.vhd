@@ -8,8 +8,8 @@ port (
 	key_col : out u4r_t;
 	-- dht
 	dht_data : inout std_logic;
-	-- lcd
-	lcd_sclk, lcd_mosi, lcd_ss_n, lcd_dc, lcd_bl, lcd_rst_n : out std_logic;
+	-- -- lcd
+	-- lcd_sclk, lcd_mosi, lcd_ss_n, lcd_dc, lcd_bl, lcd_rst_n : out std_logic;
 	-- seg
 	seg_led, seg_com : out u8r_t;
 	-- mot

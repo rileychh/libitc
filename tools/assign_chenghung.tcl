@@ -49,7 +49,7 @@ if {$make_assignments} {
 	set_location_assignment PIN_240 -to seg_led[2]
 	set_location_assignment PIN_9 -to seg_led[3]
 	set_location_assignment PIN_18 -to seg_led[4]
-	set_location_assignment PIN_22 -to seg_led[5]
+	set_location_assignment PIN_21 -to seg_led[5]
 	set_location_assignment PIN_37 -to seg_led[6]
 	set_location_assignment PIN_63 -to seg_led[7]
 

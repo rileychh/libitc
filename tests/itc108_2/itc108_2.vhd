@@ -15,13 +15,6 @@ entity itc108_2 is
 end itc108_2;
 
 architecture arch of itc108_2 is
-
-	type mode_t is (idle, tft, dht, tsl, full);
-	signal mode : mode_t;
-
-	type state_t is (idle, execute);
-	signal state : state_t;
-
 	signal rst_i : std_logic;
 	signal speed_level : integer range 1 to 3;
 	signal prev_temp : integer range 0 to 99;
@@ -31,12 +24,10 @@ architecture arch of itc108_2 is
 	-- key scan
 	signal pressed, key_on_press : std_logic;
 	signal key : i4_t;
-	signal brightness : integer range 0 to 100;
-	signal lcd_wr_ena : std_logic;
-	signal pixel_addr : integer range 0 to lcd_pixel_cnt - 1;
-	signal pixel_data : lcd_pixel_t;
+	-- seg
 	signal seg_data : string(1 to 8) := (others => ' ');
 	signal seg_dot : u8r_t;
+	-- ??
 	signal temp : integer range 0 to 99;
 	signal dir : std_logic;
 	signal speed : i8_t;
@@ -56,43 +47,97 @@ architecture arch of itc108_2 is
 	signal dot_data_r, dot_data_g : u8r_arr_t(0 to 7);
 
 	-- fpga lock state
-	signal lock : boolean;
+	signal lock : std_logic := '0';
+
+	-- fpga state => from 題目 description
+	--------------------------------------------------------------------------------
+	-- a => 初始狀態 => init
+	-- b => 待機狀態 => idle
+	-- c => 選擇服務 => service
+	-- d => 選擇座位 => seat
+	-- e => 選擇餐點 => meal
+	-- f => 活動優惠 => offer
+	-- g => 付款 => pay
+	-- h => 完成 => ok
+	--------------------------------------------------------------------------------
+	type mode_plist is (init, idle, service, seat, meal, offer, pay, ok);
+	signal mode : mode_plist;
+
+	-- eat method, 0 => out eat, 1 => in eat
+	signal eat_method : std_logic := '0';
 begin
 
 	--!inc port.plist.vhd
 
 	process (clk, rst_n) begin
 		if rst_n = '0' then
-			mode <= idle;
+			mode <= init;
 			timer_ena <= '0';
 			timer_load <= 0;
 			seg_data <= (others => ' ');
 			seg_dot <= (others => '0');
 
 			-- uart
-			tx_ena <= '0';
+			tx_ena <= '0'; -- uart tx disabled (Boolean:default => false)
 			buf_cnt <= 0;
 			-- dot reset => full orange
 			dot_data_r <= (others => (others => '1'));
 			dot_data_g <= (others => (others => '1'));
+			lock <= '0';
 		elsif rising_edge(clk) then
-			--------------------------------------------------------------------------------
-			-- a => 初始狀態
-			-- b => 待機狀態
-			-- c => 選擇服務
-			-- d => 選擇座位
-			-- e => 選擇餐點
-			-- f => 活動優惠
-			-- g => 付款
-			-- h => 完成
-			--------------------------------------------------------------------------------
+
 			timer_ena <= '1';
+
+			if (mode = init or mode = idle or mode = seat or mode = ok) then
+				seg_data <= (others => '0');
+			end if;
+
+			-- when user key press action
 			if key_on_press = '1' then
+				-- 0 => reset, 3 => back, 7 => delete, 15 => check
 				tx_data <= to_unsigned(key, 8);
 				tx_ena <= '1';
+				if lock = '0' then
+					case key is
+						when 0 =>
+							-- {{ reset }}
+							mode <= init;
+							timer_ena <= '0';
+							timer_load <= 0;
+							seg_data <= (others => ' ');
+							seg_dot <= (others => '0');
+
+							-- uart
+							tx_ena <= '0';
+							buf_cnt <= 0;
+							-- dot reset => full orange
+							dot_data_r <= (others => (others => '1'));
+							dot_data_g <= (others => (others => '1'));
+							lock <= '0';
+						when 15 =>
+							if mode = idle then
+								mode <= service;
+								-- 傳送狀態
+							elsif mode = service then
+								-- 傳送狀態
+								-- require empty site arr(rd)
+								-- if(eat_method == "in") {{run below}}
+								-- 		show empty site in dot
+								-- 		mode <= seat;
+								-- else
+								-- 		mode <=	meal
+							elsif mode = seat then
+								-- require has chosen seat (include before chosen)
+								mode <= meal;
+
+							end if;
+						when others => null;
+					end case;
+				end if;
 			else
 				tx_ena <= '0';
 			end if;
+
 			if (msec < 1000) then
 				-- reset => at first sec
 				dot_data_r <= (others => (others => '1'));
@@ -101,10 +146,16 @@ begin
 				-- logo icon
 				dot_data_r <= (others => (others => '0'));
 				dot_data_g <= (others => (others => '0'));
+				dot_data_r <= (x"0c", x"13", x"6c", x"90", x"60", x"80", x"00", x"00");
+				dot_data_g <= (x"0c", x"10", x"60", x"83", x"0c", x"10", x"60", x"80");
+				mode <= idle; -- chose service
+				lock <= '0'; -- unlock driver
 			else
 				dot_data_r <= (others => (others => '0'));
 				dot_data_g <= (others => (others => '0'));
-				-- dot_data_r <= ("00101010", "10010100", x"aa")
+				-- {{ you can use hex or binary }} => dot_data_r <= ("00101010", "10010100", x"aa")
+				dot_data_r <= (x"0c", x"13", x"6c", x"90", x"60", x"80", x"00", x"00");
+				dot_data_g <= (x"0c", x"10", x"60", x"83", x"0c", x"10", x"60", x"80");
 			end if;
 		end if;
 	end process;
