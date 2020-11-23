@@ -105,6 +105,7 @@ if {$make_assignments} {
 	set_global_assignment -name VHDL_FILE src/util/i2c.vhd
 	set_global_assignment -name VHDL_FILE src/util/timer.vhd
 	set_global_assignment -name VHDL_FILE src/util/uart.vhd
+	set_global_assignment -name VHDL_FILE src/util/uart_txt.vhd
 	set_global_assignment -name QIP_FILE src/util/framebuffer.qip
 
 	# Commit assignments
