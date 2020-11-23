@@ -34,16 +34,21 @@ end itc108_1;
 
 architecture arch of itc108_1 is
 
-	type mode_t is (idle, tft, dht, tsl, full);
+	type mode_t is (tft, dht, tsl, full);
 	signal mode : mode_t;
 
 	type state_t is (idle, execute);
 	signal state : state_t;
 
+	signal clk_main : std_logic;
 	signal speed_level : integer range 1 to 3;
 	signal prev_temp : integer range 0 to 99;
 	signal icon_color : l_px_t;
-	signal icon_angle : integer range 0 to 3;
+	signal icon_dir : integer range 0 to 3;
+	signal small_txt_addr : integer range 0 to 34;
+	signal txt_addr : integer range 0 to 5 * 7 * 7 - 1;
+	signal txt_data : l_px_t;
+	signal tsl_mode : character := 'R';
 
 	signal timer_ena : std_logic;
 	signal timer_load, msec : i32_t;
@@ -70,150 +75,168 @@ begin
 	bg_data <= white when bg_data_i(0) = '1' else black;
 	icon_data <= white when icon_data_i(0) = '1' else black;
 
-	process (clk, rst_n) begin
+	process (clk_main, rst_n) begin
 		if rst_n = '0' then
-			mode <= idle;
+			mode <= tft;
 			timer_ena <= '0';
 			timer_load <= 0;
 			brightness <= 0;
 			seg_data <= (others => ' ');
 			seg_dot <= (others => '0');
 			speed <= 0;
-		elsif rising_edge(clk) then
-			if key_on_press = '1' then
-				case key is
-					when key_start =>
-						timer_ena <= '1';
-						case to_integer(sw) is
-							when 0 =>
-								mode <= tft;
-							when 1 =>
-								mode <= dht;
-							when 2 =>
-								mode <= tsl;
-							when 3 =>
-								mode <= full;
-							when others =>
-								timer_ena <= '0';
-								mode <= idle;
-						end case;
-					when key_stop =>
-						timer_load <= msec;
-						timer_ena <= '0';
-						mode <= idle;
-					when key_rst =>
-						timer_load <= 0;
-						timer_ena <= '0';
-						mode <= idle;
+		elsif rising_edge(clk_main) then
+			if l_addr < l_addr'high then
+				l_addr <= l_addr + 1;
+			else
+				l_addr <= 0;
+			end if;
+
+			if key_on_press = '1' and key = key_start then
+				case to_integer(sw) is
+					when 0 =>
+						mode <= tft;
+					when 1 =>
+						mode <= dht;
+					when 2 =>
+						mode <= tsl;
+					when 3 =>
+						mode <= full;
 					when others => null;
 				end case;
 			end if;
 
 			case mode is
-				when idle =>
-					if msec = 0 then -- reset
-						brightness <= 0;
-						seg_data <= (others => ' ');
-						seg_dot <= (others => '0');
-					end if;
-					speed <= 0;
-
 				when tft =>
-					--!def second (msec / 1000)
-					case second is
-						when 0 =>
+					case key is
+						when key_start =>
 							timer_ena <= '1';
-							if l_addr < l_addr'high then
-								l_wr_ena <= '1';
-								l_data <= white;
-								l_addr <= l_addr + 1;
-							end if;
-							brightness <= 100;
-						when 1 to 4 => -- row 0-49 blue, 50-99 green, 100-159 red, bl 20%
-							timer_ena <= '1';
-							if l_addr < l_addr'high then
-								l_wr_ena <= '1';
-								case to_coord(l_addr)(0) is
-									when 0 to 49 =>
-										l_data <= blue;
-									when 50 to 99 =>
-										l_data <= green;
-									when others =>
-										l_data <= red;
-								end case;
-								l_addr <= l_addr + 1;
-							end if;
-							brightness <= 20 * second;
-						when 5 to 9 =>
-							brightness <= 100 - 20 * (second - 5);
-						when 10 =>
-							l_addr <= 0;
+							l_wr_ena <= '1';
+							--!def second (msec / 1000)
+							case second is
+								when 0 =>
+									timer_ena <= '1';
+									brightness <= 100;
+								when 1 to 4 => -- row 0-49 blue, 50-99 green, 100-159 red, bl 20%
+									brightness <= 20 * second;
+								when 5 to 9 =>
+									brightness <= 100 - 20 * (second - 5);
+								when 10 =>
+									timer_load <= 0;
+									timer_ena <= '0'; -- loop back to 0
+								when others => null;
+							end case;
+
+							case second is
+								when 0 =>
+									l_data <= white;
+								when others =>
+									case to_coord(l_addr)(0) is
+										when 0 to 49 =>
+											l_data <= blue;
+										when 50 to 99 =>
+											l_data <= green;
+										when others =>
+											l_data <= red;
+									end case;
+							end case;
+
+						when key_stop =>
+							timer_load <= msec;
+							timer_ena <= '0';
+							l_wr_ena <= '0';
+
+						when key_rst =>
 							timer_load <= 0;
-							timer_ena <= '0'; -- loop back to 0
+							timer_ena <= '0';
+							brightness <= 0;
+
 						when others => null;
 					end case;
-
-					if msec mod 1000 = 1 then -- on every second (can't be .0sec)
-						l_addr <= 0; -- reset pixel address for next frame
-					end if;
 
 				when dht =>
 					--!def incrs if speed_level /= 3 then speed_level <= speed_level + 1; end if
 					--!def decrs if speed_level /= 1 then speed_level <= speed_level - 1; end if
-					if key_on_press = '1' then
-						case key is
-							when key_up =>
-								incrs;
-							when key_down =>
-								decrs;
-							when others => null;
-						end case;
-					end if;
+					case key is
+						when key_start =>
+							timer_ena <= '1';
+							speed <= 25 + speed_level * 25;
+							seg_data <= to_string(speed_level, speed_level'high, 10, 2) & "SP" &
+								to_string(temp, temp'high, 10, 2) & seg_deg & 'C';
+							seg_dot <= "00110000";
 
-					if msec mod 1000 = 1 then -- on every second
-						if temp > prev_temp then
+							if msec mod 1000 = 1 then -- on every second
+								if temp > prev_temp then
+									incrs;
+								elsif temp < prev_temp then
+									decrs;
+								end if;
+								prev_temp <= temp;
+							end if;
+
+						when key_stop =>
+							speed <= 0;
+
+						when key_rst =>
+							speed <= 0;
+							seg_data <= (others => ' ');
+							seg_dot <= (others => '0');
+
+						when key_up =>
 							incrs;
-						elsif temp < prev_temp then
-							decrs;
-						end if;
-						prev_temp <= temp;
-					end if;
 
-					speed <= 25 + speed_level * 25;
-					seg_data <= to_string(speed_level, speed_level'high, 10, 2) & "SP" &
-						to_string(temp, temp'high, 10, 2) & seg_deg & 'C';
-					seg_dot <= "00110000";
+						when key_down =>
+							decrs;
+
+						when others => null;
+					end case;
 
 				when tsl =>
+					case key is
+						when key_start =>
+							timer_ena <= '1';
+							l_wr_ena <= '1';
+							brightness <= 100;
+							speed <= 50;
+							tsl_mode <= 'R';
+
+						when key_stop =>
+							timer_load <= 0;
+							timer_ena <= '0';
+							tsl_mode <= 'S';
+
+						when key_rst =>
+							timer_load <= 0;
+							timer_ena <= '0';
+							brightness <= 0;
+							speed <= 0;
+
+						when key_ok =>
+							timer_ena <= '1';
+							l_wr_ena <= '1';
+							brightness <= 100;
+							speed <= 50;
+							tsl_mode <= 'R';
+
+						when others => null;
+					end case;
+
 					if msec mod 2000 = 1 then
 						if lux > 15 then
 							dir <= '1';
 							icon_color <= black;
+							icon_dir <= 0;
 						else
 							dir <= '0';
 							icon_color <= blue;
+							icon_dir <= 1;
 						end if;
 					end if;
 
-					if msec mod 500 = 1 then
-						if dir <= '1' then
-							icon_angle <= icon_angle + 1;
-						else
-							icon_angle <= icon_angle - 1;
-						end if;
-					end if;
-
-					brightness <= 100;
-					l_wr_ena <= '1';
-					if l_addr < l_addr'high then
-						l_addr <= l_addr + 1;
-					else
-						l_addr <= 0;
-					end if;
 					bg_addr <= l_addr;
-					--!def lp_icon l_paste(l_addr, bg_data, icon_data, (108, 76), 32, 32)
-					l_data <= l_map(to_data(lp_icon), black, icon_color);
-					icon_addr <= l_rotate(to_addr(lp_icon), icon_angle, 32, 32);
+					--!def lp_mode l_paste_txt(l_addr, to_data(lp_icon), "M o d e :  " & tsl_mode, (20, 20))
+					--!def lp_icon l_paste(l_addr, bg_data, l_map(icon_data, black, icon_color), (108, 76), 32, 32)
+					l_data <= lp_mode;
+					icon_addr <= l_mirror(to_addr(lp_icon), icon_dir, 32, 32);
 				when full =>
 			end case;
 		end if;

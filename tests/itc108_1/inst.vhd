@@ -1,3 +1,13 @@
+clk_inst : entity work.clk(arch)
+	generic map(
+		freq => 1_000_000
+	)
+	port map(
+		clk_in  => clk,
+		rst_n   => rst_n,
+		clk_out => clk_main
+	);
+
 timer_inst : entity work.timer(arch)
 	port map(
 		clk   => clk,
@@ -19,7 +29,7 @@ key_inst : entity work.key(arch)
 
 edge_inst : entity work.edge(arch)
 	port map(
-		clk     => clk,
+		clk     => clk_main,
 		rst_n   => rst_n,
 		sig_in  => pressed,
 		rising  => key_on_press,
