@@ -26,21 +26,21 @@ edge_inst : entity work.edge(arch)
 		falling => open
 	);
 
-lcd_inst : entity work.lcd(arch)
-	port map(
-		clk        => clk,
-		rst_n      => rst_n,
-		lcd_sclk   => lcd_sclk,
-		lcd_mosi   => lcd_mosi,
-		lcd_ss_n   => lcd_ss_n,
-		lcd_dc     => lcd_dc,
-		lcd_bl     => lcd_bl,
-		lcd_rst_n  => lcd_rst_n,
-		brightness => brightness,
-		wr_ena     => lcd_wr_ena,
-		pixel_addr => pixel_addr,
-		pixel_data => pixel_data
-	);
+-- lcd_inst : entity work.lcd(arch)
+-- 	port map(
+-- 		clk        => clk,
+-- 		rst_n      => rst_n,
+-- 		lcd_sclk   => lcd_sclk,
+-- 		lcd_mosi   => lcd_mosi,
+-- 		lcd_ss_n   => lcd_ss_n,
+-- 		lcd_dc     => lcd_dc,
+-- 		lcd_bl     => lcd_bl,
+-- 		lcd_rst_n  => lcd_rst_n,
+-- 		brightness => brightness,
+-- 		wr_ena     => lcd_wr_ena,
+-- 		pixel_addr => pixel_addr,
+-- 		pixel_data => pixel_data
+-- 	);
 
 seg_inst : entity work.seg(arch)
 	port map(
@@ -92,11 +92,11 @@ uart_inst : entity work.uart(arch)
 
 dot_inst : entity work.dot(arch)
 	port map(
-		clk    => clk,
-		rst_n  => rst_n,
-		dot_r  => dot_red,
-		dot_g  => dot_green,
-		dot_s  => dot_com,
-		data_r => dot_data_r,
-		data_g => dot_data_g
+		clk       => clk,
+		rst_n     => rst_n,
+		dot_red   => dot_red,
+		dot_green => dot_green,
+		dot_com   => dot_com,
+		data_r    => dot_data_r,
+		data_g    => dot_data_g
 	);
