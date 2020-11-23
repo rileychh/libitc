@@ -191,7 +191,7 @@ begin
 
 	pwm_inst : entity work.pwm(arch)
 		generic map(
-			pwm_freq => sys_clk_freq / i8_t'high + 1
+			pwm_freq => 10_000
 		)
 		port map(
 			clk     => clk,
