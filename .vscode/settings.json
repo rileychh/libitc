@@ -105,7 +105,7 @@
 		{
 			"match": "(src|tests)\\\\.*\\.vhd",
 			"isAsync": true,
-			"cmd": "python ${workspaceRoot}/tools/pp.py ${file} ${workspaceRoot}/dist/${fileBasenameNoExt}.pp.vhd",
+			"cmd": "\"C:\\Program Files\\Git\\bin\\bash.exe\" -c \"cd '${workspaceRoot}'; shopt -s globstar; for f in {src,tests}/**/*.vhd; do tools/pp.py $f dist/$(basename $f .vhd).pp.vhd & done\"",
 			"event": "onFileChange"
 		}
 	]
