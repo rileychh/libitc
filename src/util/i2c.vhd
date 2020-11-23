@@ -91,7 +91,7 @@ begin
 
 		signal scl_ena : std_logic; -- SCL enable
 		signal sda_out : std_logic; -- internal SDA (tri-state open drain buffer)
-		signal cnt : integer range 0 to 8; -- generic loop counter
+		signal cnt : integer range 8 downto 0; -- generic loop counter
 		signal command : u8_t; -- command byte (address + r/w)
 		signal err : std_logic; -- error flag, automatically retry
 	begin
