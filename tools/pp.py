@@ -29,7 +29,8 @@ def include(vhd: list[str], ln: int, macro_args: str) -> list[str]:  # inc
     if args.input_file in files:
         files.remove(args.input_file)
     new_vhd = vhd
-    new_vhd[ln:ln] = [l for f in files for l in open(f, 'r').readlines()]
+    new_vhd[ln:ln] = [l for f in files for l in open(
+        f, 'r', encoding='utf-8').readlines()]
     return new_vhd
 
 

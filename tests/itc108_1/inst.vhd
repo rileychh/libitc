@@ -92,16 +92,26 @@ mot_inst : entity work.mot(arch)
 		speed   => speed
 	);
 
-bg_inst : entity work.bg(syn)
-	port map(
-		address => std_logic_vector(to_unsigned(bg_addr, 15)),
-		clock   => clk,
-		q       => bg_data_i
-	);
-
 icon_inst : entity work.icon(syn)
 	port map(
 		address => std_logic_vector(to_unsigned(icon_addr, 10)),
 		clock   => clk,
 		q       => icon_data_i
+	);
+
+tts_inst : entity work.tts(arch)
+	generic map(
+		txt_len_max => tts_rpt_len
+	)
+	port map(
+		clk       => clk,
+		rst_n     => rst_n,
+		tts_scl   => tts_scl,
+		tts_sda   => tts_sda,
+		tts_mo    => tts_mo,
+		tts_rst_n => tts_rst_n,
+		ena       => tts_ena,
+		busy      => tts_busy,
+		txt       => tts_data,
+		txt_len   => tts_rpt_len
 	);

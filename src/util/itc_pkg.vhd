@@ -150,6 +150,7 @@ package itc is
 	-- num: the unsigned number to be converted
 	-- base: output base system. can be 2/8/10/16.
 	function to_string(num, num_max, base, length : integer) return string;
+	function to_string(num, num_max, base, length : integer) return u8_arr_t;
 end package;
 
 package body itc is
@@ -321,6 +322,17 @@ package body itc is
 			else -- A to F
 				result(length - c) := character'val(to_integer(temp) - 10 + character'pos('A'));
 			end if;
+		end loop;
+
+		return result;
+	end function;
+
+	function to_string(num, num_max, base, length : integer) return u8_arr_t is
+		constant str : string := to_string(num, num_max, base, length);
+		variable result : u8_arr_t(0 to length - 1);
+	begin
+		for char in str'range loop
+			result(char - 1) := to_unsigned(character'pos(str(char)), 8);
 		end loop;
 
 		return result;
