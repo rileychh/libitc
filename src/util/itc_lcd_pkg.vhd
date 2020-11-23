@@ -1,5 +1,4 @@
 --!pp on
---!min cte
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -72,11 +71,23 @@ package itc_lcd is
 					 p_coord : l_coord_t;
 					 p_width, p_height : integer) return l_pack_t;
 
-	-- l_rotate: returns the rotated pixel address of a picture
+	function l_paste_txt(l_addr : integer; 
+						 l_data : l_px_t; txt : string;
+						 txt_coord : l_coord_t) return l_px_t;
+
+	-- l_rotate: returns the rotated address of a picture
 	-- addr: the original address
 	-- angle: 90 degrees clockwise to rotate. can be 0, 1, 2, 3
 	-- p_width, p_height: the original width and height of picture
 	function l_rotate(addr, angle, p_width, p_height : integer) return integer;
+
+	-- l_mirror: returns mirrored address of a picture
+	-- addr: the original address
+	-- mode: 0: original, 1: Y-mirror, 2: X-mirror, 3: XY-mirror
+	-- p_width, p_height: the original width and height of picture
+	function l_mirror(addr, mode, p_width, p_height : integer) return integer;
+
+	function l_scale(addr, p_width, scale : integer) return integer;
 
 	-- l_map: change one color to another
 	-- data: current picture data
@@ -141,7 +152,7 @@ package itc_lcd is
 	type glyph_t is array (0 to 6) of unsigned(0 to 4);
 	type font_t is array (32 to 127) of glyph_t;
 
-	constant lcd_font : font_t := (-- this comment is for the formatter
+	constant l_font : font_t := (-- this comment is for the formatter
 	("00000", "00000", "00000", "00000", "00000", "00000", "00000"), -- [ 32] ' '
 	("00100", "00100", "00100", "00100", "00000", "00000", "00100"), -- [ 33] '!'
 	("01010", "01010", "01010", "00000", "00000", "00000", "00000"), -- [ 34] '"'
@@ -254,11 +265,11 @@ package body itc_lcd is
 		return (left(0) * right, left(1) * right);
 	end function;
 
-	function to_coord(addr : l_addr_t; p_width : integer) return l_coord_t is begin
+	function to_coord(addr, p_width : integer) return l_coord_t is begin
 		return (addr / p_width, addr mod p_width);
 	end function;
 
-	function to_coord(addr : l_addr_t) return l_coord_t is begin
+	function to_coord(addr : integer) return l_coord_t is begin
 		return to_coord(addr, l_width);
 	end function;
 
@@ -282,7 +293,7 @@ package body itc_lcd is
 		constant row : integer := to_coord(addr, p_width)(0);
 		constant col : integer := to_coord(addr, p_width)(1);
 	begin
-		case angle mod 4 is
+		case angle is
 			when 0 =>
 				return addr; -- or row * p_width + col
 			when 1 =>
@@ -291,6 +302,24 @@ package body itc_lcd is
 				return p_width * p_height - addr - 1; -- reverse
 			when 3 =>
 				return (p_width - col - 1) * p_height + row;
+			when others => 
+				return addr;
+		end case; 
+	end function;
+
+	function l_mirror(addr, mode, p_width, p_height : integer) return integer is
+		constant row : integer := to_coord(addr, p_width)(0);
+		constant col : integer := to_coord(addr, p_width)(1);
+	begin
+		case mode is
+			when 0 =>
+				return addr; -- or row * p_width + col
+			when 1 =>
+				return to_addr((row, p_width - col - 1), p_width);
+			when 2 =>
+				return to_addr((p_height - row - 1, col), p_width);
+			when 3 =>
+				return to_addr((p_height - row - 1, p_width - col - 1), p_width);
 			when others => 
 				return addr;
 		end case; 
@@ -316,6 +345,30 @@ package body itc_lcd is
 			return to_unsigned(to_addr(l_coord - p_coord, p_width), l_addr_width) & p_data;
 		else
 			return to_unsigned(0, l_addr_width) & l_data;
+		end if;
+	end function;
+
+	function l_paste_txt(l_addr : integer; 
+						 l_data : l_px_t; txt : string;
+						 txt_coord : l_coord_t) return l_px_t is
+		constant txt_width : integer := txt'length * 5;
+		constant txt_height : integer := 7;
+		constant l_coord : l_coord_t := to_coord(l_addr);
+		constant txt_coord_end : l_coord_t := (txt_coord(0) + txt_height - 1, txt_coord(1) + txt_width - 1);
+		constant addr : integer := to_addr((l_coord - txt_coord), txt_width);
+		constant char_cnt : integer := (addr / 5) mod txt'length + 1;
+		constant char_row : integer := addr / 5 / txt'length;
+		constant char_col : integer := addr mod 5;
+	begin
+		if txt_coord(0) <= l_coord(0) and l_coord(0) <= txt_coord_end(0) and  -- check row
+		   txt_coord(1) <= l_coord(1) and l_coord(1) <= txt_coord_end(1) then -- check column
+			if l_font(character'pos(txt(char_cnt)))(char_row)(char_col) = '1' then
+				return black;
+			else
+				return white;
+			end if;
+		else
+			return l_data;
 		end if;
 	end function;
 
