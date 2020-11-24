@@ -73,15 +73,15 @@ if {$make_assignments} {
 	set_global_assignment -name QIP_FILE tests/res/image_bicolor.qip
 	set_global_assignment -name MIF_FILE tests/res/image_bicolor.mif
 
-	# <start>108th section1 target files</start>
 	set_global_assignment -name VHDL_FILE dist/itc108_1.pp.vhd
 	set_global_assignment -name QIP_FILE tests/itc108_1/res/icon.qip
 	set_global_assignment -name MIF_FILE tests/itc108_1/res/icon.mif
-	# <end>108th section1 target files<end>
 
-	# <start>109th section2 target files</start>
-	set_global_assignment -name VHDL_FILE dist/itc108_2.pp.vhd
-	# <start>109th section2 target files</start>
+	# set_global_assignment -name VHDL_FILE dist/itc108_2.pp.vhd
+
+	# set_global_assignment -name VHDL_FILE dist/itc108_2_1124.pp.vhd
+
+	# set_global_assignment -name VHDL_FILE dist/itc109_2_ex.pp.vhd
 
 	set_global_assignment -name VHDL_FILE src/dht.vhd
 	set_global_assignment -name VHDL_FILE src/dot.vhd
