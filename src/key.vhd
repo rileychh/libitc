@@ -19,12 +19,23 @@ end key;
 
 architecture arch of key is
 
+	signal clk_scan : std_logic;
 	signal pressed_i : std_logic; -- not debounced pressed flag
 
 begin
 
+	clk_inst : entity work.clk(arch)
+		generic map(
+			freq => 1_000
+		)
+		port map(
+			clk_in  => clk,
+			rst_n   => rst_n,
+			clk_out => clk_scan
+		);
+
 	-- scan through columns
-	process (clk, rst_n)
+	process (clk_scan, rst_n)
 		variable curr_cycle_pressed : std_logic;
 		variable column : integer range 0 to 3;
 	begin
@@ -32,7 +43,7 @@ begin
 			pressed_i <= '0';
 			curr_cycle_pressed := '0';
 			column := 0;
-		elsif rising_edge(clk) then
+		elsif rising_edge(clk_scan) then
 			if reduce(key_row, "and") = '0' then -- key_row has zeros (some key is pressed)
 				key <= index_of(key_row, '0') * 4 + column;
 				curr_cycle_pressed := '1'; -- remeber a button is pressed this cycle

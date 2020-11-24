@@ -3,6 +3,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 use work.itc.all;
+use work.itc_lcd.all;
 
 entity rgb is
 	port (
@@ -11,7 +12,7 @@ entity rgb is
 		-- rgb
 		rgb : out std_logic_vector(0 to 2);
 		-- user logic
-		color : in unsigned(11 downto 0) -- format: 0xRGB
+		color : in l_px_t -- format: 0xRGB
 	);
 end rgb;
 
@@ -24,12 +25,12 @@ begin
 			generic map(
 				-- higher means less LCs, but LED won't turn on if too high
 				-- 3125000Hz (max for 4-bit color) is tested and working
-				pwm_freq => sys_clk_freq / 2 ** 4
+				pwm_freq => sys_clk_freq / 2 ** 8
 			)
 			port map(
 				clk     => clk,
 				rst_n   => rst_n,
-				duty    => to_integer(color((2 - i) * 4 + 3 downto (2 - i) * 4)) * 100 / 16,
+				duty    => to_integer(color((2 - i) * 8 + 7 downto (2 - i) * 8)) * 100 / 16,
 				pwm_out => rgb(i)
 			);
 	end generate pwm_gen;

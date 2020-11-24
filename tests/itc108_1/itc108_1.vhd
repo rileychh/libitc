@@ -32,7 +32,11 @@ entity itc108_1 is
 		-- tts
 		tts_scl, tts_sda : inout std_logic;
 		tts_mo           : in unsigned(2 downto 0);
-		tts_rst_n        : out std_logic
+		tts_rst_n        : out std_logic;
+		-- led
+		led_r, led_g, led_y : out std_logic;
+		-- debug
+		dbg_a, dbg_b : out u8r_t
 	);
 end itc108_1;
 
@@ -49,7 +53,7 @@ architecture arch of itc108_1 is
 	signal prev_temp : integer range 0 to 99;
 	signal icon_color : l_px_t;
 	signal icon_dir : integer range 0 to 3;
-	signal delayed_lux : i16_t;
+	signal prev_lux : i16_t;
 	signal tsl_mode : character := 'R';
 
 	signal timer_ena : std_logic;
@@ -86,6 +90,13 @@ begin
 
 	icon_data <= white when icon_data_i(0) = '1' else black;
 
+	dbg_a <= tts_scl & tts_sda & reverse(tts_mo) & tts_rst_n & tts_ena & tts_busy;
+	dbg_b <= (others => '0');
+
+	led_r <= tts_mo(0);
+	led_g <= tts_mo(1);
+	led_y <= tts_mo(2);
+
 	process (clk_main, rst_n) begin
 		if rst_n = '0' then
 			mode <= tft;
@@ -96,6 +107,7 @@ begin
 			seg_data <= (others => ' ');
 			seg_dot <= (others => '0');
 			speed <= 0;
+			tts_ena <= '0';
 		elsif rising_edge(clk_main) then
 			if l_addr < l_addr'high then
 				l_addr <= l_addr + 1;
@@ -264,12 +276,12 @@ begin
 									icon_color <= blue;
 									icon_dir <= 1;
 								end if;
-								delayed_lux <= lux;
+								prev_lux <= lux;
 							end if;
 					end case;
 
 					--!def lp_lux l_paste_txt(l_addr, lp_mode, lux_str(1) & ' ' & lux_str(2) & ' ' & lux_str(3) & ' ' & lux_str(4), (76, 45))
-					--!def lux_str to_string(delayed_lux, 9999, 10, 4)
+					--!def lux_str to_string(prev_lux, 9999, 10, 4)
 					--!def lp_mode l_paste_txt(l_addr, lp_rt, "M o d e :  " & tsl_mode, (20, 20))
 					--!def lp_rt l_paste_txt(l_addr, to_data(lp_icon), "R T :", (120, 16))
 					--!def lp_icon l_paste(l_addr, white, l_map(icon_data, black, icon_color), (108, 76), 32, 32)
@@ -288,6 +300,8 @@ begin
 
 					case state is
 						when rst =>
+							timer_load <= 0;
+							timer_ena <= '0';
 							brightness <= 0;
 							speed <= 0;
 							seg_data <= (others => ' ');
@@ -295,50 +309,62 @@ begin
 							state <= stop;
 
 						when stop =>
+							timer_load <= 0;
+							timer_ena <= '0';
 							l_wr_ena <= '0';
 							tts_ena <= '0';
 							speed <= 0;
 
 						when start =>
-							tts_ena <= '1';
-							tts_data(0 to 56) <=
-							txt_rpt_1 & to_string(lux, lux'high, 10, 4) &
-							txt_rpt_2 & to_string(temp, temp'high, 10, 2) &
-							txt_rpt_3 & to_string(speed_level, speed_level'high, 10, 1);
+							timer_ena <= '1';
 
-							if lux > 15 then
-								dir <= '1';
-								icon_color <= black;
-								icon_dir <= 0;
-								tts_data(57 to 66) <= txt_rpt_4_ccw;
-							else
-								dir <= '0';
-								icon_color <= blue;
-								icon_dir <= 1;
-								tts_data(57 to 66) <= txt_rpt_4_cw;
+							if msec = 0 then
+								prev_lux <= lux;
+								prev_temp <= temp;
+								speed_level <= 2;
+								l_wr_ena <= '1';
+								brightness <= 100;
+								tsl_mode <= 'R';
+								tts_ena <= '1';
+							elsif tts_busy = '0' then
+								tts_data(0 to 56) <=
+								txt_rpt_1 & to_string(lux, lux'high, 10, 4) &
+								txt_rpt_2 & to_string(temp, temp'high, 10, 2) &
+								txt_rpt_3 & to_string(speed_level, speed_level'high, 10, 1);
+
+								if lux > 15 then
+									dir <= '1';
+									icon_color <= black;
+									icon_dir <= 0;
+									tts_data(57 to 66) <= txt_rpt_4_ccw;
+								else
+									dir <= '0';
+									icon_color <= blue;
+									icon_dir <= 1;
+									tts_data(57 to 66) <= txt_rpt_4_cw;
+								end if;
+								prev_lux <= lux;
+
+								if temp > prev_temp then
+									incrs;
+									tts_data(67 to 76) <= txt_rpt_5_up;
+								elsif temp < prev_temp then
+									decrs;
+									tts_data(67 to 76) <= txt_rpt_5_down;
+								else
+									tts_data(67 to 76) <= txt_rpt_5_same;
+								end if;
+								prev_temp <= temp;
 							end if;
 
-							if temp > prev_temp then
-								incrs;
-								tts_data(67 to 76) <= txt_rpt_5_up;
-							elsif temp < prev_temp then
-								decrs;
-								tts_data(67 to 76) <= txt_rpt_5_down;
-							else
-								tts_data(67 to 76) <= txt_rpt_5_same;
-							end if;
-							prev_temp <= temp;
 							speed <= 25 + speed_level * 25;
 
-							l_wr_ena <= '1';
-							brightness <= 100;
-							tsl_mode <= 'R';
+							seg_data <= to_string(speed_level, speed_level'high, 10, 2) & "SP" &
+								to_string(prev_temp, prev_temp'high, 10, 2) & seg_deg & 'C';
+							seg_dot <= "00110000";
+
 							l_data <= lp_lux;
 							icon_addr <= l_mirror(to_addr(lp_icon), icon_dir, 32, 32);
-
-							seg_data <= to_string(speed_level, speed_level'high, 10, 2) & "SP" &
-								to_string(temp, temp'high, 10, 2) & seg_deg & 'C';
-							seg_dot <= "00110000";
 					end case;
 			end case;
 		end if;
