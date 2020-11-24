@@ -1,0 +1,17 @@
+8
+txt_rpt_1
+智能居家控溫系統啟動 亮度
+txt_rpt_2
+勒克司 且溫度為
+txt_rpt_3
+度C 轉速為
+txt_rpt_4_cw
+順時鐘旋轉
+txt_rpt_4_ccw
+逆時鐘旋轉
+txt_rpt_5_up
+轉速增加中
+txt_rpt_5_same
+持續換氣中
+txt_rpt_5_down
+轉速降低中

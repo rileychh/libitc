@@ -3,9 +3,9 @@
 import pyperclip
 from textwrap import *
 
-txt_type = 'bytes_t'
-txt_signal_name = 'txt'
-txt_len_signal_name = 'len'
+txt_type = 'u8_arr_t'
+txt_signal_name = 'tts_data'
+txt_len_signal_name = 'tts_len'
 
 cnt = int(input())
 name = []
