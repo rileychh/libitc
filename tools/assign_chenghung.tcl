@@ -139,12 +139,16 @@ if {$make_assignments} {
 	set_location_assignment PIN_112 -to dot_com[7]
 
 	# PWM{1..2}, IN{1,2,3,4}
+	# set_location_assignment PIN_176 -to mot_ena[0]
+	# set_location_assignment PIN_171 -to mot_ena[1]
+	# set_location_assignment PIN_189 -to mot_ch[0]
+	# set_location_assignment PIN_187 -to mot_ch[1]
+	# set_location_assignment PIN_185 -to mot_ch[2]
+	# set_location_assignment PIN_183 -to mot_ch[3]
 	set_location_assignment PIN_176 -to mot_ena[0]
-	set_location_assignment PIN_171 -to mot_ena[1]
 	set_location_assignment PIN_189 -to mot_ch[0]
 	set_location_assignment PIN_187 -to mot_ch[1]
-	set_location_assignment PIN_185 -to mot_ch[2]
-	set_location_assignment PIN_183 -to mot_ch[3]
+
 
 	# UART_{TX,RX} (green, white)
 	set_location_assignment PIN_128 -to uart_rx

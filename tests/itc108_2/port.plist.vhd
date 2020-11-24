@@ -73,9 +73,10 @@ mot_inst : entity work.mot(arch)
 		speed   => speed
 	);
 
-uart_inst : entity work.uart(arch)
+uart_txt_inst : entity work.uart_txt(arch)
 	generic map(
-		baud => 9600
+		txt_len_max => txt_len_max,
+		baud        => 9600
 	)
 	port map(
 		clk     => clk,
@@ -85,12 +86,16 @@ uart_inst : entity work.uart(arch)
 		tx_ena  => tx_ena,
 		tx_busy => tx_busy,
 		tx_data => tx_data,
-		rx_busy => open,
-		rx_err  => open,
-		rx_data => open
+		tx_len  => tx_len,
+		rx_busy => rx_busy,
+		rx_data => rx_data,
+		rx_len  => rx_len
 	);
 
 dot_inst : entity work.dot(arch)
+	generic map(
+		common_anode => '1'
+	)
 	port map(
 		clk       => clk,
 		rst_n     => rst_n,

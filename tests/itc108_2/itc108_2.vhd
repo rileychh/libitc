@@ -33,15 +33,12 @@ architecture arch of itc108_2 is
 	signal speed : i8_t;
 
 	-- fake rs232 - uart
-	signal tx_ena, tx_busy : std_logic;
-	signal tx_data : u8_t;
+	constant txt_len_max : integer := 32;
 
-	signal rx_busy, rx_err : std_logic;
-	signal rx_data : u8_t;
+	signal tx_ena, tx_busy, rx_busy : std_logic;
+	signal tx_data, rx_data : string(1 to txt_len_max);
+	signal tx_len, rx_len : integer range 1 to txt_len_max;
 	signal rx_done : std_logic;
-
-	signal buf : u8_arr_t(0 to 63);
-	signal buf_cnt : integer range buf'range;
 
 	-- dot
 	signal dot_data_r, dot_data_g : u8r_arr_t(0 to 7);
@@ -79,7 +76,6 @@ begin
 
 			-- uart
 			tx_ena <= '0'; -- uart tx disabled (Boolean:default => false)
-			buf_cnt <= 0;
 			-- dot reset => full orange
 			dot_data_r <= (others => (others => '1'));
 			dot_data_g <= (others => (others => '1'));
@@ -95,7 +91,8 @@ begin
 			-- when user key press action
 			if key_on_press = '1' then
 				-- 0 => reset, 3 => back, 7 => delete, 15 => check
-				tx_data <= to_unsigned(key, 8);
+				tx_data(1 to 1) <= to_string(key, key'high, 16, 1);
+				tx_len <= 1;
 				tx_ena <= '1';
 				if lock = '0' then
 					case key is
@@ -109,7 +106,6 @@ begin
 
 							-- uart
 							tx_ena <= '0';
-							buf_cnt <= 0;
 							-- dot reset => full orange
 							dot_data_r <= (others => (others => '1'));
 							dot_data_g <= (others => (others => '1'));

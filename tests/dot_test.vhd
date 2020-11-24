@@ -27,6 +27,9 @@ architecture arch of dot_test is
 begin
 
 	dot_inst : entity work.dot(arch)
+		generic map(
+			common_anode => '0'
+		)
 		port map(
 			clk       => clk,
 			rst_n     => rst_n,
