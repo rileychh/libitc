@@ -23,6 +23,12 @@ architecture arch of uart_echo_test is
 	signal tx_len, rx_len : integer range 1 to txt_len_max;
 	signal rx_done : std_logic;
 
+	constant price : string := "localhost";
+
+	-- timer
+	signal timer_ena : std_logic;
+	signal timer_load, msec : i32_t;
+
 begin
 
 	uart_txt_inst : entity work.uart_txt(arch)
@@ -52,18 +58,38 @@ begin
 			rising  => open,
 			falling => rx_done
 		);
+	-- timer pause => msec <= load
+	timer_inst : entity work.timer(arch)
+		port map(
+			clk   => clk,
+			rst_n => rst_n,
+			ena   => timer_ena,
+			load  => timer_load,
+			msec  => msec
+		);
 
 	process (clk, rst_n) begin
 		if rst_n = '0' then
 			tx_ena <= '0';
+			timer_ena <= '0';
 		elsif rising_edge(clk) then
-			if rx_done = '1' and tx_busy = '0' then
-				tx_data <= rx_data;
-				tx_len <= rx_len;
+			timer_ena <= '1';
+			tx_data(price'range) <= price;
+			tx_len <= price'length;
+
+			if tx_busy = '0' and msec mod 1000 = 1 then
 				tx_ena <= '1';
+				-- == tx_data(1 to price.length);
 			else
 				tx_ena <= '0';
 			end if;
+			-- if rx_done = '1' and tx_busy = '0' then
+			-- 	tx_data <= rx_data;
+			-- 	tx_len <= rx_len;
+			-- 	tx_ena <= '1';
+			-- else
+			-- 	tx_ena <= '0';
+			-- end if;
 		end if;
 	end process;
 

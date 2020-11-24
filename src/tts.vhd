@@ -37,7 +37,7 @@ architecture arch of tts is
 	signal start : std_logic;
 	signal i2c_accepted : std_logic;
 	signal i2c_done : std_logic;
-	signal tts_done : std_logic;
+	signal tts_done, tts_accepted : std_logic;
 
 	signal txt_cnt : integer range 0 to txt_len_max - 1;
 
@@ -85,7 +85,7 @@ begin
 			rst_n   => rst_n,
 			sig_in  => tts_mo(0),
 			rising  => tts_done,
-			falling => open
+			falling => tts_accepted
 		);
 
 	process (clk, rst_n) begin
@@ -108,13 +108,13 @@ begin
 				when send =>
 					if i2c_done = '1' then -- interface is ready for next byte
 						if txt_cnt = 0 then
-							i2c_in <= x"00"; -- set MO[2..0] = 000
+							i2c_in <= x"06"; -- set MO[2..0] = 110
 						elsif txt_cnt >= 1 and txt_cnt <= txt_len then
 							i2c_in <= txt(txt_cnt - 1);
 						elsif txt_cnt = txt_len + 1 then
 							i2c_in <= tts_set_mo;
 						else
-							i2c_in <= x"01"; -- set MO[2..0] = 001
+							i2c_in <= x"07"; -- set MO[2..0] = 111
 						end if;
 
 						if txt_cnt = txt_len + 2 then
@@ -130,7 +130,7 @@ begin
 						i2c_ena <= '0';
 					end if;
 
-					if i2c_done = '1' then -- last byte transmission complete
+					if i2c_done = '1' and tts_accepted = '1' then -- last byte transmission complete
 						state <= wait_speech;
 					end if;
 
