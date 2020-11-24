@@ -46,7 +46,7 @@ if {$make_assignments} {
 	# SEG{1,2}_{A..DOT}
 	set_location_assignment PIN_232 -to seg_led[0]
 	set_location_assignment PIN_236 -to seg_led[1]
-	set_location_assignment PIN_240 -to seg_led[2]
+	set_location_assignment PIN_239 -to seg_led[2]
 	set_location_assignment PIN_9 -to seg_led[3]
 	set_location_assignment PIN_18 -to seg_led[4]
 	set_location_assignment PIN_21 -to seg_led[5]
