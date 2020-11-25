@@ -64,15 +64,12 @@ architecture arch of itc109_2_ex is
 	signal tx_data, rx_data : string(1 to 64);
 	signal tx_len, rx_len : integer range tx_data'range;
 
-	type mode_t is (init, idle, card_in, login, amount, receipt, card_out);
-	signal mode : mode_t;
-
-	type state_t is (rst, init, start);
-	signal state : state_t;
+	signal state : integer range 0 to 6;
 
 	signal accounts : i16_arr_t(21 to 28) := (others => 2000);
 	signal dot_scroll_row : integer range 0 to 7;
 	signal key_buf : i4_arr_t(0 to 3);
+	signal receipt_0, receipt_1, receipt_2 : string(1 to 4);
 
 begin
 
@@ -98,7 +95,7 @@ begin
 
 			accounts <= (others => 2000);
 			key_buf <= (others => 0);
-			state <= init;
+			state <= 0;
 		elsif rising_edge(clk) then
 			if l_addr < l_addr'high then
 				l_addr <= l_addr + 1;
@@ -108,13 +105,21 @@ begin
 
 			if key_on_press = '1' then
 				case key_lut(key) is
-					when key_rst => state <= init;
+					when key_rst => state <= 0;
+					when key_back =>
+						if state > 0 then
+							state <= state - 1;
+						end if;
+					when key_ok =>
+						if state < state'high then
+							state <= state + 1;
+						end if;
 					when others => null;
 				end case;
 			end if;
 
 			case state is
-				when init =>
+				when 0 => -- init
 					timer_ena <= '1';
 					dot_r <= (others => (others => '1'));
 					dot_g <= (others => (others => '1'));
@@ -133,98 +138,62 @@ begin
 					if msec = 1000 then
 						timer_load <= 0;
 						timer_ena <= '0';
-						state <= idle;
+						state <= 1;
 					end if;
 
-				when idle =>
+				when 1 => -- idle
 					timer_load <= 0;
 					timer_ena <= '0';
 					dot_r <= dot_logo_r;
 					dot_g <= dot_logo_g;
 
-				when card_in =>
-					if key_on_press = '1' then
-						case key_lut(key) is
-							when key_ok => state <= login;
-							when others => null;
-						end case;
-					end if;
+				when 2 => -- card_in
+					timer_load <= 0;
+					timer_ena <= '0';
 
-					timer_ena <= '1';
+					seg_data <= (others => '0'); -- string 0
+					seg_data <= (others => '0'); -- logic 0
 
-					if msec = 1 then
-						dot_r <= dot_up_r;
-						dot_g <= dot_up_g;
-					elsif msec mod 200 = 1 then
-						-- get the first row
-						--!def dot_row0 (msec / 200) mod 8
-						dot_r <= dot_up_r(dot_row0) & dot_up_r(7 - dot_row0 to dot_row0 - 1);
-						-- dot_r <= dot_r(7) & dot_r(0 to 6);
-						-- dot_r <= dot_r(6) & dot_r(1 to 5);
-						-- dot_r <= dot_r(5) & dot_r(2 to 4);
-						-- dot_g <= dot_g(7) & dot_g(0 to 6);
-						dot_g <= dot_up_g(dot_row0) & dot_up_g(7 - dot_row0 to dot_row0 - 1);
-					end if;
+					dot_r <= dot_up_r;
+					dot_g <= dot_up_g;
 
 					if reduce(sw_rising, "or_") = '1' then
 						tx_data(1 to 2) <= to_string(index_of(sw_rising, '1') + 21, 99, 10, 2);
 						tx_len <= 2;
 						tx_ena <= '1';
-						state <= login;
+						state <= 3;
 					else
 						tx_ena <= '0';
 					end if;
 
-				when login =>
-					if key_on_press = '1' then
-						case key_lut(key) is
-							when key_clr => state <= card_in;
-							when key_ok => state <= amount;
-							when others => null;
-						end case;
-					end if;
+				when 3 => -- login
+					timer_load <= 0;
+					timer_ena <= '0';
+					tx_ena <= '0';
 
+				when 4 => -- amount
 					timer_load <= 0;
 					timer_ena <= '0';
 
-				when amount =>
-					if key_on_press = '1' then
-						case key_lut(key) is
-							when key_clr => state <= card_in;
-							when key_ok => state <= login;
-							when others => null;
-						end case;
-					end if;
-
+				when 5 => -- receipt
 					timer_load <= 0;
 					timer_ena <= '0';
 
-				when receipt =>
-					if key_on_press = '1' then
-						case key_lut(key) is
-							when key_clr => state <= card_in;
-							when key_ok => state <= login;
-							when others => null;
-						end case;
-					end if;
+					receipt_0 <= "24  ";
+					receipt_1 <= "4592";
+					receipt_2 <= "500 ";
 
-					timer_load <= 0;
-					timer_ena <= '0';
+					--!def lp_row2 l_paste_txt(l_addr, lp_row1, receipt_2(1) & "      " & receipt_2(2) & "      " & receipt_2(3) & "      " & receipt_2(4) , (129, 14))
+					--!def lp_row1 l_paste_txt(l_addr, lp_row0, receipt_1(1) & "      " & receipt_1(2) & "      " & receipt_1(3) & "      " & receipt_1(4) , (76, 14))
+					--!def lp_row0 l_paste_txt(l_addr, white, receipt_0(1) & "      " & receipt_0(2) & "      " & receipt_0(3) & "      " & receipt_0(4) , (23, 14))
+					l_data <= lp_row2;
 
-				when card_out =>
-					if key_on_press = '1' then
-						case key_lut(key) is
-							when key_clr => state <= card_in;
-							when key_ok => state <= login;
-							when others => null;
-						end case;
-					end if;
-
+				when 6 => -- card_out
 					timer_ena <= '1';
 			end case;
 
-			seg_data <= to_string(msec, 99999999, 10, 8);
-			-- seg_data <= to_string(state_t'pos(state), 99999999, 10, 8);
+			-- seg_data <= to_string(msec, 99999999, 10, 8);
+			seg_data <= to_string(state, 99999999, 10, 8);
 			-- seg_data <= to_string(key, 99999999, 10, 8);
 			-- seg_dot <= repeat(key_on_press, 8);
 		end if;
