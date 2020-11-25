@@ -45,6 +45,7 @@ mode_group = parser.add_mutually_exclusive_group()
 mode_group.add_argument('-i', '--icon', action='store_true')
 mode_group.add_argument('-f', '--fit', metavar='COLOR', default='', type=str)
 parser.add_argument('-b', '--bicolor', action='store_true', default=False)
+parser.add_argument('-s', '--small', action='store_true', default=False)
 args = parser.parse_args()
 
 buffer = BytesIO()
@@ -68,13 +69,23 @@ pixels = list(im.getdata())
 def format_pixel(pixel: Union[tuple[int, int, int], int]) -> str:
     if args.bicolor:
         return '1' if pixel else '0'
+    elif args.small:
+        r, g, b = pixel
+        return '{:x}'.format((r >> 7) << 2 | (g >> 7) << 1 | b >> 7)
     else:
         r, g, b = pixel
         return '{:x}'.format(r << 16 | g << 8 | b)
 
 
+if args.bicolor:
+    width = 1
+elif args.small:
+    width = 3
+else:
+    width = 24
+
 mif_header = f'''\
-WIDTH={'1' if args.bicolor else '24'};
+WIDTH={str(width)};
 DEPTH={len(pixels)};
 
 ADDRESS_RADIX=UNS;

@@ -64,7 +64,10 @@ architecture arch of itc109_2_ex is
 	signal tx_data, rx_data : string(1 to 64);
 	signal tx_len, rx_len : integer range tx_data'range;
 
-	type state_t is (init, idle, card_in, login, amount, receipt, card_out);
+	type mode_t is (init, idle, card_in, login, amount, receipt, card_out);
+	signal mode : mode_t;
+
+	type state_t is (rst, init, start);
 	signal state : state_t;
 
 	signal accounts : i16_arr_t(21 to 28) := (others => 2000);
@@ -105,15 +108,7 @@ begin
 
 			if key_on_press = '1' then
 				case key_lut(key) is
-					when key_back =>
-						if state /= init then
-							state <= state_t'val((state_t'pos(state) - 1));
-						end if;
 					when key_rst => state <= init;
-					when key_ok =>
-						if state /= card_out then
-							state <= state_t'val((state_t'pos(state) + 1));
-						end if;
 					when others => null;
 				end case;
 			end if;
@@ -148,6 +143,13 @@ begin
 					dot_g <= dot_logo_g;
 
 				when card_in =>
+					if key_on_press = '1' then
+						case key_lut(key) is
+							when key_ok => state <= login;
+							when others => null;
+						end case;
+					end if;
+
 					timer_ena <= '1';
 
 					if msec = 1 then
@@ -174,18 +176,50 @@ begin
 					end if;
 
 				when login =>
+					if key_on_press = '1' then
+						case key_lut(key) is
+							when key_clr => state <= card_in;
+							when key_ok => state <= amount;
+							when others => null;
+						end case;
+					end if;
+
 					timer_load <= 0;
 					timer_ena <= '0';
 
 				when amount =>
+					if key_on_press = '1' then
+						case key_lut(key) is
+							when key_clr => state <= card_in;
+							when key_ok => state <= login;
+							when others => null;
+						end case;
+					end if;
+
 					timer_load <= 0;
 					timer_ena <= '0';
 
 				when receipt =>
+					if key_on_press = '1' then
+						case key_lut(key) is
+							when key_clr => state <= card_in;
+							when key_ok => state <= login;
+							when others => null;
+						end case;
+					end if;
+
 					timer_load <= 0;
 					timer_ena <= '0';
 
 				when card_out =>
+					if key_on_press = '1' then
+						case key_lut(key) is
+							when key_clr => state <= card_in;
+							when key_ok => state <= login;
+							when others => null;
+						end case;
+					end if;
+
 					timer_ena <= '1';
 			end case;
 
