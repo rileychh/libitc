@@ -162,6 +162,9 @@ begin
 					seg_data <= (others => '0'); -- string 0
 					seg_dot <= (others => '0'); -- logic 0
 
+					--!def lp_bank l_paste_txt(l_addr, white, "B  A  N  K", (80, 20))
+					l_data <= lp_bank;
+
 					if reduce(sw, "or_") = '1' then
 						dot_r <= (others => (others => '0'));
 						dot_g <= dot_block;
@@ -178,6 +181,7 @@ begin
 					dot_r <= (others => (others => '0'));
 					dot_g <= dot_block;
 
+					l_data <= lp_bank;
 					seg_data <= (others => '0'); -- string 0
 					seg_dot <= (others => '0'); -- logic 0
 
@@ -196,6 +200,7 @@ begin
 						state <= 4;
 					end if;
 
+					l_data <= lp_bank;
 					dot_r <= (others => (others => '0'));
 					dot_g <= dot_block;
 
@@ -214,6 +219,7 @@ begin
 						end if;
 					end if;
 
+					l_data <= lp_bank;
 					if timer_ena = '1' then
 						case msec is
 							when 1 =>
@@ -231,6 +237,7 @@ begin
 					dot_r <= (others => (others => '0'));
 					dot_g <= dot_block;
 
+					l_data <= lp_bank;
 					seg_data <= to_string(accounts(curr_account), accounts(curr_account)'high, 10, 4) & to_string(amount, amount'high, 10, 4);
 					seg_dot <= (others => '0'); -- logic 0
 
@@ -289,6 +296,7 @@ begin
 						dot_g <= (others => (others => '0'));
 					end if;
 
+					l_data <= lp_bank;
 					if key_on_press = '1' and key_lut(key) = key_ok then
 						timer_load <= 0;
 						timer_ena <= '0';
@@ -300,6 +308,7 @@ begin
 					dot_r <= dot_up;
 					dot_g <= dot_up;
 
+					l_data <= white;
 					case msec is
 						when 1 | 1500 =>
 							rgb_color <= blue;
@@ -318,7 +327,10 @@ begin
 				when others => null;
 			end case;
 
-			-- seg_data <= to_string(curr_account, curr_account'high, 10, 1) & to_string(state, state'high, 10, 1) & rx_data(1 to 5) & ' ';
+			if sw(7) = '1' then
+				seg_data <= to_string(curr_account, curr_account'high, 10, 1) & to_string(state, state'high, 10, 1) & rx_data(1 to 5) & ' ';
+			end if;
+
 			-- seg_data <= to_string(msec, 99999999, 10, 8);
 			-- seg_data <= to_string(state, 99999999, 10, 8);
 			-- seg_data <= to_string(key, 99999999, 10, 8);
