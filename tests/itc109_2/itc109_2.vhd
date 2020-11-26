@@ -70,6 +70,7 @@ architecture arch of itc109_2 is
 	signal curr_account : integer range 1 to 3;
 	signal accounts : i16_arr_t(1 to 3) := (1000, 2000, 3000);
 	signal key_buf : string(1 to 4) := "0000";
+	signal amount : integer range 0 to 9999;
 	signal receipt_0, receipt_1, receipt_2 : string(1 to 4);
 
 begin
@@ -96,6 +97,7 @@ begin
 
 			accounts <= (1000, 2000, 3000);
 			key_buf <= (others => '0');
+			amount <= 0;
 			state <= 0;
 		elsif rising_edge(clk) then
 			if l_addr < l_addr'high then
@@ -166,7 +168,7 @@ begin
 						dot_g <= dot_up;
 					end if;
 
-					if key_on_press = '1' and key_lut(key) = key_ok then
+					if key_on_press = '1' and key_lut(key) = key_ok and reduce(sw, "or_") = '1' then
 						state <= 2;
 						curr_account <= index_of(sw, '1') + 1;
 					end if;
@@ -200,8 +202,7 @@ begin
 
 				when 4 => -- login (wait ok)
 					if key_on_press = '1' and key_lut(key) = key_ok then
-						if rx_data(1 to 5) = passwords(curr_account) then -- correct
-							curr_account <= index_of(sw, '1') + 1;
+						if rx_data(1) = to_string(curr_account, curr_account'high, 10, 1)(1) then -- correct
 							state <= 5;
 						else
 							timer_ena <= '1';
@@ -226,13 +227,14 @@ begin
 					dot_r <= (others => (others => '0'));
 					dot_g <= dot_block;
 
-					seg_data <= to_string(accounts(curr_account), accounts(curr_account)'high, 10, 4) & key_buf;
+					seg_data <= to_string(accounts(curr_account), accounts(curr_account)'high, 10, 4) & to_string(amount, amount'high, 10, 4);
 					seg_dot <= (others => '0'); -- logic 0
 
 					if key_on_press = '1' then
 						case key_lut(key) is
 							when 0 to 9 =>
-								key_buf <= key_buf(2 to 4) & to_string(key_lut(key), 9, 10, 1);
+								amount <= (amount mod 1000) * 10 + key_lut(key);
+							when key_ok => state <= 6;
 							when others => null;
 						end case;
 					end if;
@@ -256,8 +258,9 @@ begin
 				when others => null;
 			end case;
 
+			-- seg_data <= to_string(curr_account, curr_account'high, 10, 1) & to_string(state, state'high, 10, 1) & rx_data(1 to 5) & ' ';
 			-- seg_data <= to_string(msec, 99999999, 10, 8);
-			seg_data <= to_string(state, 99999999, 10, 8);
+			-- seg_data <= to_string(state, 99999999, 10, 8);
 			-- seg_data <= to_string(key, 99999999, 10, 8);
 			-- seg_dot <= repeat(key_on_press, 8);
 		end if;
