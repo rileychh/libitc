@@ -70,7 +70,7 @@ architecture arch of itc109_2 is
 	signal curr_account : integer range 1 to 3;
 	signal accounts : i16_arr_t(1 to 3) := (1000, 2000, 3000);
 	signal key_buf : string(1 to 4) := "0000";
-	signal amount : integer range 0 to 9999;
+	signal old_amount, amount : integer range 0 to 9999;
 	signal receipt_0, receipt_1, receipt_2 : string(1 to 4);
 
 begin
@@ -203,7 +203,10 @@ begin
 				when 4 => -- login (wait ok)
 					if key_on_press = '1' and key_lut(key) = key_ok then
 						if rx_data(1) = to_string(curr_account, curr_account'high, 10, 1)(1) then -- correct
+							timer_load <= 0;
+							timer_ena <= '0';
 							state <= 5;
+							old_amount <= accounts(curr_account);
 						else
 							timer_ena <= '1';
 						end if;
@@ -215,15 +218,14 @@ begin
 								buz <= '1';
 							when 500 =>
 								buz <= '0';
-								state <= 6; -- card out
+								timer_load <= 0;
+								timer_ena <= '0';
+								state <= 7; -- card out
 							when others => null;
 						end case;
 					end if;
 
 				when 5 => -- amount
-					timer_load <= 0;
-					timer_ena <= '0';
-
 					dot_r <= (others => (others => '0'));
 					dot_g <= dot_block;
 
@@ -234,7 +236,28 @@ begin
 						case key_lut(key) is
 							when 0 to 9 =>
 								amount <= (amount mod 1000) * 10 + key_lut(key);
-							when key_ok => state <= 6;
+							when key_ok =>
+								if amount <= accounts(curr_account) then
+									accounts(curr_account) <= accounts(curr_account) - amount;
+									state <= 6;
+								else
+									timer_ena <= '1';
+								end if;
+							when others => null;
+						end case;
+					end if;
+
+					if timer_ena = '1' then
+						case msec is
+							when 1 | 1000 =>
+								buz <= '1';
+							when 500 =>
+								buz <= '0';
+							when 1500 =>
+								buz <= '0';
+								timer_load <= 0;
+								timer_ena <= '0';
+								state <= 7; -- card out
 							when others => null;
 						end case;
 					end if;
@@ -243,18 +266,53 @@ begin
 					timer_load <= 0;
 					timer_ena <= '0';
 
-					receipt_0 <= "24  ";
-					receipt_1 <= "4592";
-					receipt_2 <= "500 ";
+					receipt_0 <= to_string(curr_account, curr_account'high, 10, 1) & "   ";
+					receipt_1 <= to_string(amount, amount'high, 10, 4);
+					receipt_2 <= to_string(accounts(curr_account), accounts(curr_account)'high, 10, 4);
 
 					--!def lp_row2 l_paste_txt(l_addr, lp_row1, receipt_2(1) & "      " & receipt_2(2) & "      " & receipt_2(3) & "      " & receipt_2(4) , (129, 14))
 					--!def lp_row1 l_paste_txt(l_addr, lp_row0, receipt_1(1) & "      " & receipt_1(2) & "      " & receipt_1(3) & "      " & receipt_1(4) , (76, 14))
 					--!def lp_row0 l_paste_txt(l_addr, white, receipt_0(1) & "      " & receipt_0(2) & "      " & receipt_0(3) & "      " & receipt_0(4) , (23, 14))
 					l_data <= lp_row2;
 
-				when 7 => -- card_out
-					timer_ena <= '1';
+					if key_on_press = '1' and key_lut(key) = key_ok then
+						state <= 7;
+					end if;
+
+				when 7 => -- card_pull
+					if sw(curr_account - 1) = '1' then
+						dot_r <= dot_block;
+						dot_g <= dot_block;
+					else
+						dot_g <= (others => (others => '0'));
+					end if;
+
+					if key_on_press = '1' and key_lut(key) = key_ok then
+						timer_load <= 0;
+						timer_ena <= '0';
+						state <= 8;
+					end if;
+
 				when 8 => -- done (rgb)
+					timer_ena <= '1';
+					dot_r <= dot_up;
+					dot_g <= dot_up;
+
+					case msec is
+						when 1 | 1500 =>
+							rgb_color <= blue;
+						when 500 | 2000 =>
+							rgb_color <= green;
+						when 1000 | 2500 =>
+							rgb_color <= red;
+						when 3000 =>
+							timer_load <= 0;
+							timer_ena <= '0';
+							rgb_color <= black;
+							state <= 1;
+						when others => null;
+					end case;
+
 				when others => null;
 			end case;
 
