@@ -77,6 +77,8 @@ begin
 
 	--!inc inst.vhd
 
+	dbg_a(0 to 1) <= uart_rx & uart_tx;
+
 	process (clk, rst_n) begin
 		if rst_n = '0' then
 			dot_r <= (others => (others => '1'));
