@@ -8,7 +8,7 @@ key_inst : entity work.key(arch)
 		key     => key
 	);
 
-edge_inst : entity work.edge(arch)
+edge_inst_rx : entity work.edge(arch)
 	port map(
 		clk     => clk,
 		rst_n   => rst_n,

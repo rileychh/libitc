@@ -53,7 +53,7 @@ if {$make_assignments} {
 
 	# source files
 	set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
-	set_global_assignment -name TOP_LEVEL_ENTITY itc109_2_ex
+	set_global_assignment -name TOP_LEVEL_ENTITY itc109_2
 
 	set_global_assignment -name VHDL_FILE tests/dht_test.vhd
 	set_global_assignment -name VHDL_FILE tests/dot_test.vhd
@@ -81,7 +81,7 @@ if {$make_assignments} {
 
 	# set_global_assignment -name VHDL_FILE dist/itc108_2_1124.pp.vhd
 
-	set_global_assignment -name VHDL_FILE dist/itc109_2_ex.pp.vhd
+	set_global_assignment -name VHDL_FILE dist/itc109_2.pp.vhd
 
 	# set_global_assignment -name VHDL_FILE dist/itc109_1.pp.vhd
 	# set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_0.qip
