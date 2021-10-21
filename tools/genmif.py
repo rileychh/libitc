@@ -45,6 +45,7 @@ mode_group = parser.add_mutually_exclusive_group()
 mode_group.add_argument('-i', '--icon', action='store_true')
 mode_group.add_argument('-f', '--fit', metavar='COLOR', default='', type=str)
 parser.add_argument('-b', '--bicolor', action='store_true', default=False)
+parser.add_argument('-t', '--tiny', action='store_true', default=False)
 parser.add_argument('-s', '--small', action='store_true', default=False)
 args = parser.parse_args()
 
@@ -69,9 +70,12 @@ pixels = list(im.getdata())
 def format_pixel(pixel: Union[tuple[int, int, int], int]) -> str:
     if args.bicolor:
         return '1' if pixel else '0'
-    elif args.small:
+    elif args.tiny:
         r, g, b = pixel
         return '{:x}'.format((r >> 7) << 2 | (g >> 7) << 1 | b >> 7)
+    elif args.small:
+        r, g, b = pixel
+        return '{:x}'.format((r >> 5) << 5 | (g >> 5) << 2 | (b >> 6))
     else:
         r, g, b = pixel
         return '{:x}'.format(r << 16 | g << 8 | b)
@@ -79,8 +83,10 @@ def format_pixel(pixel: Union[tuple[int, int, int], int]) -> str:
 
 if args.bicolor:
     width = 1
-elif args.small:
+elif args.tiny:
     width = 3
+elif args.small:
+    width = 8
 else:
     width = 24
 

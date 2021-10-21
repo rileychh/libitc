@@ -83,29 +83,29 @@ if {$make_assignments} {
 
 	set_global_assignment -name VHDL_FILE dist/itc109_2.pp.vhd
 
-	# set_global_assignment -name VHDL_FILE dist/itc109_1.pp.vhd
-	# set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_0.qip
-	# set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_0.mif
-	# set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_1.qip
-	# set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_1.mif
-	# set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_2.qip
-	# set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_2.mif
-	# set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_3.qip
-	# set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_3.mif
-	# set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_4.qip
-	# set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_4.mif
-	# set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_5.qip
-	# set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_5.mif
-	# set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_6.qip
-	# set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_6.mif
-	# set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_7.qip
-	# set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_7.mif
-	# set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_8.qip
-	# set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_8.mif
-	# set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_9.qip
-	# set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_9.mif
-	# set_global_assignment -name QIP_FILE tests/itc109_1/res/sensor_bg.qip
-	# set_global_assignment -name MIF_FILE tests/itc109_1/res/sensor_bg.mif
+	set_global_assignment -name VHDL_FILE dist/itc109_1.pp.vhd
+	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_0.qip
+	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_0.mif
+	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_1.qip
+	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_1.mif
+	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_2.qip
+	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_2.mif
+	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_3.qip
+	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_3.mif
+	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_4.qip
+	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_4.mif
+	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_5.qip
+	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_5.mif
+	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_6.qip
+	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_6.mif
+	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_7.qip
+	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_7.mif
+	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_8.qip
+	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_8.mif
+	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_9.qip
+	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_9.mif
+	set_global_assignment -name QIP_FILE tests/itc109_1/res/sensor_bg.qip
+	set_global_assignment -name MIF_FILE tests/itc109_1/res/sensor_bg.mif
 
 	set_global_assignment -name VHDL_FILE src/dht.vhd
 	set_global_assignment -name VHDL_FILE src/dot.vhd
