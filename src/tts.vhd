@@ -130,7 +130,8 @@ begin
 						i2c_ena <= '0';
 					end if;
 
-					if i2c_done = '1' and tts_accepted = '1' then -- last byte transmission complete
+					-- if i2c_done = '1' and tts_accepted = '1' then -- last byte transmission complete
+					if i2c_done = '1' then -- last byte transmission complete
 						state <= wait_speech;
 					end if;
 
