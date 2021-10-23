@@ -7,7 +7,7 @@ use ieee.numeric_std.all;
 
 use work.itc.all;
 use work.itc_lcd.all;
-use work.itc108_2_const.all;
+use work.itc109_2_const.all;
 
 entity itc109_2 is
 	port (

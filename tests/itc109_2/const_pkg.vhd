@@ -4,7 +4,7 @@ use ieee.numeric_std.all;
 
 use work.itc.all;
 
-package itc108_2_const is
+package itc109_2_const is
 	constant key_lut : i4_arr_t(i4_t'range) := (
 		1,  2,  3, 10,
 		4,  5,  6, 11,

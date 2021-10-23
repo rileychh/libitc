@@ -8,7 +8,7 @@ key_inst : entity work.key(arch)
 		key     => key
 	);
 
-edge_inst : entity work.edge(arch)
+edge_key_inst : entity work.edge(arch)
 	port map(
 		clk     => clk,
 		rst_n   => rst_n,
@@ -106,7 +106,7 @@ uart_txt_inst : entity work.uart_txt(arch)
 		rx_len  => rx_len
 	);
 
-edge_inst : entity work.edge(arch)
+edge_uart_inst : entity work.edge(arch)
 	port map(
 		clk     => clk,
 		rst_n   => rst_n,

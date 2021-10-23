@@ -7,7 +7,7 @@ use ieee.numeric_std.all;
 
 use work.itc.all;
 use work.itc_lcd.all;
-use work.itc108_2_const.all;
+use work.itc109_e2_const.all;
 
 entity itc109_e2 is
 	port (
@@ -63,6 +63,7 @@ architecture arch of itc109_e2 is
 	signal tx_ena, tx_busy, rx_busy : std_logic;
 	signal tx_data, rx_data : string(1 to 64);
 	signal tx_len, rx_len : integer range tx_data'range;
+	signal rx_done : std_logic;
 
 	signal state : integer range 0 to 6;
 
@@ -122,13 +123,13 @@ begin
 			tx_ena <= '0';
 			if rx_done = '1' then
 				if rx_data(1 to 6) = "!reset" then
-					state <= init;
+					state <= 0;
 				elsif rx_data(1 to 5) = "!init" then
-					state <= init;
+					state <= 0;
 				elsif rx_data(1 to 5) = "!idle" then
-					state <= idle;
+					state <= 1;
 				elsif rx_data(1 to 7) = "!cardin" then
-					state <= card_in;
+					state <= 2;
 				elsif rx_data(1 to 6) = "!login" then
 					tx_data(passwords(curr_account)'range) <= passwords(curr_account);
 					tx_len <= passwords(curr_account)'length;
