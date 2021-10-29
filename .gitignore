@@ -2,7 +2,7 @@ db/
 incremental_db/
 output_files/
 simulation/
-tools/venv/
+tools/env/
 docs/ref
 dist/
 *.qsf

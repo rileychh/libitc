@@ -27,7 +27,7 @@
 	"vhdl.enableStutterDelimiters": true,
 	"vhdl.enableStutterBrackets": true,
 	// Python
-	"python.pythonPath": "tools\\venv\\Scripts\\python.exe",
+	"python.pythonPath": "tools/env/bin/python",
 	// Markdown
 	"[markdown]": {
 		"editor.defaultFormatter": "yzhang.markdown-all-in-one"
@@ -105,7 +105,7 @@
 		{
 			"match": "(src|tests)\\\\.*\\.vhd",
 			"isAsync": true,
-			"cmd": "\"C:\\Program Files\\Git\\bin\\bash.exe\" -c \"cd '${workspaceRoot}'; shopt -s globstar; for f in {src,tests}/**/*.vhd; do tools/pp.py $f dist/$(basename $f .vhd).pp.vhd & done\"",
+			"cmd": "/usr/bin/bash -c \"cd '${workspaceRoot}'; shopt -s globstar; for f in {src,tests}/**/*.vhd; do tools/pp.py $f dist/$(basename $f .vhd).pp.vhd & done\"",
 			"event": "onFileChange"
 		}
 	]
