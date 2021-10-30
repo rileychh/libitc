@@ -1,0 +1,56 @@
+{
+	"version": "2.0.0",
+	"presentation": {
+		"echo": true,
+		"reveal": "always",
+		"focus": false,
+		"panel": "dedicated",
+		"showReuseMessage": true,
+		"clear": true
+	},
+	"tasks": [
+		{
+			"label": "Build",
+			"type": "shell",
+			"command": [
+				"set -o pipefail;",
+				"rm libitc.qsf;",
+				"time (",
+				"quartus_sh -t tools/assign.tcl &&",
+				"quartus_sh -t tools/compile.tcl",
+				") | sed -e 's/^\\s*//g' -e '/^Info/d'"
+			],
+			"problemMatcher": [],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"label": "Deploy",
+			"type": "shell",
+			"command": [
+				"set -o pipefail;",
+				"quartus_pgm -c 'USB-Blaster [USB-0]' output_files/libitc.cdf |",
+				"sed -e 's/^\\s*//g' -e '/^Info/d'"
+			],
+			"problemMatcher": [],
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			},
+			"dependsOn": "Build"
+		},
+		{
+			"label": "Preprocess (Current file)",
+			"type": "process",
+			"command": "python.exe",
+			"args": [
+				"tools/pp.py",
+				"${file}",
+				"dist\\${fileBasenameNoExtension}.pp${fileExtname}"
+			],
+			"problemMatcher": []
+		}
+	]
+}
