@@ -5,6 +5,7 @@ simulation/
 tools/env/
 docs/ref
 dist/
+__pycache__/
 *.qsf
 *.qws
 *.alc
