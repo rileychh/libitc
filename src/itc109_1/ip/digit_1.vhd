@@ -16,8 +16,6 @@
 --
 -- 13.1.0 Build 162 10/23/2013 SJ Full Version
 -- ************************************************************
-
-
 --Copyright (C) 1991-2013 Altera Corporation
 --Your use of Altera Corporation's design tools, logic functions 
 --and other software and tools, and its AMPP partner logic 
@@ -31,57 +29,50 @@
 --programming logic devices manufactured by Altera and sold by 
 --Altera or its authorized distributors.  Please refer to the 
 --applicable agreement for further details.
+library ieee;
+use ieee.std_logic_1164.all;
 
+library altera_mf;
+use altera_mf.altera_mf_components.all;
 
-LIBRARY ieee;
-USE ieee.std_logic_1164.all;
-
-LIBRARY altera_mf;
-USE altera_mf.altera_mf_components.all;
-
-ENTITY digit_1 IS
-	PORT
-	(
-		address		: IN STD_LOGIC_VECTOR (14 DOWNTO 0);
-		clock		: IN STD_LOGIC  := '1';
-		q		: OUT STD_LOGIC_VECTOR (0 DOWNTO 0)
+entity digit_1 is
+	port (
+		address : in std_logic_vector (14 downto 0);
+		clock   : in std_logic := '1';
+		q       : out std_logic_vector (0 downto 0)
 	);
-END digit_1;
+end digit_1;
+architecture SYN of digit_1 is
 
+	signal sub_wire0 : std_logic_vector (0 downto 0);
 
-ARCHITECTURE SYN OF digit_1 IS
-
-	SIGNAL sub_wire0	: STD_LOGIC_VECTOR (0 DOWNTO 0);
-
-BEGIN
-	q    <= sub_wire0(0 DOWNTO 0);
+begin
+	q <= sub_wire0(0 downto 0);
 
 	altsyncram_component : altsyncram
-	GENERIC MAP (
-		address_aclr_a => "NONE",
-		clock_enable_input_a => "BYPASS",
-		clock_enable_output_a => "BYPASS",
-		init_file => "1.mif",
+	generic map(
+		address_aclr_a         => "NONE",
+		clock_enable_input_a   => "BYPASS",
+		clock_enable_output_a  => "BYPASS",
+		init_file              => "digit_1.mif",
 		intended_device_family => "Cyclone III",
-		lpm_hint => "ENABLE_RUNTIME_MOD=NO",
-		lpm_type => "altsyncram",
-		numwords_a => 20480,
-		operation_mode => "ROM",
-		outdata_aclr_a => "NONE",
-		outdata_reg_a => "UNREGISTERED",
-		widthad_a => 15,
-		width_a => 1,
-		width_byteena_a => 1
+		lpm_hint               => "ENABLE_RUNTIME_MOD=NO",
+		lpm_type               => "altsyncram",
+		numwords_a             => 20480,
+		operation_mode         => "ROM",
+		outdata_aclr_a         => "NONE",
+		outdata_reg_a          => "UNREGISTERED",
+		widthad_a              => 15,
+		width_a                => 1,
+		width_byteena_a        => 1
 	)
-	PORT MAP (
+	port map(
 		address_a => address,
-		clock0 => clock,
-		q_a => sub_wire0
+		clock0    => clock,
+		q_a       => sub_wire0
 	);
 
-
-
-END SYN;
+end SYN;
 
 -- ============================================================
 -- CNX file retrieval info
@@ -103,7 +94,7 @@ END SYN;
 -- Retrieval info: PRIVATE: JTAG_ENABLED NUMERIC "0"
 -- Retrieval info: PRIVATE: JTAG_ID STRING "NONE"
 -- Retrieval info: PRIVATE: MAXIMUM_DEPTH NUMERIC "0"
--- Retrieval info: PRIVATE: MIFfilename STRING "1.mif"
+-- Retrieval info: PRIVATE: MIFfilename STRING "digit_1.mif"
 -- Retrieval info: PRIVATE: NUMWORDS_A NUMERIC "20480"
 -- Retrieval info: PRIVATE: RAM_BLOCK_TYPE NUMERIC "0"
 -- Retrieval info: PRIVATE: RegAddr NUMERIC "1"
@@ -118,7 +109,7 @@ END SYN;
 -- Retrieval info: CONSTANT: ADDRESS_ACLR_A STRING "NONE"
 -- Retrieval info: CONSTANT: CLOCK_ENABLE_INPUT_A STRING "BYPASS"
 -- Retrieval info: CONSTANT: CLOCK_ENABLE_OUTPUT_A STRING "BYPASS"
--- Retrieval info: CONSTANT: INIT_FILE STRING "1.mif"
+-- Retrieval info: CONSTANT: INIT_FILE STRING "digit_1.mif"
 -- Retrieval info: CONSTANT: INTENDED_DEVICE_FAMILY STRING "Cyclone III"
 -- Retrieval info: CONSTANT: LPM_HINT STRING "ENABLE_RUNTIME_MOD=NO"
 -- Retrieval info: CONSTANT: LPM_TYPE STRING "altsyncram"
