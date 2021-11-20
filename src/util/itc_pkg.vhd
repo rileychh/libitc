@@ -116,7 +116,7 @@ package itc is
 	x"b9", x"73", x"a4", x"40", x"a4", x"47", x"a4", x"54", x"a5", x"7c", x"a4", x"ad", x"a4", x"bb", x"a4", x"43",
 	x"a4", x"4b", x"a4", x"45", x"a4", x"51"
 	);
-	
+
 	--------------------------------------------------------------------------------
 	-- common functions
 	--------------------------------------------------------------------------------
@@ -377,7 +377,7 @@ package body itc is
 				return res ;
 			end if;
 		else
-			if(txt /10 = 1)then
+			if txt /10 = 1 then
 				res(0) :=big5(20);
 				res(1) :=big5(21);
 				res(2) :=big5((txt rem 10)*2);
@@ -385,7 +385,7 @@ package body itc is
 				res(4) :=x"83";
 				res(5) :=x"00";
 				return res ;
-			elsif (txt /10 > 1)then
+			elsif txt /10 > 1 then
 				res(0) :=big5((txt / 10)*2);
 				res(1) :=big5((txt / 10)*2 + 1);
 				res(2) :=big5(20);

@@ -267,7 +267,7 @@ begin
 			sub_mode <= 0;
 			tts_status <= '0' ;
 			elsif rising_edge(clk) then
-			if time_clk = '1' then
+			if time_clk = '1'and tts_status = '0'then
 				if secs = secs'high then
 					secs <= 0;
 					if mins = mins'high then
@@ -284,33 +284,33 @@ begin
 					secs <= secs + 1;
 				end if;
 			end if;
-			if(sw(6 to 7) ="00" and done) then
+			if sw(6 to 7) ="00" and done then
 				mode <= TFT_lcd_test;
 				bg_color <= white;
 				dis <= '0';
 				ena <= '0';
 				lcd_clear <= '0';
 			end if;
-			if(sw(6 to 7) ="01"and done )then 
+			if sw(6 to 7) ="01"and done  then 
 				mode <= start;
 				dis <= '0';
 				sub_mode <= 0;
 				lcd_clear <= '0';
 			end if;
-			if(sw(6 to 7) ="10" and done )then 
+			if sw(6 to 7) ="10" and done  then 
 				dis <= '1';
 				bg_color <= white;
 				lcd_count <= 0;
 				lcd_clear <= '0';
 				font_start <= '0';
 			end if;
-			if(sw(6 to 7) ="11" and done )then 
+			if sw(6 to 7) ="11" and done  then 
 				mode <= test_all;
 				lcd_count <= 0;
 				font_start <= '0';
 				bg_color <= white;
 				dis <= '1';
-				if(latch = '0') then
+				if latch = '0' then
 					latch <= '1';
 				else
 					tts_status <= not tts_status;
@@ -335,7 +335,7 @@ begin
 					ena <= '1';
 					lcd_clear <= '0';
 					if msec >= 500 and bg_color = white then
-						if(font_busy = '0') then
+						if font_busy = '0' then
 							bg_color <= black;
 							lcd_clear <= '1';
 						end if;
@@ -533,8 +533,8 @@ begin
 					end case;
 				when start =>
 						dot <= b"00000100";
-						if(dis = '0') then
-							if(draw_done = '1' ) then
+						if dis = '0' then
+							if draw_done = '1'  then
 								bg_color <= red;
 								lcd_clear <= '0';
 							else 
@@ -613,7 +613,7 @@ begin
 							when others => null;
 						end case;
 				when test_all => 
-					if(pressed = '1') then
+					if pressed = '1' then
 						case key is
 							when 0 => 
 							when 1 => 
@@ -634,7 +634,7 @@ begin
 						when 0 =>  
 							bg_color <= white;
 							lcd_clear <= '1';
-							if(draw_done = '1') then
+							if draw_done = '1' then
 								lcd_clear <= '0';
 								status <= 1;
 							end if;
@@ -671,11 +671,11 @@ begin
 				when others =>
 					null;
 			end case;
-			if(pause = '1') then 
+			if pause = '1' then 
 				txt(0 to 1) <= tts_instant_pause;
 				len <= 2;
 				tts_ena <= '1';
-			elsif(resume = '1') then
+			elsif resume = '1' then
 				txt(0 to 1) <= tts_instant_resume;
 				len <= 2;
 				tts_ena <= '1';	
@@ -685,14 +685,14 @@ begin
 				txt(0 to 25) <=set_vol & to_big(hour)&date(0 to 1) & to_big(mins)&date(2 to 3) & to_big(secs)&date(4 to 5);
 				len <= 26;
 				tts_ena <= '1';
-				if(tts_done= '1') then
+				if tts_done= '1' then
 					tts_ena <= '0';
 				end if;
 			when 3 => 
 				txt(0 to 11) <=temp(0 to 5) & to_big(temp_int);
 				len <= 12;
 				tts_ena <= '1';
-				if(tts_done= '1') then
+				if tts_done= '1' then
 					tts_ena <= '0';
 				end if;
 				
@@ -700,18 +700,18 @@ begin
 				txt(0 to 11) <=humd(0 to 5) & to_big(hum_int);
 				len <= 12;
 				tts_ena <= '1';
-				if(tts_done= '1') then
+				if tts_done= '1' then
 					tts_ena <= '0';
 				end if;
 			when others => 
 				null;			
 			end case;		
 			end if;
-			if(dis = '1' and tts_status = '0') then
+			if dis = '1' and tts_status = '0' then
 				case lcd_count is
 					when 0 =>
 						bg_color <= white;
-						if(font_busy = '0') then
+						if font_busy = '0' then
 							lcd_clear <= '1';
 						else
 							lcd_clear <= '0';
@@ -724,7 +724,7 @@ begin
 						data <= "20210615Tue.";
 						y <= 0;
 						x <= 0;
-						if(font_busy = '0') then
+						if font_busy = '0' then
 							font_start <= '1';
 						else
 							font_start <= '1';
