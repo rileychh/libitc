@@ -30,7 +30,7 @@ architecture arch of seg is
 		-- ASCII printable characters (SPC to DEL)
 		x"00", x"61", x"44", x"7e", x"b6", x"4b", x"62", x"04", x"94", x"d0", x"84", x"0e", x"08", x"02", x"01", x"4a",
 		x"fc", x"60", x"da", x"f2", x"66", x"b6", x"be", x"e0", x"fe", x"f6", x"90", x"b0", x"86", x"12", x"c2", x"cb",
-		x"fa", x"ee", x"3e", x"9c", x"7a", x"9e", x"8e", x"bc", x"6e", x"0c", x"78", x"ae", x"1c", x"a8", x"ec", x"fc",
+		x"fa", x"ee", x"3e", x"9c", x"7a", x"9e", x"8e", x"bc", x"6e", x"0c", x"78", x"ae", x"1c", x"aa", x"ec", x"fc",
 		x"ce", x"d6", x"cc", x"b6", x"1e", x"7c", x"7c", x"54", x"6e", x"76", x"da", x"9c", x"26", x"f0", x"c4", x"10",
 		x"40", x"fa", x"3e", x"1a", x"7a", x"de", x"8e", x"f6", x"2e", x"08", x"30", x"ae", x"0c", x"28", x"2a", x"3a",
 		x"ce", x"e6", x"0a", x"b6", x"1e", x"38", x"38", x"28", x"6e", x"76", x"da", x"62", x"0c", x"0e", x"80", x"00"
