@@ -110,6 +110,13 @@ package itc is
 	-- | 0x0b  |   both   |           |  both   |
 	constant tts_set_channel : u8_t := x"8b";
 
+	-- Big5 decimal table
+	-- 零一二三四五六七八九十
+	constant big5 : u8_arr_t(0 to 21) := (
+	x"b9", x"73", x"a4", x"40", x"a4", x"47", x"a4", x"54", x"a5", x"7c", x"a4", x"ad", x"a4", x"bb", x"a4", x"43",
+	x"a4", x"4b", x"a4", x"45", x"a4", x"51"
+	);
+	
 	--------------------------------------------------------------------------------
 	-- common functions
 	--------------------------------------------------------------------------------
@@ -151,6 +158,8 @@ package itc is
 	-- base: output base system. can be 2/8/10/16.
 	function to_string(num, num_max, base, length : integer) return string;
 	function to_string(num, num_max, base, length : integer) return u8_arr_t;
+	function to_big(txt: integer) return u8_arr_t;
+
 end package;
 
 package body itc is
@@ -336,5 +345,63 @@ package body itc is
 		end loop;
 
 		return result;
+	end function;
+
+	function to_big(txt : integer range 0 to 99) return u8_arr_t is
+		variable res : u8_arr_t(0 to 5);
+	begin
+		if txt rem 10 = 0 then
+			if txt > 10 then
+				res(0) :=big5((txt / 10)*2);
+				res(1) :=big5((txt / 10)*2 + 1);
+				res(2) :=big5(20);
+				res(3) :=big5(21);
+				res(4) :=x"83";
+				res(5) :=x"00";
+				return res ;
+			elsif txt = 10 then
+				res(0) :=big5(20);
+				res(1) :=big5(21);
+				res(2) :=x"83";
+				res(3) :=x"00";
+				res(4) :=x"83";
+				res(5) :=x"00";
+				return res ;
+			else
+				res(0) := big5(0);
+				res(1) := big5(1);
+				res(2) :=x"83";
+				res(3) :=x"00";
+				res(4) :=x"83";
+				res(5) :=x"00";
+				return res ;
+			end if;
+		else
+			if(txt /10 = 1)then
+				res(0) :=big5(20);
+				res(1) :=big5(21);
+				res(2) :=big5((txt rem 10)*2);
+				res(3) :=big5((txt rem 10)*2 + 1);
+				res(4) :=x"83";
+				res(5) :=x"00";
+				return res ;
+			elsif (txt /10 > 1)then
+				res(0) :=big5((txt / 10)*2);
+				res(1) :=big5((txt / 10)*2 + 1);
+				res(2) :=big5(20);
+				res(3) :=big5(21);
+				res(4) :=big5((txt rem 10)*2);
+				res(5) :=big5((txt rem 10)*2 + 1);
+				return res ;
+			else
+				res(0) :=big5(txt * 2);
+				res(1) :=big5(txt * 2 + 1);
+				res(2) :=x"83";
+				res(3) :=x"00";
+				res(4) :=x"83";
+				res(5) :=x"00";
+			return res ;
+			end if;
+		end if;
 	end function;
 end package body;
