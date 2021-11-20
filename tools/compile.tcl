@@ -53,7 +53,9 @@ if {$make_assignments} {
 
 	# source files
 	set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
-	set_global_assignment -name TOP_LEVEL_ENTITY itc109_2
+	set_global_assignment -name TOP_LEVEL_ENTITY itc110_e2
+
+	## Unit tests
 
 	set_global_assignment -name VHDL_FILE tests/dht_test.vhd
 	set_global_assignment -name VHDL_FILE tests/dot_test.vhd
@@ -106,6 +108,15 @@ if {$make_assignments} {
 	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_9.mif
 	set_global_assignment -name QIP_FILE tests/itc109_1/res/sensor_bg.qip
 	set_global_assignment -name MIF_FILE tests/itc109_1/res/sensor_bg.mif
+
+	set_global_assignment -name VHDL_FILE dist/itc109_2.pp.vhd
+
+	set_global_assignment -name VHDL_FILE dist/itc109_e2.pp.vhd
+
+	set_global_assignment -name VHDL_FILE tests/itc110_e1/itc110_e1.vhd
+	set_global_assignment -name VHDL_FILE tests/itc110_e2/itc110_e2.vhd
+	
+	## Components
 
 	set_global_assignment -name VHDL_FILE src/dht.vhd
 	set_global_assignment -name VHDL_FILE src/dot.vhd
