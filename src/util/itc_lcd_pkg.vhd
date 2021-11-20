@@ -83,13 +83,4 @@ package itc_lcd is
 		l_ramwr
 	);
 	constant l_init_dc : std_logic_vector(0 to 79) := "01110111011111101110101101101101011111111111111110111111111111111101011110111100";
-
-	--------------------------------------------------------------------------------
-	-- font
-	-- HD44780 5x7 pixel font data, http://eleif.net/HD44780.html 
-	-- Array index is the relative ASCII code
-	--------------------------------------------------------------------------------
-
-	type glyph_t is array (0 to 6) of unsigned(0 to 4);
-	type font_t is array (32 to 127) of glyph_t;
 end package;
