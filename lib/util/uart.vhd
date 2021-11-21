@@ -102,10 +102,10 @@ begin
 						rx_state <= idle; -- remain in idle state
 					end if;
 				when execute => -- receive state
-					if (os_count < os_rate - 1) then -- not center of bit
+					if os_count < os_rate - 1 then -- not center of bit
 						os_count := os_count + 1; -- increment oversampling pulse counter
 						rx_state <= execute; -- remain in receive state
-					elsif (rx_count < 8) then -- center of bit and not all bits received
+					elsif rx_count < 8 then -- center of bit and not all bits received
 						os_count := 0; -- reset oversampling pulse counter		
 						rx_count := rx_count + 1; -- increment number of bits received counter
 						rx_buffer <= uart_rx & rx_buffer(8 downto 1); -- shift new received bit into receive buffer
