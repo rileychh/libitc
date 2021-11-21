@@ -84,7 +84,7 @@ begin
 
 			timer_ena <= '1';
 
-			if (mode = init or mode = idle or mode = seat or mode = ok) then
+			if mode = init or mode = idle or mode = seat or mode = ok then
 				seg_data <= (others => '0');
 			end if;
 
@@ -134,7 +134,7 @@ begin
 				tx_ena <= '0';
 			end if;
 
-			if (msec < 1000) then
+			if msec < 1000 then
 				-- reset => at first sec
 				dot_data_r <= (others => (others => '1'));
 				dot_data_g <= (others => (others => '1'));

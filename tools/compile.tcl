@@ -53,7 +53,7 @@ if {$make_assignments} {
 
 	# Source files
 	set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
-	set_global_assignment -name TOP_LEVEL_ENTITY itc110_e1
+	set_global_assignment -name TOP_LEVEL_ENTITY itc110_e2
 
 	## Unit tests
 
@@ -112,6 +112,7 @@ if {$make_assignments} {
 	set_global_assignment -name VHDL_FILE dist/itc109_e2.pp.vhd
 
 	set_global_assignment -name VHDL_FILE tests/itc110_e1/itc110_e1.vhd
+	set_global_assignment -name VHDL_FILE tests/itc110_e2/itc110_e2.vhd
 	
 	## Components
 
