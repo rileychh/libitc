@@ -50,18 +50,19 @@ package itc is
 	--------------------------------------------------------------------------------
 
 	constant seg_deg : character := character'val(0);
+	constant percent : character := character'val(1);
 
 	--------------------------------------------------------------------------------
 	-- tts command constants
 	--------------------------------------------------------------------------------
 
-	-- constant tts_instant_clear : u8_t := (x"80"); -- DO NOT USE, MAY CRASH MODULE
+	-- constant tts_instant_clear : u8_t := (x"80"); -- !!! DO NOT USE, MAY CRASH MODULE !!!
 	constant tts_instant_vol_up : u8_t := x"81";
 	constant tts_instant_vol_down : u8_t := x"82";
 	constant tts_instant_pause : u8_arr_t(0 to 1) := (x"8f", x"00");
 	constant tts_instant_resume : u8_arr_t(0 to 1) := (x"8f", x"01");
 	constant tts_instant_skip : u8_arr_t(0 to 1) := (x"8f", x"02"); -- skips delay or music
-	constant tts_instant_soft_reset : u8_arr_t(0 to 1) := (x"8f", x"03"); -- TODO what's the use case?
+	constant tts_instant_soft_reset : u8_arr_t(0 to 1) := (x"8f", x"03"); -- TODO what's the use case?	(Soft Reset)
 
 	-- concatenate 1 speed byte after
 	-- e.g. 0x83 0x19 means 25% faster 
@@ -159,7 +160,7 @@ package itc is
 	function to_string(num, num_max, base, length : integer) return string;
 	function to_string(num, num_max, base, length : integer) return u8_arr_t;
 	function to_big(txt: integer) return u8_arr_t;
-
+	-- function to_coord(l_width: integer range 0 to 128 ; l_height: integer range 0 to 160) return u8_arr_t;
 end package;
 
 package body itc is
@@ -169,239 +170,242 @@ package body itc is
 		else
 			return 1;
 		end if;
-	end function;
+		end function;
 
 	function log(base, num : integer) return integer is
 		variable temp : integer := 1;
 		variable result : integer := 0;
-	begin
-		for i in 0 to num loop
-			if temp < num then
-				temp := temp * base;
-				result := result + 1;
-			else
-				return result;
-			end if;
-		end loop;
-	end function;
+		begin
+			for i in 0 to num loop
+				if temp < num then
+					temp := temp * base;
+					result := result + 1;
+				else
+					return result;
+				end if;
+			end loop;
+		end function;
 
 	function repeat(logic : std_logic; num : integer) return std_logic_vector is
 		variable result : std_logic_vector(0 to num - 1);
-	begin
-		for i in result'range loop
-			result(i) := logic;
-		end loop;
+		begin
+			for i in result'range loop
+				result(i) := logic;
+			end loop;
 
-		return result;
-	end function;
+			return result;
+		end function;
 
 	function repeat(logic : std_logic; num : integer) return unsigned is
 		variable result : unsigned(0 to num - 1);
-	begin
-		for i in result'range loop
-			result(i) := logic;
-		end loop;
+		begin
+			for i in result'range loop
+				result(i) := logic;
+			end loop;
 
-		return result;
-	end function;
+			return result;
+		end function;
 
 	function repeat(vector : std_logic_vector; num : integer) return std_logic_vector is
 		variable result : std_logic_vector(0 to vector'length * num - 1);
 		variable vector_asc : std_logic_vector(0 to vector'length - 1);
-	begin
-		if vector'ascending then
-			vector_asc := vector;
-		else
-			vector_asc := reverse(vector);
-		end if;
+		begin
+			if vector'ascending then
+				vector_asc := vector;
+			else
+				vector_asc := reverse(vector);
+			end if;
 
-		for i in 0 to num - 1 loop
-			result(i * vector_asc'length to i * vector_asc'length + vector_asc'high) := vector_asc;
-		end loop;
+			for i in 0 to num - 1 loop
+				result(i * vector_asc'length to i * vector_asc'length + vector_asc'high) := vector_asc;
+			end loop;
 
-		if vector'ascending then
-			return result;
-		else
-			return reverse(result);
-		end if;
-	end function;
+			if vector'ascending then
+				return result;
+			else
+				return reverse(result);
+			end if;
+		end function;
 
 	function repeat(vector : unsigned; num : integer) return unsigned is begin
 		return unsigned(repeat(std_logic_vector(vector), num));
-	end function;
+		end function;
 
 	function reverse(vector : std_logic_vector) return std_logic_vector is
 		variable result : std_logic_vector(vector'reverse_range);
-	begin
-		for i in vector'range loop
-			result(i) := vector(i);
-		end loop;
+		begin
+			for i in vector'range loop
+				result(i) := vector(i);
+			end loop;
 
-		return result;
-	end function;
+			return result;
+		end function;
 
 	function reverse(vector : unsigned) return unsigned is begin
 		return unsigned(reverse(std_logic_vector(vector)));
-	end function;
+		end function;
 
 	function reduce(vector : std_logic_vector; operation : string) return std_logic is
 		variable result : std_logic := vector(0);
-	begin
-		for i in vector'range loop
-			case operation is
-				when "and" =>
-					result := result and vector(i);
-				when "or_" =>
-					result := result or vector(i);
-				when "xor" =>
-					result := result xor vector(i);
-				when others =>
-					return 'X';
-			end case;
-		end loop;
+		begin
+			for i in vector'range loop
+				case operation is
+					when "and" =>
+						result := result and vector(i);
+					when "or_" =>
+						result := result or vector(i);
+					when "xor" =>
+						result := result xor vector(i);
+					when others =>
+						return 'X';
+				end case;
+			end loop;
 
-		return result;
-	end function;
+			return result;
+		end function;
 
 	function reduce(vector : unsigned; operation : string) return std_logic is begin
 		return reduce(std_logic_vector(vector), operation);
-	end function;
+		end function;
 
 	function index_of(vector : std_logic_vector; element : std_logic) return integer is
 		variable temp : std_logic_vector(vector'range);
-	begin
-		for i in vector'range loop
-			if vector(i) = element then
-				return i;
-			end if;
-		end loop;
+		begin
+			for i in vector'range loop
+				if vector(i) = element then
+					return i;
+				end if;
+			end loop;
 
-		return 0;
-	end function;
+			return 0;
+		end function;
 
 	function index_of(vector : unsigned; element : std_logic) return integer is begin
 		return index_of(std_logic_vector(vector), element);
-	end function;
+		end function;
 
 	function to_bcd(num, num_max, dec_width : integer) return unsigned is
 		constant bin_width : integer := log(2, num_max);
 		variable bin : unsigned(bin_width - 1 downto 0) := to_unsigned(num, bin_width);
 		variable bcd : unsigned(dec_width * 4 - 1 downto 0) := (others => '0');
-	begin
-		-- https://en.wikipedia.org/wiki/Double_dabble 
-		for i in 0 to bin_width - 1 loop
-			-- check if any nibble (bcd digit) is more then 4
-			for digit in 0 to dec_width - 1 loop
-				if bcd(digit * 4 + 3 downto digit * 4) > 4 then
-					bcd(digit * 4 + 3 downto digit * 4) := bcd(digit * 4 + 3 downto digit * 4) + 3; -- add 3 to the digit
-				end if;
+		begin
+			-- https://en.wikipedia.org/wiki/Double_dabble 
+			for i in 0 to bin_width - 1 loop
+				-- check if any nibble (bcd digit) is more then 4
+				for digit in 0 to dec_width - 1 loop
+					if bcd(digit * 4 + 3 downto digit * 4) > 4 then
+						bcd(digit * 4 + 3 downto digit * 4) := bcd(digit * 4 + 3 downto digit * 4) + 3; -- add 3 to the digit
+					end if;
+				end loop;
+
+				--   shift
+				--  <------
+				-- bcd & bin
+				bcd := bcd sll 1;
+				bcd(bcd'right) := bin(bin'left);
+				bin := bin sll 1;
 			end loop;
 
-			--   shift
-			--  <------
-			-- bcd & bin
-			bcd := bcd sll 1;
-			bcd(bcd'right) := bin(bin'left);
-			bin := bin sll 1;
-		end loop;
-
-		return bcd;
-	end function;
+			return bcd;
+		end function;
 
 	function to_string(num, num_max, base, length : integer) return string is
 		variable temp : unsigned(3 downto 0);
 		variable result : string(1 to length);
-	begin
-		for c in 0 to length - 1 loop
-			case base is
-				when 2 =>
-					temp := "000" & to_unsigned(num, length)(c);
-				when 8 =>
-					temp := "0" & to_unsigned(num, length * 3)(c * 3 + 2 downto c * 3);
-				when 10 =>
-					temp := to_bcd(num, num_max, length)(c * 4 + 3 downto c * 4); -- convert BCD to string
-				when 16 =>
-					temp := to_unsigned(num, length * 4)(c * 4 + 3 downto c * 4);
-				when others =>
-					return (1 to length => 'E');
-			end case;
+		begin
+			for c in 0 to length - 1 loop
+				case base is
+					when 2 =>
+						temp := "000" & to_unsigned(num, length)(c);
+					when 8 =>
+						temp := "0" & to_unsigned(num, length * 3)(c * 3 + 2 downto c * 3);
+					when 10 =>
+						temp := to_bcd(num, num_max, length)(c * 4 + 3 downto c * 4); -- convert BCD to string
+					when 16 =>
+						temp := to_unsigned(num, length * 4)(c * 4 + 3 downto c * 4);
+					when others =>
+						return (1 to length => 'E');
+				end case;
 
-			if temp < 10 then -- 0 to 9
-				result(length - c) := character'val(to_integer(temp) + character'pos('0'));
-			else -- A to F
-				result(length - c) := character'val(to_integer(temp) - 10 + character'pos('A'));
-			end if;
-		end loop;
+				if temp < 10 then -- 0 to 9
+					result(length - c) := character'val(to_integer(temp) + character'pos('0'));
+				else -- A to F
+					result(length - c) := character'val(to_integer(temp) - 10 + character'pos('A'));
+				end if;
+			end loop;
 
-		return result;
-	end function;
+			return result;
+		end function;
 
 	function to_string(num, num_max, base, length : integer) return u8_arr_t is
 		constant str : string := to_string(num, num_max, base, length);
 		variable result : u8_arr_t(0 to length - 1);
-	begin
-		for char in str'range loop
-			result(char - 1) := to_unsigned(character'pos(str(char)), 8);
-		end loop;
+		begin
+			for char in str'range loop
+				result(char - 1) := to_unsigned(character'pos(str(char)), 8);
+			end loop;
 
-		return result;
-	end function;
+			return result;
+		end function;
 
 	function to_big(txt : integer range 0 to 99) return u8_arr_t is
 		variable res : u8_arr_t(0 to 5);
-	begin
-		if txt rem 10 = 0 then
-			if txt > 10 then
-				res(0) :=big5((txt / 10)*2);
-				res(1) :=big5((txt / 10)*2 + 1);
-				res(2) :=big5(20);
-				res(3) :=big5(21);
-				res(4) :=x"83";
-				res(5) :=x"00";
-				return res ;
-			elsif txt = 10 then
-				res(0) :=big5(20);
-				res(1) :=big5(21);
-				res(2) :=x"83";
-				res(3) :=x"00";
-				res(4) :=x"83";
-				res(5) :=x"00";
-				return res ;
+		begin
+			if txt rem 10 = 0 then
+				if txt > 10 then
+					res(0) :=big5((txt / 10)*2);
+					res(1) :=big5((txt / 10)*2 + 1);
+					res(2) :=big5(20);
+					res(3) :=big5(21);
+					res(4) :=x"83";
+					res(5) :=x"00";
+					return res ;
+				elsif txt = 10 then
+					res(0) :=big5(20);
+					res(1) :=big5(21);
+					res(2) :=x"83";
+					res(3) :=x"00";
+					res(4) :=x"83";
+					res(5) :=x"00";
+					return res ;
+				else
+					res(0) := big5(0);
+					res(1) := big5(1);
+					res(2) :=x"83";
+					res(3) :=x"00";
+					res(4) :=x"83";
+					res(5) :=x"00";
+					return res ;
+				end if;
 			else
-				res(0) := big5(0);
-				res(1) := big5(1);
-				res(2) :=x"83";
-				res(3) :=x"00";
-				res(4) :=x"83";
-				res(5) :=x"00";
+				if txt /10 = 1 then
+					res(0) :=big5(20);
+					res(1) :=big5(21);
+					res(2) :=big5((txt rem 10)*2);
+					res(3) :=big5((txt rem 10)*2 + 1);
+					res(4) :=x"83";
+					res(5) :=x"00";
+					return res ;
+				elsif txt /10 > 1 then
+					res(0) :=big5((txt / 10)*2);
+					res(1) :=big5((txt / 10)*2 + 1);
+					res(2) :=big5(20);
+					res(3) :=big5(21);
+					res(4) :=big5((txt rem 10)*2);
+					res(5) :=big5((txt rem 10)*2 + 1);
+					return res ;
+				else
+					res(0) :=big5(txt * 2);
+					res(1) :=big5(txt * 2 + 1);
+					res(2) :=x"83";
+					res(3) :=x"00";
+					res(4) :=x"83";
+					res(5) :=x"00";
 				return res ;
+				end if;
 			end if;
-		else
-			if txt /10 = 1 then
-				res(0) :=big5(20);
-				res(1) :=big5(21);
-				res(2) :=big5((txt rem 10)*2);
-				res(3) :=big5((txt rem 10)*2 + 1);
-				res(4) :=x"83";
-				res(5) :=x"00";
-				return res ;
-			elsif txt /10 > 1 then
-				res(0) :=big5((txt / 10)*2);
-				res(1) :=big5((txt / 10)*2 + 1);
-				res(2) :=big5(20);
-				res(3) :=big5(21);
-				res(4) :=big5((txt rem 10)*2);
-				res(5) :=big5((txt rem 10)*2 + 1);
-				return res ;
-			else
-				res(0) :=big5(txt * 2);
-				res(1) :=big5(txt * 2 + 1);
-				res(2) :=x"83";
-				res(3) :=x"00";
-				res(4) :=x"83";
-				res(5) :=x"00";
-			return res ;
-			end if;
-		end if;
-	end function;
+		end function;
+	-- function to_coord(l_width: integer range 0 to 128 ; l_height: integer range 0 to 160) return u8_arr_t is
+	-- 	begin
+	-- 	end function;
 end package body;

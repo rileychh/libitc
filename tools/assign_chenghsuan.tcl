@@ -120,12 +120,12 @@ if {$make_assignments} {
 
 	# DOT_R{4,3,2,1,5,6,7,8} (R stands for green)
 	set_location_assignment PIN_112  -to dot_green[0]
-	set_location_assignment PIN_98 -to dot_green[1]
-	set_location_assignment PIN_84 -to dot_green[2]
-	set_location_assignment PIN_76 -to dot_green[3]
-	set_location_assignment PIN_78 -to dot_green[4]
-	set_location_assignment PIN_87 -to dot_green[5]
-	set_location_assignment PIN_99 -to dot_green[6]
+	set_location_assignment PIN_98	 -to dot_green[1]
+	set_location_assignment PIN_84	 -to dot_green[2]
+	set_location_assignment PIN_76	 -to dot_green[3]
+	set_location_assignment PIN_78	 -to dot_green[4]
+	set_location_assignment PIN_87	 -to dot_green[5]
+	set_location_assignment PIN_99	 -to dot_green[6]
 	set_location_assignment PIN_113  -to dot_green[7]
 
 	# DOT_S{4,3,2,1,5,6,7,8} (S stands for common, thank me later)

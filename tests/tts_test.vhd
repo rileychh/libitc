@@ -61,8 +61,8 @@ architecture arch of tts_test is
 	-- "啊", 2
 	-- txt(0 to 1) <= ah;
 	-- len <= 2;
-	constant ah : u8_arr_t(0 to 1) := (
-		x"b0", x"da"
+	constant ah : u8_arr_t(0 to 6) := (
+		tts_set_vol,x"f0",tts_play_file, x"27",x"0f",x"00",x"01"
 	);
 
 	constant datasheet_example : u8_arr_t(0 to 58) := (
@@ -143,8 +143,8 @@ begin
 							len <= 242;
 
 						when 2 =>
-							txt(0 to 1) <= ah;
-							len <= 2;
+							txt(0 to 6) <= ah;
+							len <= 7 ;
 
 						when 3 =>
 							txt(0 to 58) <= datasheet_example;

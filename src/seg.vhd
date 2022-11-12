@@ -6,7 +6,7 @@ use work.itc.all;
 
 entity seg is
 	generic (
-		common_anode : std_logic := '0'
+		common_anode : std_logic := '1'
 	);
 	port (
 		-- system
@@ -25,7 +25,8 @@ architecture arch of seg is
 	type lut_t is array(0 to 2 ** 7 - 1) of u8r_t;
 	constant lut : lut_t := (
 		-- HACK add additional characters between 0 to 31
-		x"c6", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00",
+		-- x"c6"" <= 11000110 (abcdefg0)
+		x"c6", x"4a", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00",
 		x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00",
 		-- ASCII printable characters (SPC to DEL)
 		x"00", x"61", x"44", x"7e", x"b6", x"4b", x"62", x"04", x"94", x"d0", x"84", x"0e", x"08", x"02", x"01", x"4a",
@@ -33,7 +34,7 @@ architecture arch of seg is
 		x"fa", x"ee", x"3e", x"9c", x"7a", x"9e", x"8e", x"bc", x"6e", x"0c", x"78", x"ae", x"1c", x"aa", x"ec", x"fc",
 		x"ce", x"d6", x"cc", x"b6", x"1e", x"7c", x"7c", x"54", x"6e", x"76", x"da", x"9c", x"26", x"f0", x"c4", x"10",
 		x"40", x"fa", x"3e", x"1a", x"7a", x"de", x"8e", x"f6", x"2e", x"08", x"30", x"ae", x"0c", x"28", x"2a", x"3a",
-		x"ce", x"e6", x"0a", x"b6", x"1e", x"38", x"38", x"28", x"6e", x"76", x"da", x"62", x"0c", x"0e", x"80", x"00"
+		x"ce", x"e6", x"0a", x"b6", x"1e", x"38", x"30", x"28", x"6e", x"76", x"da", x"62", x"0c", x"0e", x"80", x"00"
 	);
 
 	signal clk_scan : std_logic;

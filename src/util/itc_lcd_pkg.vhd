@@ -28,37 +28,37 @@ package itc_lcd is
 	-- color constants
 	--------------------------------------------------------------------------------
 
-	constant black : l_px_t:= x"000000";
-	constant blue : l_px_t := x"0000ff";
-	constant red : l_px_t := x"ff0000";
+	constant black   : l_px_t := x"000000";
+	constant blue    : l_px_t := x"0000ff";
+	constant red     : l_px_t := x"ff0000";
 	constant magenta : l_px_t := x"ff00ff";
-	constant green : l_px_t := x"00ff00";
-	constant cyan : l_px_t := x"00ffff";
-	constant yellow : l_px_t := x"ffff00";
-	constant white : l_px_t := x"ffffff";
+	constant green   : l_px_t := x"00ff00";
+	constant cyan    : l_px_t := x"00ffff";
+	constant yellow  : l_px_t := x"ffff00";
+	constant white   : l_px_t := x"ffffff";
 
 	--------------------------------------------------------------------------------
 	-- command constants
 	-- only the used commands are listed here
 	--------------------------------------------------------------------------------
 
-	constant l_slpout : u8_t := x"11";
+	constant l_slpout  : u8_t := x"11";
 	constant l_frmctr1 : u8_t := x"b1";
 	constant l_frmctr2 : u8_t := x"b2";
 	constant l_frmctr3 : u8_t := x"b3";
-	constant l_pwctr1 : u8_t := x"c0";
-	constant l_pwctr2 : u8_t := x"c1";
-	constant l_pwctr3 : u8_t := x"c2";
-	constant l_pwctr4 : u8_t := x"c3";
-	constant l_pwctr5 : u8_t := x"c4";
-	constant l_vmctr1 : u8_t := x"c5";
+	constant l_pwctr1  : u8_t := x"c0";
+	constant l_pwctr2  : u8_t := x"c1";
+	constant l_pwctr3  : u8_t := x"c2";
+	constant l_pwctr4  : u8_t := x"c3";
+	constant l_pwctr5  : u8_t := x"c4";
+	constant l_vmctr1  : u8_t := x"c5";
 	constant l_gmctrp1 : u8_t := x"e0"; -- aka gamctrp1
 	constant l_gmctrn1 : u8_t := x"e1"; -- aka gamctrn1
-	constant l_madctl : u8_t := x"36";
-	constant l_caset : u8_t := x"2a";
-	constant l_raset : u8_t := x"2b";
-	constant l_dispon : u8_t := x"29";
-	constant l_ramwr : u8_t := x"2c";
+	constant l_madctl  : u8_t := x"36";
+	constant l_caset   : u8_t := x"2a";
+	constant l_raset   : u8_t := x"2b";
+	constant l_dispon  : u8_t := x"29";
+	constant l_ramwr   : u8_t := x"2c";
 
 	--------------------------------------------------------------------------------
 	-- initialization commands and arguments

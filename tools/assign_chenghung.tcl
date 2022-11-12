@@ -151,9 +151,10 @@ if {$make_assignments} {
 
 
 	# UART_{TX,RX} (green, white)
-	set_location_assignment PIN_128 -to uart_rx
+	
 	set_location_assignment PIN_127 -to uart_tx
-
+	set_location_assignment PIN_128 -to uart_rx
+	
 	# Commit assignments
 	export_assignments
 

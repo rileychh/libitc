@@ -33,23 +33,23 @@
 --applicable agreement for further details.
 
 
-LIBRARY ieee;
-USE ieee.std_logic_1164.all;
+library ieee;
+use ieee.std_logic_1164.all;
 
-LIBRARY altera_mf;
-USE altera_mf.altera_mf_components.all;
+library altera_mf;
+use altera_mf.altera_mf_components.all;
 
-ENTITY icon IS
-	PORT
+entity icon is
+	port
 	(
 		address		: IN STD_LOGIC_VECTOR (9 DOWNTO 0);
 		clock		: IN STD_LOGIC  := '1';
 		q		: OUT STD_LOGIC_VECTOR (0 DOWNTO 0)
 	);
-END icon;
+end icon;
 
 
-ARCHITECTURE SYN OF icon IS
+architecture SYN of icon is
 
 	SIGNAL sub_wire0	: STD_LOGIC_VECTOR (0 DOWNTO 0);
 
