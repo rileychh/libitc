@@ -1,0 +1,327 @@
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+use work.itc.all;
+use work.itc_lcd.all;
+
+entity itc110_e2 is
+	port (
+		-- system
+		clk, rst_n : in std_logic;
+		-- lcd
+		lcd_sclk, lcd_mosi, lcd_ss_n, lcd_dc, lcd_bl, lcd_rst_n : out std_logic;
+		-- sw
+		sw : in u8r_t;
+		-- seg
+		seg_led, seg_com : out u8r_t;
+		-- key
+		key_row : in u4r_t;
+		key_col : out u4r_t;
+		--led
+		rgb                 : out std_logic_vector(0 to 2);
+		led_g, led_r, led_y : out std_logic;
+		--dot
+		dot_red, dot_green, dot_com : out u8r_t;
+		--buzzer
+		buz : out std_logic;
+		--uart
+		uart_rx : in std_logic; -- receive pin
+		uart_tx : out std_logic -- transmit pin
+	);
+end itc110_e2;
+architecture arch of itc110_e2 is
+	type mode_t is (idle, feed, tacit, play, sport);
+	type led_t is (g, r, b);
+	signal led : led_t;
+	signal mode : mode_t;
+	signal ena, wr_ena : std_logic;
+	signal addr : l_addr_t;
+	signal load, msec : i32_t;
+	signal data : u8_arr_t(0 to 11);
+	signal seg_data : string(1 to 8);
+	signal inter_rst : std_logic;
+	--key
+	signal pressed_i, pressed : std_logic;
+	signal key : i4_t;
+	--seg 
+	signal dot : u8_t;
+	--dot led 
+	signal data_g, data_r : u8r_arr_t(0 to 7);
+	signal dot_x, dot_y : integer range 0 to 7;
+	signal done : boolean;
+	signal play_happy : integer range -50 to 150;
+	--uart
+	constant txt_len_max : integer := 32;
+	signal pass_str : string(1 to 4);
+	signal tx_ena, tx_busy, rx_busy, rx_err : std_logic;
+	signal tx_data, rx_data : u8_t := x"00";
+	signal pass : u8_arr_t(0 to 3);
+	type keypad_t is array(0 to 9) of integer;
+	signal keypad : character;
+	signal count : integer range 0 to 50;
+	signal tx_len, rx_len : integer range 1 to 4;
+	signal rx_start, rx_done : std_logic;
+	signal stop_buz : std_logic;
+	signal font_start : std_logic;
+	signal font_busy : std_logic;
+begin
+
+	edge_inst : entity work.edge(arch)
+		port map(
+			clk     => clk,
+			rst_n   => rst_n,
+			sig_in  => pressed_i,
+			rising  => pressed,
+			falling => open
+		);
+	lcd_draw : entity work.gen_font(arch)
+		port map(
+			clk        => clk,
+			rst_n      => rst_n,
+			x          => 0,
+			y          => 0,
+			font_start => font_start,
+			font_busy  => font_busy,
+			data       => data,
+			text_color => red,
+			bg_color   => blue,
+			clear      => '1',
+			lcd_sclk   => lcd_sclk,
+			lcd_mosi   => lcd_mosi,
+			lcd_ss_n   => lcd_ss_n,
+			lcd_dc     => lcd_dc,
+			lcd_bl     => lcd_bl,
+			lcd_rst_n  => lcd_rst_n
+
+		);
+	dot_inst : entity work.dot(arch)
+		generic map(
+			common_anode => '0'
+		)
+		port map(
+			clk       => clk,
+			rst_n     => rst_n,
+			dot_red   => dot_red,
+			dot_green => dot_green,
+			dot_com   => dot_com,
+			data_r    => data_r,
+			data_g    => data_g
+		);
+	key_inst : entity work.key(arch)
+		port map(
+			clk     => clk,
+			rst_n   => rst_n,
+			key_row => key_row,
+			key_col => key_col,
+			pressed => pressed_i,
+			key     => key
+		);
+	seg_inst : entity work.seg(arch)
+		port map(
+			clk     => clk,
+			rst_n   => rst_n,
+			seg_led => seg_led,
+			seg_com => seg_com,
+			data    => seg_data,
+			dot     => dot
+		);
+	timer_inst : entity work.timer(arch)
+		port map(
+			clk   => clk,
+			rst_n => rst_n,
+			ena   => ena,
+			load  => 0,
+			msec  => msec
+		);
+	uart_inst : entity work.uart(arch)
+		generic map(
+			baud => 9600
+		)
+		port map(
+			clk     => clk,
+			rst_n   => rst_n,
+			uart_rx => uart_rx,
+			uart_tx => uart_tx,
+			tx_ena  => tx_ena,
+			tx_busy => tx_busy,
+			tx_data => tx_data,
+			rx_busy => rx_busy,
+			rx_err  => rx_err,
+			rx_data => rx_data
+		);
+	edge_inst1 : entity work.edge(arch)
+		port map(
+			clk     => clk,
+			rst_n   => rst_n,
+			sig_in  => rx_busy,
+			rising  => rx_start,
+			falling => rx_done
+		);
+	mode <= idle when (sw = x"00" and done)else
+		feed when (sw = x"80" and done)else
+		tacit when (sw = x"40" and done)else
+		play when (sw = x"20" and done)else
+		sport when (sw = x"10" and done);
+	inter_rst <= '0' when (key = 12) and (pressed = '1')else
+		'1';
+	done <= (pressed = '1') and (key = 14);
+	keypad <=
+		'7'when (pressed = '1') and (key = 0) else
+		'8' when (pressed = '1') and (key = 1) else
+		'9' when (pressed = '1') and (key = 2) else
+		'0' when (pressed = '1') and (key = 3) else
+		'4' when (pressed = '1') and (key = 4) else
+		'5' when (pressed = '1') and (key = 5) else
+		'6' when (pressed = '1') and (key = 6) else
+		'1' when (pressed = '1') and (key = 8) else
+		'2' when (pressed = '1') and (key = 9) else
+		'3' when (pressed = '1') and (key = 5);
+	process (clk, rst_n, inter_rst)
+	begin
+		if rst_n = '0' or inter_rst = '0' then
+			ena <= '0';
+			led <= g;
+			led_g <= '0';
+			led_r <= '0';
+			seg_data <= "        ";
+			data <= white;
+			dot_x <= 0;
+			dot_y <= 7;
+			play_happy <= 20;
+			buz <= '0';
+			count <= 0;
+			pass_str <= "    ";
+			font_start <= '1';
+			pass <= (others => x"00");
+		elsif rising_edge(clk) then
+			if pressed = '1' then
+				case key is
+					when 13 =>
+						seg_data <= "        ";
+					when others =>
+						null;
+				end case;
+			end if;
+			case mode is
+				when idle =>
+					seg_data <= "        ";
+					font_start <= '1';
+					led_g <= '0';
+					led_r <= '0';
+					if ena = '0' then
+						ena <= '1';
+					end if;
+					if msec >= 1000 then
+						ena <= '0';
+						case led is
+							when g =>
+								rgb <= b"100";
+								led <= r;
+							when r =>
+								rgb <= b"010";
+								led <= b;
+							when b =>
+								rgb <= b"001";
+								led <= g;
+							when others =>
+								led <= g;
+						end case;
+					end if;
+				when feed =>
+					if rx_done = '1' then
+						if to_integer(rx_data) = 13 then
+							x <= 0;
+							y <= 0;
+							if (font_start = '0' and font_busy = '0') then
+								font_start <= '1';
+							else
+								font_start <= '0';
+							end if;
+							data <= "  " & to_string(to_integer(pass(0)) - 48, 8, 10, 1) & " " & character'val(to_integer(pass(1))) & " " & character'val(to_integer(pass(2))) & " " & character'val(to_integer(pass(3))) & "   ";
+							count <= 0;
+						else
+							pass(count) <= rx_data;
+							count <= count + 1;
+						end if;
+					end if;
+
+				when tacit =>
+					seg_data <= to_string(to_integer(pass(0)) - 48, 8, 10, 1) & character'val(to_integer(pass(1))) & character'val(to_integer(pass(2))) & character'val(to_integer(pass(3))) & pass_str;
+					if rx_done = '1' then
+						if to_integer(rx_data) = 13 then
+							count <= 0;
+						else
+							pass(count) <= rx_data;
+							count <= count + 1;
+						end if;
+					end if;
+
+					if pressed = '1' then
+						if key = 14 then
+							if seg_data(1 to 4) = pass_str then
+								led_g <= '1';
+							else
+								ena <= '0';
+								buz <= '1';
+								if ena = '0' then
+									ena <= '1';
+								end if;
+							end if;
+						end if;
+
+						if key < 11 and key /= 7 then
+							pass_str <= pass_str(2 to 4) & keypad;
+						end if;
+					end if;
+					if msec >= 1000 then
+						buz <= '0';
+						ena <= '0';
+					end if;
+				when play =>
+					seg_data <= to_string(play_happy, play_happy'high, 10, 4) & "    ";
+					if pressed = '1' and key = 7 then
+						play_happy <= play_happy + 20;
+
+					end if;
+					if pressed = '1' and key = 11 then
+						if play_happy <= 40 then
+							play_happy <= 0;
+							ena <= '0';
+							buz <= '1';
+						else
+							play_happy <= play_happy - 40;
+						end if;
+					end if;
+					if play_happy >= 100 then
+						play_happy <= 100;
+						led_g <= '1';
+						led_r <= '0';
+					end if;
+					if play_happy <= 0 then
+						led_g <= '0';
+						led_r <= '1';
+						if ena = '0' then
+							ena <= '1';
+						elsif msec >= 1000 then
+							buz <= '0';
+						end if;
+					end if;
+				when sport =>
+					data_g(dot_y)(dot_x) <= '1';
+					if dot_x = 7 then
+						data_r(7)(7) <= '0';
+						led_g <= '1';
+					elsif pressed = '1' and key = 15 then
+						led_g <= '0';
+						data_g(dot_y)(dot_x) <= '0';
+						dot_x <= dot_x + 1;
+					else
+						data_r(7)(7) <= '1';
+					end if;
+				when others =>
+					null;
+			end case;
+		end if;
+	end process;
+end arch;
