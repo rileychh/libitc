@@ -1,0 +1,66 @@
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+use work.itc.all;
+use work.itc_lcd.all;
+entity tts_jay is
+	port
+	(
+		clk, rst_n : in std_logic;
+
+		-- tts
+		tts_scl, tts_sda : inout std_logic;
+		tts_mo           : in unsigned(2 downto 0);
+		dbg_b			 : out u8r_t;
+		tts_rst_n        : out std_logic
+	);
+end tts_jay;
+
+architecture rtl of tts_jay is
+------------------------------------------------------------------signal
+
+--tts
+signal tts_ena : std_logic;
+signal busy : std_logic;
+constant max_len : integer := 100;
+signal txt : u8_arr_t(0 to max_len - 1);
+signal len : integer range 0 to max_len;
+-- "幹你娘", 6
+-- tts_data(0 to 5) <= fuck;
+-- tts_len <= 6;
+constant fuck : u8_arr_t(0 to 5) := (
+        x"b7", x"46", x"a7", x"41", x"ae", x"51"
+);
+------------------------------------------------------------------end signal
+begin
+----------------------------------------begin packages
+		
+	------------------------------tts	
+	tts_inst: entity work.tts(arch)
+		generic map (
+				txt_len_max => max_len
+			)
+		port map (
+			clk => clk,
+			rst_n => rst_n,
+			tts_scl => tts_scl,			
+			tts_sda => tts_sda,			
+			tts_mo => tts_mo,			
+			tts_rst_n => tts_rst_n,		
+			ena => tts_ena,				
+			busy => busy,				
+			txt => txt,					
+			txt_len => len				
+		);
+		process(clk,rst_n)
+		begin
+			if rst_n='0' then
+				len<=0;
+			elsif rising_edge(clk) then
+				tts_ena<='1';
+				txt(0 to 5) <= fuck;
+				len <= 6;
+			end if;
+		end process;
+end architecture;

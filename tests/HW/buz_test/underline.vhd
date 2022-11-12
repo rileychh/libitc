@@ -5,16 +5,16 @@ use ieee.numeric_std.all;
 use work.itc.all;
 use work.itc_lcd.all;
 
-entity cat_ex is
+entity buz_test is
 	port (
 		-- --sys
 		clk, rst_n : in std_logic;
 		-- lcd
 		lcd_sclk, lcd_mosi, lcd_ss_n, lcd_dc, lcd_bl, lcd_rst_n : out std_logic
 	);
-end cat_ex;
+end buz_test;
 
-architecture arch of cat_ex is
+architecture arch of buz_test is
 
 	signal wr_ena : std_logic;
 	signal l_addr : l_addr_t;

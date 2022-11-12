@@ -29,7 +29,7 @@ architecture arch of itc109_1 is
 	--LCD
 	signal font_busy, draw_start, draw_done, font_start, lcd_clear, ena : std_logic;
 	signal text_count : integer range 0 to 9;
-	signal data : string(1 to 13);
+	signal data : string(1 to 12);
 	signal bg_color, text_color : l_px_t;
 	signal x, y : integer range 0 to 159;
 	signal addr : l_addr_t;
