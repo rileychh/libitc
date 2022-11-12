@@ -3,10 +3,10 @@ incremental_db/
 output_files/
 simulation/
 tools/venv/
+tools/env/
 docs/ref
 dist/
+__pycache__/
 *.qsf
 *.qws
 *.alc
-.vscode/tasks.json
-*.bat

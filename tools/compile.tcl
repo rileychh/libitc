@@ -25,10 +25,10 @@ if {[is_project_open]} {
 
 # Make assignments
 if {$make_assignments} {
-	# collect trash files
+	# Collect trash files
 	set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 
-	# speed up compilation
+	# Speed up compilation
 	set_global_assignment -name PHYSICAL_SYNTHESIS_EFFORT FAST
 	set_global_assignment -name FITTER_EFFORT FAST_FIT
 	set_global_assignment -name SYNTHESIS_EFFORT FAST
@@ -47,11 +47,11 @@ if {$make_assignments} {
 	# set_global_assignment -name ROUTER_TIMING_OPTIMIZATION_LEVEL MINIMUM
 	# set_global_assignment -name PLACEMENT_EFFORT_MULTIPLIER 0.000001
 	# set_global_assignment -name ROUTER_EFFORT_MULTIPLIER 0.25
-	
-	# disable unused pins
+
+	# Disable unused pins
 	set_global_assignment -name RESERVE_ALL_UNUSED_PINS_WEAK_PULLUP "AS INPUT TRI-STATED"
 
-	# source files
+	# Source files
 	set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
 	set_global_assignment -name TOP_LEVEL_ENTITY underline
 
@@ -74,54 +74,40 @@ if {$make_assignments} {
 	# set_global_assignment -name QIP_FILE tests/res/image_bicolor.qip
 	# set_global_assignment -name MIF_FILE tests/res/image_bicolor.mif
 
-	# set_global_assignment -name VHDL_FILE dist/itc108_1.pp.vhd
-	# set_global_assignment -name QIP_FILE tests/itc108_1/res/icon.qip
-	# set_global_assignment -name MIF_FILE tests/itc108_1/res/icon.mif
+
+	set_global_assignment -name VHDL_FILE dist/itc108_1.pp.vhd
+	set_global_assignment -name QIP_FILE tests/itc108_1/res/icon.qip
+	set_global_assignment -name MIF_FILE tests/itc108_1/res/icon.mif
 
 	# set_global_assignment -name VHDL_FILE dist/itc108_2.pp.vhd
 
 	# set_global_assignment -name VHDL_FILE dist/itc108_2_1124.pp.vhd
 
-	# set_global_assignment -name VHDL_FILE dist/itc109_2.pp.vhd
+	set_global_assignment -name VHDL_FILE dist/itc109_2.pp.vhd
 
-	# set_global_assignment -name VHDL_FILE dist/itc109_1.pp.vhd
-	# set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_0.qip
-	# set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_0.mif
-	# set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_1.qip
-	# set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_1.mif
-	# set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_2.qip
-	# set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_2.mif
-	# set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_3.qip
-	# set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_3.mif
-	# set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_4.qip
-	# set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_4.mif
-	# set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_5.qip
-	# set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_5.mif
-	# set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_6.qip
-	# set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_6.mif
-	# set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_7.qip
-	# set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_7.mif
-	# set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_8.qip
-	# set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_8.mif
-	# set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_9.qip
-	# set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_9.mif
-	# set_global_assignment -name QIP_FILE tests/itc109_1/res/sensor_bg.qip
-	# set_global_assignment -name MIF_FILE tests/itc109_1/res/sensor_bg.mif
-
-	# set_global_assignment -name VHDL_FILE dist/itc109_2.pp.vhd
-
-	# set_global_assignment -name VHDL_FILE dist/itc109_e2.pp.vhd
-
-	# set_global_assignment -name VHDL_FILE tests/itc110_e1/itc110_e1.vhd
-	# set_global_assignment -name VHDL_FILE tests/itc110_e2/itc110_e2.vhd
-	# set_global_assignment -name VHDL_FILE tests/itc110_e1/itc109_1/itc109_1.vhd
-
-	# set_global_assignment -name VHDL_FILE tests/itc110_e2/gen_font.vhd
-	# set_global_assignment -name VHDL_FILE tests/itc110_e2/gen_font_test.vhd
-	# set_global_assignment -name QIP_FILE tests/itc110_e2/res/Font.qip
-	# set_global_assignment -name VHDL_FILE tests/itc110_e2/res/Font.vhd
-	# set_global_assignment -name MIF_FILE tests/itc110_e2/res/Font.mif
-	# set_global_assignment -name VHDL_FILE tests/HW/tts_Jay/ser/tts_stop.vhd
+	set_global_assignment -name VHDL_FILE dist/itc109_1.pp.vhd
+	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_0.qip
+	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_0.mif
+	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_1.qip
+	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_1.mif
+	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_2.qip
+	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_2.mif
+	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_3.qip
+	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_3.mif
+	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_4.qip
+	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_4.mif
+	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_5.qip
+	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_5.mif
+	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_6.qip
+	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_6.mif
+	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_7.qip
+	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_7.mif
+	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_8.qip
+	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_8.mif
+	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_9.qip
+	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_9.mif
+	set_global_assignment -name QIP_FILE tests/itc109_1/res/sensor_bg.qip
+	set_global_assignment -name MIF_FILE tests/itc109_1/res/sensor_bg.mif
 
 	set_global_assignment -name VHDL_FILE tests/HW/buz_test/F1_underline.vhd
 	set_global_assignment -name QIP_FILE tests/HW/buz_test/F1_underline.qip
