@@ -103,9 +103,9 @@
 	"todo-tree.regex.regex": "((//|#|<!--|;|/\\*|^|--)\\s*($TAGS)|^\\s*- \\[ \\])",
 	"filewatcher.commands": [
 		{
-			"match": "(src|tests)\\\\.*\\.vhd",
+			"match": "(lib|src|tests)\\\\.*\\.vhd",
 			"isAsync": true,
-			"cmd": "/usr/bin/bash -c \"cd '${workspaceRoot}'; shopt -s globstar; for f in {src,tests}/**/*.vhd; do tools/pp.py $f dist/$(basename $f .vhd).pp.vhd & done\"",
+			"cmd": "C:\\Program Files\\Git\\bin\\bash.exe -c \"cd '${workspaceRoot}'; shopt -s globstar; for f in {src,tests}/**/*.vhd; do tools/pp.py $f dist/$(basename $f .vhd).pp.vhd & done\"",
 			"event": "onFileChange"
 		}
 	]

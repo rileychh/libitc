@@ -69,45 +69,45 @@ if {$make_assignments} {
 	# set_global_assignment -name VHDL_FILE tests/tts_test.vhd
 	# set_global_assignment -name VHDL_FILE tests/uart_dino_test.vhd
 	# set_global_assignment -name VHDL_FILE tests/uart_echo_test.vhd
-	# set_global_assignment -name QIP_FILE tests/res/image.qip
-	# set_global_assignment -name MIF_FILE tests/res/image.mif
-	# set_global_assignment -name QIP_FILE tests/res/image_bicolor.qip
-	# set_global_assignment -name MIF_FILE tests/res/image_bicolor.mif
+	# set_global_assignment -name QIP_FILE tests/lcd/ip/image.qip
+	# set_global_assignment -name MIF_FILE tests/lcd/ip/image.mif
+	# set_global_assignment -name QIP_FILE tests/lcd/ip/image_bicolor.qip
+	# set_global_assignment -name MIF_FILE tests/lcd/ip/image_bicolor.mif
 
 
-	set_global_assignment -name VHDL_FILE dist/itc108_1.pp.vhd
-	set_global_assignment -name QIP_FILE tests/itc108_1/res/icon.qip
-	set_global_assignment -name MIF_FILE tests/itc108_1/res/icon.mif
+	# set_global_assignment -name VHDL_FILE dist/itc108_1.pp.vhd
+	# set_global_assignment -name QIP_FILE src/itc108_1/ip/icon.qip
+	# set_global_assignment -name MIF_FILE src/itc108_1/ip/icon.mif
 
 	# set_global_assignment -name VHDL_FILE dist/itc108_2.pp.vhd
 
 	# set_global_assignment -name VHDL_FILE dist/itc108_2_1124.pp.vhd
 
-	set_global_assignment -name VHDL_FILE dist/itc109_2.pp.vhd
+	# set_global_assignment -name VHDL_FILE dist/itc109_2.pp.vhd
 
-	set_global_assignment -name VHDL_FILE dist/itc109_1.pp.vhd
-	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_0.qip
-	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_0.mif
-	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_1.qip
-	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_1.mif
-	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_2.qip
-	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_2.mif
-	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_3.qip
-	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_3.mif
-	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_4.qip
-	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_4.mif
-	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_5.qip
-	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_5.mif
-	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_6.qip
-	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_6.mif
-	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_7.qip
-	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_7.mif
-	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_8.qip
-	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_8.mif
-	set_global_assignment -name QIP_FILE tests/itc109_1/res/digit_9.qip
-	set_global_assignment -name MIF_FILE tests/itc109_1/res/digit_9.mif
-	set_global_assignment -name QIP_FILE tests/itc109_1/res/sensor_bg.qip
-	set_global_assignment -name MIF_FILE tests/itc109_1/res/sensor_bg.mif
+	# set_global_assignment -name VHDL_FILE dist/itc109_1.pp.vhd
+	# set_global_assignment -name QIP_FILE src/itc109_1/ip/digit_0.qip
+	# set_global_assignment -name MIF_FILE src/itc109_1/ip/digit_0.mif
+	# set_global_assignment -name QIP_FILE src/itc109_1/ip/digit_1.qip
+	# set_global_assignment -name MIF_FILE src/itc109_1/ip/digit_1.mif
+	# set_global_assignment -name QIP_FILE src/itc109_1/ip/digit_2.qip
+	# set_global_assignment -name MIF_FILE src/itc109_1/ip/digit_2.mif
+	# set_global_assignment -name QIP_FILE src/itc109_1/ip/digit_3.qip
+	# set_global_assignment -name MIF_FILE src/itc109_1/ip/digit_3.mif
+	# set_global_assignment -name QIP_FILE src/itc109_1/ip/digit_4.qip
+	# set_global_assignment -name MIF_FILE src/itc109_1/ip/digit_4.mif
+	# set_global_assignment -name QIP_FILE src/itc109_1/ip/digit_5.qip
+	# set_global_assignment -name MIF_FILE src/itc109_1/ip/digit_5.mif
+	# set_global_assignment -name QIP_FILE src/itc109_1/ip/digit_6.qip
+	# set_global_assignment -name MIF_FILE src/itc109_1/ip/digit_6.mif
+	# set_global_assignment -name QIP_FILE src/itc109_1/ip/digit_7.qip
+	# set_global_assignment -name MIF_FILE src/itc109_1/ip/digit_7.mif
+	# set_global_assignment -name QIP_FILE src/itc109_1/ip/digit_8.qip
+	# set_global_assignment -name MIF_FILE src/itc109_1/ip/digit_8.mif
+	# set_global_assignment -name QIP_FILE src/itc109_1/ip/digit_9.qip
+	# set_global_assignment -name MIF_FILE src/itc109_1/ip/digit_9.mif
+	# set_global_assignment -name QIP_FILE src/itc109_1/ip/sensor_bg.qip
+	# set_global_assignment -name MIF_FILE src/itc109_1/ip/sensor_bg.mif
 
 	set_global_assignment -name VHDL_FILE tests/HW/buz_test/F1_underline.vhd
 	set_global_assignment -name QIP_FILE tests/HW/buz_test/F1_underline.qip
@@ -120,27 +120,27 @@ if {$make_assignments} {
 
 	## Components
 
-	set_global_assignment -name VHDL_FILE src/dht.vhd
-	set_global_assignment -name VHDL_FILE src/dot.vhd
-	set_global_assignment -name VHDL_FILE src/key.vhd
-	set_global_assignment -name VHDL_FILE src/lcd.vhd
-	set_global_assignment -name VHDL_FILE src/mot.vhd
-	set_global_assignment -name VHDL_FILE src/rgb.vhd
-	set_global_assignment -name VHDL_FILE src/seg.vhd
-	set_global_assignment -name VHDL_FILE src/sw.vhd
-	set_global_assignment -name VHDL_FILE src/tsl.vhd
-	set_global_assignment -name VHDL_FILE src/tts.vhd
-	set_global_assignment -name VHDL_FILE src/util/itc_pkg.vhd
-	set_global_assignment -name VHDL_FILE dist/itc_lcd_pkg.pp.vhd
-	set_global_assignment -name VHDL_FILE src/util/clk.vhd
-	set_global_assignment -name VHDL_FILE src/util/debounce.vhd
-	set_global_assignment -name VHDL_FILE src/util/edge.vhd
-	set_global_assignment -name VHDL_FILE src/util/pwm.vhd
-	set_global_assignment -name VHDL_FILE src/util/i2c.vhd
-	set_global_assignment -name VHDL_FILE src/util/timer.vhd
-	set_global_assignment -name VHDL_FILE src/util/uart.vhd
-	set_global_assignment -name VHDL_FILE src/util/uart_txt.vhd
-	set_global_assignment -name QIP_FILE src/util/framebuffer.qip
+	set_global_assignment -name VHDL_FILE lib/dht.vhd
+	set_global_assignment -name VHDL_FILE lib/dot.vhd
+	set_global_assignment -name VHDL_FILE lib/key.vhd
+	set_global_assignment -name VHDL_FILE lib/lcd.vhd
+	set_global_assignment -name VHDL_FILE lib/mot.vhd
+	set_global_assignment -name VHDL_FILE lib/rgb.vhd
+	set_global_assignment -name VHDL_FILE lib/seg.vhd
+	set_global_assignment -name VHDL_FILE lib/sw.vhd
+	set_global_assignment -name VHDL_FILE lib/tsl.vhd
+	set_global_assignment -name VHDL_FILE lib/tts.vhd
+	set_global_assignment -name VHDL_FILE lib/pkg/itc.pkg.vhd
+	set_global_assignment -name VHDL_FILE lib/pkg/lcd.pkg.vhd
+	set_global_assignment -name VHDL_FILE lib/util/clk.vhd
+	set_global_assignment -name VHDL_FILE lib/util/debounce.vhd
+	set_global_assignment -name VHDL_FILE lib/util/edge.vhd
+	set_global_assignment -name VHDL_FILE lib/util/pwm.vhd
+	set_global_assignment -name VHDL_FILE lib/util/i2c.vhd
+	set_global_assignment -name VHDL_FILE lib/util/timer.vhd
+	set_global_assignment -name VHDL_FILE lib/util/uart.vhd
+	set_global_assignment -name VHDL_FILE lib/util/uart_txt.vhd
+	set_global_assignment -name QIP_FILE lib/ip/framebuffer.qip
 
 	# Commit assignments
 	export_assignments

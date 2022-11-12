@@ -12,10 +12,10 @@ entity lcd is
 		-- lcd
 		lcd_sclk, lcd_mosi, lcd_ss_n, lcd_dc, lcd_bl, lcd_rst_n : out std_logic;
 		-- user logic
-		brightness         : in integer range 0 to 100;
-		update_ena, wr_ena : in std_logic;
-		addr               : in l_addr_t;
-		data               : in l_px_t
+		brightness : in integer range 0 to 100;
+		wr_ena     : in std_logic;
+		addr       : in l_addr_t;
+		data       : in l_px_t
 	);
 end lcd;
 
