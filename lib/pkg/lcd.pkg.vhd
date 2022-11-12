@@ -65,13 +65,13 @@ package itc_lcd is
 	--     icon_addr <= to_addr(PACK);
 	-- the function can be nested to paste multiple pictures
 	function l_paste(l_addr : integer;
-					 l_data, p_data : l_px_t;
-					 p_coord : l_coord_t;
-					 p_width, p_height : integer) return l_pack_t;
+	                 l_data, p_data : l_px_t;
+	                 p_coord : l_coord_t;
+	                 p_width, p_height : integer) return l_pack_t;
 
 	function l_paste_txt(l_addr : integer; 
-						 l_data : l_px_t; txt : string;
-						 txt_coord : l_coord_t) return l_px_t;
+                       l_data : l_px_t; txt : string;
+                       txt_coord : l_coord_t) return l_px_t;
 
 	-- l_rotate: returns the rotated address of a picture
 	-- addr: the original address
