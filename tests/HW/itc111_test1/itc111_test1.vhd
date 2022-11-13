@@ -4,22 +4,19 @@ use ieee.numeric_std.all;
 
 use work.itc.all;
 use work.itc_lcd.all;
-
-
 entity itc111_test1 is
-	port
-	(
+	port (
 		clk, rst_n : in std_logic;
 
 		-- sw
 		sw : in u8r_t;
-		
+
 		-- dht
 		dht_data : inout std_logic;
 
 		--seg
 		seg_led, seg_com : out u8r_t;
-		
+
 		-- key
 		key_row : in u4r_t;
 		key_col : out u4r_t;
@@ -27,7 +24,7 @@ entity itc111_test1 is
 		-- tts
 		tts_scl, tts_sda : inout std_logic;
 		tts_mo           : in unsigned(2 downto 0);
-		dbg_b			 : out u8r_t;
+		dbg_b            : out u8r_t;
 		tts_rst_n        : out std_logic;
 
 		-- lcd
@@ -37,88 +34,88 @@ end itc111_test1;
 
 architecture arch of itc111_test1 is
 
-------------------------------------------------------------------signal
---seg
-signal seg_data:string(1 to 8):=(others=>' ');
-signal dot:u8r_t:=(others=>'0');
+	------------------------------------------------------------------signal
+	--seg
+	signal seg_data : string(1 to 8) := (others => ' ');
+	signal dot : u8r_t := (others => '0');
 
---key
-signal pressed, pressed_i : std_logic;
-signal key : i4_t;
+	--key
+	signal pressed, pressed_i : std_logic;
+	signal key : i4_t;
 
---dht11
-signal temp_int, hum_int : integer range 0 to 99;
+	--dht11
+	signal temp_int, hum_int : integer range 0 to 99;
 
---f(1khz)
-signal msec,load:i32_t;
-signal time_ena:std_logic;
+	--f(1khz)
+	signal msec, load : i32_t;
+	signal time_ena : std_logic;
 
---lcd_draw
-signal bg_color, text_color : l_px_t;
-signal addr : l_addr_t;
-signal text_size : integer range 1 to 12;
-signal data : string(1 to 12);
-signal font_start,font_busy,lcd_clear : std_logic;
-signal draw_done,draw_start : std_logic;
-signal x : integer range -5 to 159;
-signal y : integer range 0 to 159;
+	--lcd_draw
+	signal bg_color, text_color : l_px_t;
+	signal addr : l_addr_t;
+	signal text_size : integer range 1 to 12;
+	signal data : string(1 to 12);
+	signal font_start, font_busy, lcd_clear : std_logic;
+	signal draw_done, draw_start : std_logic;
+	signal x : integer range -5 to 159;
+	signal y : integer range 0 to 159;
 
---tts
-signal tts_ena : std_logic;
-signal tts_busy : std_logic;
-constant max_len : integer := 100;
-signal txt : u8_arr_t(0 to max_len - 1);
-signal len : integer range 0 to max_len;
-signal tts_done : std_logic;
---clk_1hz
-signal clk_1hz, time_clk,clk_500mhz,clk_500ms : std_logic;
---mode
-type mode_t is (idle,buff,auto,dht,tts,stop);
-signal mode : mode_t;
+	--tts
+	signal tts_ena : std_logic;
+	signal tts_busy : std_logic;
+	constant max_len : integer := 100;
+	signal txt : u8_arr_t(0 to max_len - 1);
+	signal len : integer range 0 to max_len;
+	signal tts_done : std_logic;
+	--clk_1hz
+	signal clk_1hz, time_clk, clk_500mhz, clk_500ms : std_logic;
+	--mode
+	type mode_t is (idle, buff, auto, dht, tts, stop);
+	signal mode : mode_t;
 
---user
-signal mins : integer range 0 to 59 := 0;
-signal secs : integer range 0 to 59 := 50;
-signal done : std_logic;
+	--user
+	signal mins : integer range 0 to 59 := 0;
+	signal secs : integer range 0 to 59 := 50;
+	signal done : std_logic;
 
-signal lcd_count : integer range 0 to 50 ;
+	signal lcd_count : integer range 0 to 50;
 
---01 dht
-signal seg_func_count : integer range 0 to 5 ;
-signal seg_count : integer range 0 to 9 ;
---10 tts
-type tts_mode_t is (idle,tts_play,stop);
-signal tts_mode : tts_mode_t;
-signal addr_ena : std_logic:='0';
-signal tts_flag : std_logic:='0';
-signal tts_count : integer range 0 to 10 ;
-signal tts_play_count : integer range 0 to 3 ;
-signal tts_func_count : integer range 1 to 3 ;
-signal play_count : integer range 0 to 3 ;
-signal func_count : integer range 1 to 3 ;
+	--01 dht
+	signal seg_func_count : integer range 0 to 5;
+	signal seg_count : integer range 0 to 9;
+	--10 tts
+	type tts_mode_t is (idle, tts_play, stop);
+	signal tts_mode : tts_mode_t;
+	signal addr_ena : std_logic := '0';
+	signal tts_flag : std_logic := '0';
+	signal tts_count : integer range 0 to 10;
+	signal tts_play_count : integer range 0 to 3;
+	signal tts_func_count : integer range 1 to 3;
+	signal play_count : integer range 0 to 3;
+	signal func_count : integer range 1 to 3;
 
-constant star  : u8_arr_t(0 to 3) := ( x"03",x"e9",x"00",x"01");--1001.wav
-constant tiger : u8_arr_t(0 to 3) := ( x"03",x"ea",x"00",x"02");--1002.wav
-constant bee   : u8_arr_t(0 to 3) := ( x"03",x"eb",x"00",x"02");--1003.wav
---11 auto
---Tx.wav
--- constant play_music1 : u8_arr_t(0 to 10) := (x"bc", x"bd", x"a9", x"f1", x"20", x"74", x"31", x"20", x"77", x"61", x"76");
--- constant play_music2 : u8_arr_t(0 to 10) := (x"bc", x"bd", x"a9", x"f1", x"20", x"74", x"32", x"20", x"77", x"61", x"76");
--- constant play_music3 : u8_arr_t(0 to 10) := (x"bc", x"bd", x"a9", x"f1", x"20", x"74", x"33", x"20", x"77", x"61", x"76");
---Tx
-constant play_music1 : u8_arr_t(0 to 5) := (x"bc", x"bd", x"a9", x"f1", x"54", x"31");
-constant Play_music2 : u8_arr_t(0 to 5) := (x"bc", x"bd", x"a9", x"f1", x"54", x"32");
-constant Play_music3 : u8_arr_t(0 to 5) := (x"bc", x"bd", x"a9", x"f1", x"54", x"33");
+	constant star : u8_arr_t(0 to 3) := (x"03", x"e9", x"00", x"01");--1001.wav
+	constant tiger : u8_arr_t(0 to 3) := (x"03", x"ea", x"00", x"02");--1002.wav
+	constant bee : u8_arr_t(0 to 3) := (x"03", x"eb", x"00", x"02");--1003.wav
+	--11 auto
+	--Tx.wav
+	-- constant play_music1 : u8_arr_t(0 to 10) := (x"bc", x"bd", x"a9", x"f1", x"20", x"74", x"31", x"20", x"77", x"61", x"76");
+	-- constant play_music2 : u8_arr_t(0 to 10) := (x"bc", x"bd", x"a9", x"f1", x"20", x"74", x"32", x"20", x"77", x"61", x"76");
+	-- constant play_music3 : u8_arr_t(0 to 10) := (x"bc", x"bd", x"a9", x"f1", x"20", x"74", x"33", x"20", x"77", x"61", x"76");
+	--Tx
+	constant play_music1 : u8_arr_t(0 to 5) := (x"bc", x"bd", x"a9", x"f1", x"54", x"31");
+	constant Play_music2 : u8_arr_t(0 to 5) := (x"bc", x"bd", x"a9", x"f1", x"54", x"32");
+	constant Play_music3 : u8_arr_t(0 to 5) := (x"bc", x"bd", x"a9", x"f1", x"54", x"33");
 
-constant tts_pause : u8_arr_t(0 to 11) := (x"ad", x"b5", x"a4", x"eb", x"bc", x"c8", x"b0", x"b1", x"bc", x"b7", x"a9", x"f1");
-constant tts_continue : u8_arr_t(0 to 11) := (x"ad", x"b5", x"a4", x"eb", x"c4", x"7e", x"c4", x"f2", x"bc", x"b7", x"a9", x"f1");
-constant tts_setup : u8_arr_t(0 to 7) := (x"a5", x"5c", x"af", x"e0", x"b3", x"5d", x"a9", x"77");
+	constant tts_pause : u8_arr_t(0 to 11) := (x"ad", x"b5", x"a4", x"eb", x"bc", x"c8", x"b0", x"b1", x"bc", x"b7", x"a9", x"f1");
+	constant tts_continue : u8_arr_t(0 to 11) := (x"ad", x"b5", x"a4", x"eb", x"c4", x"7e", x"c4", x"f2", x"bc", x"b7", x"a9", x"f1");
+	constant tts_setup : u8_arr_t(0 to 7) := (x"a5", x"5c", x"af", x"e0", x"b3", x"5d", x"a9", x"77");
 
-------------------------------------------------------------------end signal
+	------------------------------------------------------------------end signal
 
 begin
 
-----------------------------------------begin packages
+	----------------------------------------begin packages
 	clk_inst : entity work.clk(arch)
 		generic map(
 			freq => 1
@@ -151,31 +148,31 @@ begin
 		port map(
 			clk     => clk,
 			rst_n   => rst_n,
-			seg_led => seg_led,		--腳位 a~g
-			seg_com => seg_com,		--共同腳位
-			data    => seg_data,	--七段資料 輸入要顯示字元即可,遮末則輸入空白
-			dot     => dot			--小數點 1 亮
-									--輸入資料ex: b"01000000" = x"70"  
-									--seg_deg 度C
+			seg_led => seg_led,  --腳位 a~g
+			seg_com => seg_com,  --共同腳位
+			data    => seg_data, --七段資料 輸入要顯示字元即可,遮末則輸入空白
+			dot     => dot       --小數點 1 亮
+			--輸入資料ex: b"01000000" = x"70"  
+			--seg_deg 度C
 		);
 
 	key_inst : entity work.key(arch)
 		port map(
 			clk     => clk,
 			rst_n   => rst_n,
-			key_row => key_row,		--腳位
-			key_col => key_col,		--腳位
-			pressed => pressed_i,	--pressed='1' 代表按住
-			key     => key			--key=0 代表按下 key 1	key=1 代表按下 key 2...........
+			key_row => key_row,   --腳位
+			key_col => key_col,   --腳位
+			pressed => pressed_i, --pressed='1' 代表按住
+			key     => key        --key=0 代表按下 key 1	key=1 代表按下 key 2...........
 		);
 
 	timer_inst : entity work.timer(arch)
 		port map(
 			clk   => clk,
-			rst_n => rst_n,		
-			ena   => time_ena,			--當ena='0', msec=load
-			load  => load,				--起始值
-			msec  => msec			--毫秒數
+			rst_n => rst_n,
+			ena   => time_ena, --當ena='0', msec=load
+			load  => load,     --起始值
+			msec  => msec      --毫秒數
 		);
 
 	edge_inst_key : entity work.edge(arch)
@@ -188,8 +185,7 @@ begin
 		);
 
 	edge_inst_font_done : entity work.edge(arch)
-		port map
-		(
+		port map(
 			clk     => clk,
 			rst_n   => rst_n,
 			sig_in  => font_busy,
@@ -198,31 +194,28 @@ begin
 		);
 
 	edge_inst_1s : entity work.edge(arch)
-		port map
-		(
+		port map(
 			clk     => clk,
 			rst_n   => rst_n,
 			sig_in  => clk_1hz,
-			rising  => time_clk,		
-			falling => open			
+			rising  => time_clk,
+			falling => open
 		);
 	edge_inst_500ms : entity work.edge(arch)
-		port map
-		(
+		port map(
 			clk     => clk,
 			rst_n   => rst_n,
 			sig_in  => clk_500mhz,
-			rising  => clk_500ms,		
-			falling => open			
+			rising  => clk_500ms,
+			falling => open
 		);
 	edge_inst_tts_done : entity work.edge(arch)
-		port map
-		(
+		port map(
 			clk     => clk,
 			rst_n   => rst_n,
 			sig_in  => tts_busy,
-			rising  => open,		
-			falling => tts_done			
+			rising  => open,
+			falling => tts_done
 		);
 	lcd_draw : entity work.gen_font(arch)
 		port map(
@@ -236,7 +229,7 @@ begin
 			data       => data,
 			text_color => text_color,
 			addr       => addr,
-			bg_color   => bg_color, 
+			bg_color   => bg_color,
 			clear      => lcd_clear,
 			lcd_sclk   => lcd_sclk,
 			lcd_mosi   => lcd_mosi,
@@ -246,53 +239,51 @@ begin
 			lcd_rst_n  => lcd_rst_n
 
 		);
-	tts_inst: entity work.tts_stop(arch)
-		generic map (
-				txt_len_max => max_len
-			)
-		port map (
-			clk => clk,
-			rst_n => rst_n,
-			tts_scl => tts_scl,
-			tts_sda => tts_sda,
-			tts_mo => tts_mo,
+	tts_inst : entity work.tts_stop(arch)
+		generic map(
+			txt_len_max => max_len
+		)
+		port map(
+			clk       => clk,
+			rst_n     => rst_n,
+			tts_scl   => tts_scl,
+			tts_sda   => tts_sda,
+			tts_mo    => tts_mo,
 			tts_rst_n => tts_rst_n,
-			ena => tts_ena,
-			busy => tts_busy,
-			txt => txt,
-			txt_len => len
+			ena       => tts_ena,
+			busy      => tts_busy,
+			txt       => txt,
+			txt_len   => len
 		);
-
-
----------------------------------------end packages
-	Process(clk,rst_n)
+	---------------------------------------end packages
+	process (clk, rst_n)
 	begin
-		if rst_n='0' then
-			bg_color		<=white;
-			done			<='0';
-			lcd_count		<= 1 ;
-			lcd_clear		<='1';
-			font_start		<='0';
-			seg_func_count	<= 0 ;
-			seg_data		<= "        ";
-			dot				<= "00000000";
-			data			<= "            ";
-			load			<= 0 ;
-			time_ena		<='0';
-			x				<= 0 ;
-			y				<= 0 ;
-			secs			<= 50;
-			mins			<= 0 ;
-			tts_count		<= 0 ;
-			tts_ena			<='0';
-			tts_play_count	<= 1 ;
-			tts_func_count	<= 1 ;
-			play_count		<= 0 ;
-			func_count		<= 1 ;
-			tts_mode		<=idle;
+		if rst_n = '0' then
+			bg_color <= white;
+			done <= '0';
+			lcd_count <= 1;
+			lcd_clear <= '1';
+			font_start <= '0';
+			seg_func_count <= 0;
+			seg_data <= "        ";
+			dot <= "00000000";
+			data <= "            ";
+			load <= 0;
+			time_ena <= '0';
+			x <= 0;
+			y <= 0;
+			secs <= 50;
+			mins <= 0;
+			tts_count <= 0;
+			tts_ena <= '0';
+			tts_play_count <= 1;
+			tts_func_count <= 1;
+			play_count <= 0;
+			func_count <= 1;
+			tts_mode <= idle;
 		elsif rising_edge(clk) then
-			if done='1' and (mode=tts or mode=auto) then
-				if time_clk = '1' then		
+			if done = '1' and (mode = tts or mode = auto) then
+				if time_clk = '1' then
 					if secs = secs'high then
 						secs <= 0;
 						if mins = mins'high then
@@ -306,853 +297,851 @@ begin
 				end if;
 			end if;
 			if (pressed = '1') and (key = 12) then
-				done<= not done;
+				done <= not done;
 			end if;
-			if done='1' then
+			if done = '1' then
 				case sw(6 to 7) is
-					when "00" =>----idle
-						tts_flag<='0';
-						mode<=buff;
-					when "01" =>----dht
-						lcd_clear<='1';
-						tts_flag<='0';
-						seg_data<="        ";
-						dot<="00000000";
-						mode<=dht;
-					when "10" =>----tts
-						lcd_clear<='1';
-						tts_flag<='1';
-						text_color<=green;
-						bg_color<=white;
-						mode<=tts;
-					when "11" =>----auto
-						lcd_clear<='1';
-						text_color<=green;
-						bg_color<=white;
-						font_start<='0';
-						tts_flag<='1';
-						mode<=auto;
+					when "00" => ----idle
+						tts_flag <= '0';
+						mode <= buff;
+					when "01" => ----dht
+						lcd_clear <= '1';
+						tts_flag <= '0';
+						seg_data <= "        ";
+						dot <= "00000000";
+						mode <= dht;
+					when "10" => ----tts
+						lcd_clear <= '1';
+						tts_flag <= '1';
+						text_color <= green;
+						bg_color <= white;
+						mode <= tts;
+					when "11" => ----auto
+						lcd_clear <= '1';
+						text_color <= green;
+						bg_color <= white;
+						font_start <= '0';
+						tts_flag <= '1';
+						mode <= auto;
 				end case;
 			else
-				mode<=stop;
+				mode <= stop;
 			end if;
 			case mode is
 				when buff =>
-					font_start<='0';
-					lcd_clear<='0';
-					if font_busy='0' then
-						mode<=idle;
+					font_start <= '0';
+					lcd_clear <= '0';
+					if font_busy = '0' then
+						mode <= idle;
 					end if;
 				when idle =>
 					case lcd_count is
-						when 1=>--red
-							lcd_clear<='0';
-							bg_color<=red;
+						when 1 => --red
+							lcd_clear <= '0';
+							bg_color <= red;
 							if y < y'high then
-								if font_busy='0' then
-									font_start<='1';
+								if font_busy = '0' then
+									font_start <= '1';
 								end if;
-								if draw_done='1' then 
-									font_start<='0';
-									y<=y+1;
+								if draw_done = '1' then
+									font_start <= '0';
+									y <= y + 1;
 								end if;
 							else
-								time_ena<='1';
-								y<=0;
-								if y>=y'high and msec>=300 then
-									lcd_clear<='1';
-									lcd_count<=2;
+								time_ena <= '1';
+								y <= 0;
+								if y >= y'high and msec >= 300 then
+									lcd_clear <= '1';
+									lcd_count <= 2;
 								end if;
 							end if;
-						when 2=>--blue
-							lcd_clear<='0';
-							bg_color<=blue;
+						when 2 => --blue
+							lcd_clear <= '0';
+							bg_color <= blue;
 							if y < y'high then
-								if font_busy='0' then
-									font_start<='1';
+								if font_busy = '0' then
+									font_start <= '1';
 								end if;
-								if draw_done='1' then 
-									font_start<='0';
-									y<=y+1;
+								if draw_done = '1' then
+									font_start <= '0';
+									y <= y + 1;
 								end if;
 							else
-								y<=0;
-								if y>=y'high and msec>=600 then
-									lcd_clear<='1';
-									lcd_count<=3;
+								y <= 0;
+								if y >= y'high and msec >= 600 then
+									lcd_clear <= '1';
+									lcd_count <= 3;
 								end if;
 							end if;
-						when 3=>--green
-							lcd_clear<='0';
-							bg_color<=green;
+						when 3 => --green
+							lcd_clear <= '0';
+							bg_color <= green;
 							if y < y'high then
-								if font_busy='0' then
-									font_start<='1';
+								if font_busy = '0' then
+									font_start <= '1';
 								end if;
-								if draw_done='1' then 
-									font_start<='0';
-									y<=y+1;
+								if draw_done = '1' then
+									font_start <= '0';
+									y <= y + 1;
 								end if;
 							else
-								y<=0;
-								if y>=y'high and msec>=900 then
-									lcd_clear<='1';
-									lcd_count<=4;
+								y <= 0;
+								if y >= y'high and msec >= 900 then
+									lcd_clear <= '1';
+									lcd_count <= 4;
 								end if;
 							end if;
-						when 4=>--white
-							lcd_clear<='0';
-							bg_color<=white;
+						when 4 => --white
+							lcd_clear <= '0';
+							bg_color <= white;
 							if y < y'high then
-								if font_busy='0' then
-									font_start<='1';
+								if font_busy = '0' then
+									font_start <= '1';
 								end if;
-								if draw_done='1' then 
-									font_start<='0';
-									y<=y+1;
+								if draw_done = '1' then
+									font_start <= '0';
+									y <= y + 1;
 								end if;
 							else
-								lcd_clear<='1';
-								y<=0;
-								text_color<=black;
-								lcd_count<=5;
+								lcd_clear <= '1';
+								y <= 0;
+								text_color <= black;
+								lcd_count <= 5;
 							end if;
-						when 5=>
-							lcd_clear<='0';
-							y<=0;
-							data<="____________";
-							font_start<='1';
-							if y<=150 then
-								y<=y+10;
+						when 5 =>
+							lcd_clear <= '0';
+							y <= 0;
+							data <= "____________";
+							font_start <= '1';
+							if y <= 150 then
+								y <= y + 10;
 							else
-								y<=0;
+								y <= 0;
 							end if;
-							if draw_done='1' then
-								font_start<='0';
-								lcd_clear<='1';
+							if draw_done = '1' then
+								font_start <= '0';
+								lcd_clear <= '1';
 							end if;
-						when 6=>--1~5
-							lcd_clear<='0';
-							y<=10;
-							data<="  T E S T   ";
-							font_start<='1';
-							if draw_done='1' and msec>=4500 then
-								font_start<='0';
-								y<=30;
-								lcd_count<=7;
+						when 6 => --1~5
+							lcd_clear <= '0';
+							y <= 10;
+							data <= "  T E S T   ";
+							font_start <= '1';
+							if draw_done = '1' and msec >= 4500 then
+								font_start <= '0';
+								y <= 30;
+								lcd_count <= 7;
 							end if;
-						when 7=>--6~0
-							if y=30 then
-								data<=" 1 2 3 4 5  ";
-								font_start<='1';
+						when 7 => --6~0
+							if y = 30 then
+								data <= " 1 2 3 4 5  ";
+								font_start <= '1';
 							end if;
-							if draw_done='1' and msec>=5000 then
-								font_start<='0';
-								y<=50;
-								lcd_count<=8;
+							if draw_done = '1' and msec >= 5000 then
+								font_start <= '0';
+								y <= 50;
+								lcd_count <= 8;
 							end if;
-						when 8=>--Vol. On Off
-							if y=50 then
-								data<=" 6 7 8 9 0  ";
-								font_start<='1';
+						when 8 => --Vol. On Off
+							if y = 50 then
+								data <= " 6 7 8 9 0  ";
+								font_start <= '1';
 							end if;
-							if draw_done='1' and msec>=5500 then
-								font_start<='0';
-								y<=70;
-								lcd_count<=9;
+							if draw_done = '1' and msec >= 5500 then
+								font_start <= '0';
+								y <= 70;
+								lcd_count <= 9;
 							end if;
-						when 9=>--P A N F T
-							if y=70 then
-								data<=" F T w a v  ";
-								font_start<='1';
+						when 9 => --P A N F T
+							if y = 70 then
+								data <= " F T w a v  ";
+								font_start <= '1';
 							end if;
-							if draw_done='1' and msec>=6000 then
-								font_start<='0';
-								y<=90;
-								lcd_count<=10;
+							if draw_done = '1' and msec >= 6000 then
+								font_start <= '0';
+								y <= 90;
+								lcd_count <= 10;
 							end if;
-						when 10=>--, : _ .
-							if y=90 then
-								data<=" Vol.On OFF ";
-								font_start<='1';
+						when 10 => --, : _ .
+							if y = 90 then
+								data <= " Vol.On OFF ";
+								font_start <= '1';
 							end if;
-							if draw_done='1' and msec>=6500 then
-								data<="            ";
-								font_start<='0';
-								lcd_count<=1;
-								lcd_clear<='1';
-								y<=0;
-								load<=0;
-								time_ena<='0';
+							if draw_done = '1' and msec >= 6500 then
+								data <= "            ";
+								font_start <= '0';
+								lcd_count <= 1;
+								lcd_clear <= '1';
+								y <= 0;
+								load <= 0;
+								time_ena <= '0';
 							end if;
-						when others=>null;
+						when others => null;
 					end case;
 				when dht =>
-						dot<="00100000";
-						if pressed='1' then
-							case key is
-								when 8 =>
-									if seg_func_count<5 then
-										seg_func_count<=seg_func_count+1;
-									else
-										seg_func_count<=seg_func_count;
-									end if;
-								when 7 =>
-									if seg_func_count>0	then
-										seg_func_count<=seg_func_count-1;
-									else
-										seg_func_count<=seg_func_count;
-									end if;
-								when others=>
-							end case;
+					dot <= "00100000";
+					if pressed = '1' then
+						case key is
+							when 8 =>
+								if seg_func_count < 5 then
+									seg_func_count <= seg_func_count + 1;
+								else
+									seg_func_count <= seg_func_count;
+								end if;
+							when 7 =>
+								if seg_func_count > 0 then
+									seg_func_count <= seg_func_count - 1;
+								else
+									seg_func_count <= seg_func_count;
+								end if;
+							when others =>
+						end case;
+					end if;
+					if clk_500ms = '1' then
+						if seg_count >= 9 then
+							seg_count <= 0;
+						else
+							seg_count <= seg_count + 1;
 						end if;
-						if clk_500ms='1' then
-							if seg_count>=9 then
-								seg_count<=0;
-							else
-								seg_count<=seg_count+1;
-							end if;
-						end if;
-						case seg_func_count is
-							when 0=>--F0
-								seg_data<="F0 "&to_string(seg_count,9,10,1)&to_string(seg_count,9,10,1)&to_string(seg_count,9,10,1)&to_string(seg_count,9,10,1)&to_string(seg_count,9,10,1);
-							when 1=>--F1
-								seg_data<="F1  " & to_string(temp_int,temp_int'high,10,2) & seg_deg & 'C';
-							when 2=>--F2
-								seg_data<="F2 " & to_string(hum_int,hum_int'high,10,2) & seg_deg & percent & 'o';
-							when 3=>--F3
-								seg_data<="F3 T1WAv";
-							when 4=>--F4
-								seg_data<="F4 T2WAv";
-							when 5=>
-								seg_data<="F5 T3WAv";
-						end case;				
+					end if;
+					case seg_func_count is
+						when 0 => --F0
+							seg_data <= "F0 " & to_string(seg_count, 9, 10, 1) & to_string(seg_count, 9, 10, 1) & to_string(seg_count, 9, 10, 1) & to_string(seg_count, 9, 10, 1) & to_string(seg_count, 9, 10, 1);
+						when 1 => --F1
+							seg_data <= "F1  " & to_string(temp_int, temp_int'high, 10, 2) & seg_deg & 'C';
+						when 2 => --F2
+							seg_data <= "F2 " & to_string(hum_int, hum_int'high, 10, 2) & seg_deg & seg_percent & 'o';
+						when 3 => --F3
+							seg_data <= "F3 T1WAv";
+						when 4 => --F4
+							seg_data <= "F4 T2WAv";
+						when 5 =>
+							seg_data <= "F5 T3WAv";
+					end case;
 				when tts =>
-					lcd_clear<='0';
-					if pressed='1' then--tts_play_count   tts_func_count   tts_play
+					lcd_clear <= '0';
+					if pressed = '1' then--tts_play_count   tts_func_count   tts_play
 						case key is
 							when 9 =>
-								if tts_func_count=1 then
-									tts_play_count<=1;
-								elsif tts_func_count=2 then
-									if tts_play_count<3 then
-										tts_play_count<=tts_play_count+1;
+								if tts_func_count = 1 then
+									tts_play_count <= 1;
+								elsif tts_func_count = 2 then
+									if tts_play_count < 3 then
+										tts_play_count <= tts_play_count + 1;
 									else
-										tts_play_count<=tts_play_count;
+										tts_play_count <= tts_play_count;
 									end if;
 								else
-									tts_play_count<=0;
-								end if;	
+									tts_play_count <= 0;
+								end if;
 							when 8 =>
-								if tts_func_count=1 then
-									tts_play_count<=1;
-								elsif tts_func_count=2 then
-									if tts_play_count>1	then
-										tts_play_count<=tts_play_count-1;
+								if tts_func_count = 1 then
+									tts_play_count <= 1;
+								elsif tts_func_count = 2 then
+									if tts_play_count > 1 then
+										tts_play_count <= tts_play_count - 1;
 									else
-										tts_play_count<=tts_play_count;
+										tts_play_count <= tts_play_count;
 									end if;
 								else
-									tts_play_count<=0;
+									tts_play_count <= 0;
 								end if;
-							when 15=>
-								if tts_func_count>=3 then
-									tts_func_count<=2;
+							when 15 =>
+								if tts_func_count >= 3 then
+									tts_func_count <= 2;
 								else
-									tts_func_count<=tts_func_count+1;
+									tts_func_count <= tts_func_count + 1;
 								end if;
-							when 10=>
+							when 10 =>
 								-- func_count<=tts_func_count;
 								-- play_count<=tts_play_count;
-							when others=>null;
+							when others => null;
 						end case;
 					end if;
 					case tts_mode is
-						when idle=>
-							if pressed='1' and (key=15 or key=10) then
-								tts_mode<=tts_play;
+						when idle =>
+							if pressed = '1' and (key = 15 or key = 10) then
+								tts_mode <= tts_play;
 							end if;
-						when tts_play=>
-							tts_ena<='1';
-							if key=10 then
-								if tts_play_count=1 then
-									len<=5;
-									txt(0 to 4)<=tts_play_file & star;
-								elsif tts_play_count=2 then
-									len<=5;
-									txt(0 to 4)<=tts_play_file & tiger;
-								elsif tts_play_count=3 then
-									len<=5;
-									txt(0 to 4)<=tts_play_file & bee;
+						when tts_play =>
+							tts_ena <= '1';
+							if key = 10 then
+								if tts_play_count = 1 then
+									len <= 5;
+									txt(0 to 4) <= tts_play_file & star;
+								elsif tts_play_count = 2 then
+									len <= 5;
+									txt(0 to 4) <= tts_play_file & tiger;
+								elsif tts_play_count = 3 then
+									len <= 5;
+									txt(0 to 4) <= tts_play_file & bee;
 								end if;
-								if tts_done='1' then
+								if tts_done = '1' then
 									tts_ena <= '0';
-									tts_mode<= stop;
+									tts_mode <= stop;
 								end if;
-							elsif key=15 then
-								len<=2;
-								if tts_func_count=2 then
-									txt(0 to 1)<=tts_instant_resume;
+							elsif key = 15 then
+								len <= 2;
+								if tts_func_count = 2 then
+									txt(0 to 1) <= tts_instant_resume;
 								else
-									txt(0 to 1)<=tts_instant_pause;
+									txt(0 to 1) <= tts_instant_pause;
 								end if;
 							end if;
-							if tts_done='1' then
-								tts_ena<='0';
-								tts_mode<=stop;
+							if tts_done = '1' then
+								tts_ena <= '0';
+								tts_mode <= stop;
 							end if;
-						when stop=>
+						when stop =>
 							if tts_busy = '0' then
-								tts_mode<= idle;
+								tts_mode <= idle;
 							end if;
 					end case;
-					case lcd_count is	--lcd_count(LCD)
-						when 0  =>-- white
-							lcd_clear<='0';
-							bg_color<=white;
+					case lcd_count is --lcd_count(LCD)
+						when 0 => -- white
+							lcd_clear <= '0';
+							bg_color <= white;
 							if y < y'high then
-								if font_busy='0' then
-									font_start<='1';
+								if font_busy = '0' then
+									font_start <= '1';
 								end if;
-								if draw_done='1' then 
-									font_start<='0';
-									y<=y+1;
+								if draw_done = '1' then
+									font_start <= '0';
+									y <= y + 1;
 								end if;
 							else
-								if y>=y'high then
-									lcd_clear<='1';
-									text_color<=green;
-									lcd_count<=1;
+								if y >= y'high then
+									lcd_clear <= '1';
+									text_color <= green;
+									lcd_count <= 1;
 								end if;
 							end if;
-							lcd_clear<='0';
-						when 1  =>-- F1 , N , P under line
-							y<=5;
-							if tts_func_count=0 then
-								data<="            ";
-								font_start<='1';
-							elsif tts_func_count=1 then
-								data<=" __         ";
-								font_start<='1';
-							elsif tts_func_count=2 then
-								data<="      _     ";
-								font_start<='1';
-							elsif tts_func_count=3 then
-								tts_ena<='0';
-								data<="          _ ";
-								font_start<='1';
+							lcd_clear <= '0';
+						when 1 => -- F1 , N , P under line
+							y <= 5;
+							if tts_func_count = 0 then
+								data <= "            ";
+								font_start <= '1';
+							elsif tts_func_count = 1 then
+								data <= " __         ";
+								font_start <= '1';
+							elsif tts_func_count = 2 then
+								data <= "      _     ";
+								font_start <= '1';
+							elsif tts_func_count = 3 then
+								tts_ena <= '0';
+								data <= "          _ ";
+								font_start <= '1';
 							end if;
-							if draw_done='1' then
-								font_start<='0';
-								y<=0;
-								lcd_count<=2;
+							if draw_done = '1' then
+								font_start <= '0';
+								y <= 0;
+								lcd_count <= 2;
 							end if;
-						when 2  =>-- F1 , N , P
-							if y=0 and done='1' then
-								y<=0;
+						when 2 => -- F1 , N , P
+							if y = 0 and done = '1' then
+								y <= 0;
 							end if;
-							if y=0 then
-								data<=" F1 , N , P ";
-								font_start<='1';
+							if y = 0 then
+								data <= " F1 , N , P ";
+								font_start <= '1';
 							end if;
-							if draw_done='1' then
-								font_start<='0';
-								lcd_count<=3;
+							if draw_done = '1' then
+								font_start <= '0';
+								lcd_count <= 3;
 							end if;
-						when 3  =>-- T1 under line
-							y<=30;
-							if tts_play_count=1 and tts_func_count=2 then
-								data<="      ______";
+						when 3 => -- T1 under line
+							y <= 30;
+							if tts_play_count = 1 and tts_func_count = 2 then
+								data <= "      ______";
 							else
-								data<="            ";
+								data <= "            ";
 							end if;
-							font_start<='1';
-							if draw_done='1' then
-								font_start<='0';
-								y<=25;
-								lcd_count<=4;
+							font_start <= '1';
+							if draw_done = '1' then
+								font_start <= '0';
+								y <= 25;
+								lcd_count <= 4;
 							end if;
-						when 4  =>-- File:T1.wav
-							if y=0 and done='1' then
-								y<=25;
+						when 4 => -- File:T1.wav
+							if y = 0 and done = '1' then
+								y <= 25;
 							end if;
-							if y=25 then
-								x<=-2;
-								data<="File1:T1.wav";
-								font_start<='1';
+							if y = 25 then
+								x <= - 2;
+								data <= "File1:T1.wav";
+								font_start <= '1';
 							end if;
-							if draw_done='1' then
-								font_start<='0';
-								lcd_count<=5;
+							if draw_done = '1' then
+								font_start <= '0';
+								lcd_count <= 5;
 							end if;
-						when 5  =>-- T2 under line
-							y<=55;
-							if tts_play_count=2 and tts_func_count=2 then
-								data<="      ______";
+						when 5 => -- T2 under line
+							y <= 55;
+							if tts_play_count = 2 and tts_func_count = 2 then
+								data <= "      ______";
 							else
-								data<="            ";
+								data <= "            ";
 							end if;
-							font_start<='1';
-							if draw_done='1' then
-								font_start<='0';
-								y<=50;
-								lcd_count<=6;
+							font_start <= '1';
+							if draw_done = '1' then
+								font_start <= '0';
+								y <= 50;
+								lcd_count <= 6;
 							end if;
-						when 6  =>--      T2.wav
-							if y=0 and done='1' then
-								y<=50;
+						when 6 => --      T2.wav
+							if y = 0 and done = '1' then
+								y <= 50;
 							end if;
-							if y=50 then
-								data<="      T2.wav";
-								font_start<='1';
+							if y = 50 then
+								data <= "      T2.wav";
+								font_start <= '1';
 							end if;
-							if draw_done='1' then
-								font_start<='0';
-								lcd_count<=7;
+							if draw_done = '1' then
+								font_start <= '0';
+								lcd_count <= 7;
 							end if;
-						when 7  =>-- T3 under line
-							y<=80;
-							if tts_play_count=3  and tts_func_count=2 then
-								data<="      ______";
+						when 7 => -- T3 under line
+							y <= 80;
+							if tts_play_count = 3 and tts_func_count = 2 then
+								data <= "      ______";
 							else
-								data<="            ";
+								data <= "            ";
 							end if;
-							font_start<='1';
-							if draw_done='1' then
-								font_start<='0';
-								y<=75;
-								lcd_count<=8;
+							font_start <= '1';
+							if draw_done = '1' then
+								font_start <= '0';
+								y <= 75;
+								lcd_count <= 8;
 							end if;
-						when 8  =>--      T3.wav
-							if y=0 and done='1' then
-								y<=75;
+						when 8 => --      T3.wav
+							if y = 0 and done = '1' then
+								y <= 75;
 							end if;
-							if y=75 then
-								data<="      T3.wav";
-								font_start<='1';
+							if y = 75 then
+								data <= "      T3.wav";
+								font_start <= '1';
 							end if;
-							if draw_done='1' then
-								font_start<='0';
-								y<=100;
-								lcd_count<=9;
+							if draw_done = '1' then
+								font_start <= '0';
+								y <= 100;
+								lcd_count <= 9;
 							end if;
-						when 9  =>-- Vol. :05
-							if y=0 and done='1' then
-								y<=100;
+						when 9 => -- Vol. :05
+							if y = 0 and done = '1' then
+								y <= 100;
 							end if;
-							if y=100 then
-								data<=" Vol. :05   ";
-								font_start<='1';
+							if y = 100 then
+								data <= " Vol. :05   ";
+								font_start <= '1';
 							end if;
-							if draw_done='1' then
-								font_start<='0';
-								y<=120;
-								lcd_count<=10;
+							if draw_done = '1' then
+								font_start <= '0';
+								y <= 120;
+								lcd_count <= 10;
 							end if;
-						when 10 =>-- Time
-							if y=0 and done='1' then
-								y<=120;
+						when 10 => -- Time
+							if y = 0 and done = '1' then
+								y <= 120;
 							end if;
-							if y=120 then
-								data<=" T    :"&to_string(mins,mins'high,10,2)&":"&to_string(secs,secs'high,10,2);
-								font_start<='1';
+							if y = 120 then
+								data <= " T    :" & to_string(mins, mins'high, 10, 2) & ":" & to_string(secs, secs'high, 10, 2);
+								font_start <= '1';
 							end if;
-							if draw_done='1' then
-								data<="            ";
-								y<=0;
-								font_start<='0';
-								lcd_count<=1;
+							if draw_done = '1' then
+								data <= "            ";
+								y <= 0;
+								font_start <= '0';
+								lcd_count <= 1;
 							end if;
-						when others=>	
+						when others =>
 					end case;
 				when auto =>
-					lcd_clear<='0';
-					if pressed='1' then--tts_play_count   tts_func_count   tts_play
+					lcd_clear <= '0';
+					if pressed = '1' then--tts_play_count   tts_func_count   tts_play
 						case key is
 							when 9 =>
-								if tts_func_count=1 then
-									tts_play_count<=1;
-								elsif tts_func_count=2 then
-									if tts_play_count<3 then
-										tts_play_count<=tts_play_count+1;
+								if tts_func_count = 1 then
+									tts_play_count <= 1;
+								elsif tts_func_count = 2 then
+									if tts_play_count < 3 then
+										tts_play_count <= tts_play_count + 1;
 									else
-										tts_play_count<=tts_play_count;
+										tts_play_count <= tts_play_count;
 									end if;
 								else
-									tts_play_count<=0;
-								end if;	
+									tts_play_count <= 0;
+								end if;
 							when 8 =>
-								if tts_func_count=1 then
-									tts_play_count<=1;
-								elsif tts_func_count=2 then
-									if tts_play_count>1	then
-										tts_play_count<=tts_play_count-1;
+								if tts_func_count = 1 then
+									tts_play_count <= 1;
+								elsif tts_func_count = 2 then
+									if tts_play_count > 1 then
+										tts_play_count <= tts_play_count - 1;
 									else
-										tts_play_count<=tts_play_count;
+										tts_play_count <= tts_play_count;
 									end if;
 								else
-									tts_play_count<=0;
+									tts_play_count <= 0;
 								end if;
-							when 15=>
-								if tts_func_count>=3 then
-									tts_func_count<=2;
+							when 15 =>
+								if tts_func_count >= 3 then
+									tts_func_count <= 2;
 								else
-									tts_func_count<=tts_func_count+1;
+									tts_func_count <= tts_func_count + 1;
 								end if;
-							when 14=>
-								dot<="00100000";
-								seg_data<="F1  " & to_string(temp_int,temp_int'high,10,2) & seg_deg & 'C';
-							when others=>null;
+							when 14 =>
+								dot <= "00100000";
+								seg_data <= "F1  " & to_string(temp_int, temp_int'high, 10, 2) & seg_deg & 'C';
+							when others => null;
 						end case;
 					end if;
-					
-					case lcd_count is	--lcd_count(LCD)
-						when 0  =>-- white
-							lcd_clear<='0';
-							bg_color<=white;
+
+					case lcd_count is --lcd_count(LCD)
+						when 0 => -- white
+							lcd_clear <= '0';
+							bg_color <= white;
 							if y < y'high then
-								if font_busy='0' then
-									font_start<='1';
+								if font_busy = '0' then
+									font_start <= '1';
 								end if;
-								if draw_done='1' then 
-									font_start<='0';
-									y<=y+1;
+								if draw_done = '1' then
+									font_start <= '0';
+									y <= y + 1;
 								end if;
 							else
-								if y>=y'high then
-									lcd_clear<='1';
-									text_color<=green;
-									lcd_count<=1;
+								if y >= y'high then
+									lcd_clear <= '1';
+									text_color <= green;
+									lcd_count <= 1;
 								end if;
 							end if;
-							lcd_clear<='0';
-						when 1  =>-- F1 , N , P under line
-							y<=5;
-							if tts_func_count=0 then
-								data<="            ";
-								font_start<='1';
-							elsif tts_func_count=1 then
-								data<=" __         ";
-								font_start<='1';
-							elsif tts_func_count=2 then
-								data<="      _     ";
-								font_start<='1';
-							elsif tts_func_count=3 then
-								tts_ena<='0';
-								data<="          _ ";
-								font_start<='1';
+							lcd_clear <= '0';
+						when 1 => -- F1 , N , P under line
+							y <= 5;
+							if tts_func_count = 0 then
+								data <= "            ";
+								font_start <= '1';
+							elsif tts_func_count = 1 then
+								data <= " __         ";
+								font_start <= '1';
+							elsif tts_func_count = 2 then
+								data <= "      _     ";
+								font_start <= '1';
+							elsif tts_func_count = 3 then
+								tts_ena <= '0';
+								data <= "          _ ";
+								font_start <= '1';
 							end if;
-							if draw_done='1' then
-								font_start<='0';
-								y<=0;
-								lcd_count<=2;
+							if draw_done = '1' then
+								font_start <= '0';
+								y <= 0;
+								lcd_count <= 2;
 							end if;
-						when 2  =>-- F1 , N , P
-							if y=0 and done='1' then
-								y<=0;
+						when 2 => -- F1 , N , P
+							if y = 0 and done = '1' then
+								y <= 0;
 							end if;
-							if y=0 then
-								data<=" F1 , N , P ";
-								font_start<='1';
+							if y = 0 then
+								data <= " F1 , N , P ";
+								font_start <= '1';
 							end if;
-							if draw_done='1' then
-								font_start<='0';
-								lcd_count<=3;
+							if draw_done = '1' then
+								font_start <= '0';
+								lcd_count <= 3;
 							end if;
-						when 3  =>-- T1 under line
-							y<=30;
-							if tts_play_count=1 and tts_func_count=2 then
-								data<="      ______";
+						when 3 => -- T1 under line
+							y <= 30;
+							if tts_play_count = 1 and tts_func_count = 2 then
+								data <= "      ______";
 							else
-								data<="            ";
+								data <= "            ";
 							end if;
-							font_start<='1';
-							if draw_done='1' then
-								font_start<='0';
-								y<=25;
-								lcd_count<=4;
+							font_start <= '1';
+							if draw_done = '1' then
+								font_start <= '0';
+								y <= 25;
+								lcd_count <= 4;
 							end if;
-						when 4  =>-- File:T1.wav
-							if y=0 and done='1' then
-								y<=25;
+						when 4 => -- File:T1.wav
+							if y = 0 and done = '1' then
+								y <= 25;
 							end if;
-							if y=25 then
-								x<=-2;
-								data<="File1:T1.wav";
-								font_start<='1';
+							if y = 25 then
+								x <= - 2;
+								data <= "File1:T1.wav";
+								font_start <= '1';
 							end if;
-							if draw_done='1' then
-								font_start<='0';
-								lcd_count<=5;
+							if draw_done = '1' then
+								font_start <= '0';
+								lcd_count <= 5;
 							end if;
-						when 5  =>-- T2 under line
-							y<=55;
-							if tts_play_count=2 and tts_func_count=2 then
-								data<="      ______";
+						when 5 => -- T2 under line
+							y <= 55;
+							if tts_play_count = 2 and tts_func_count = 2 then
+								data <= "      ______";
 							else
-								data<="            ";
+								data <= "            ";
 							end if;
-							font_start<='1';
-							if draw_done='1' then
-								font_start<='0';
-								y<=50;
-								lcd_count<=6;
+							font_start <= '1';
+							if draw_done = '1' then
+								font_start <= '0';
+								y <= 50;
+								lcd_count <= 6;
 							end if;
-						when 6  =>--      T2.wav
-							if y=0 and done='1' then
-								y<=50;
+						when 6 => --      T2.wav
+							if y = 0 and done = '1' then
+								y <= 50;
 							end if;
-							if y=50 then
-								data<="      T2.wav";
-								font_start<='1';
+							if y = 50 then
+								data <= "      T2.wav";
+								font_start <= '1';
 							end if;
-							if draw_done='1' then
-								font_start<='0';
-								lcd_count<=7;
+							if draw_done = '1' then
+								font_start <= '0';
+								lcd_count <= 7;
 							end if;
-						when 7  =>-- T3 under line
-							y<=80;
-							if tts_play_count=3  and tts_func_count=2 then
-								data<="      ______";
+						when 7 => -- T3 under line
+							y <= 80;
+							if tts_play_count = 3 and tts_func_count = 2 then
+								data <= "      ______";
 							else
-								data<="            ";
+								data <= "            ";
 							end if;
-							font_start<='1';
-							if draw_done='1' then
-								font_start<='0';
-								y<=75;
-								lcd_count<=8;
+							font_start <= '1';
+							if draw_done = '1' then
+								font_start <= '0';
+								y <= 75;
+								lcd_count <= 8;
 							end if;
-						when 8  =>--      T3.wav
-							if y=0 and done='1' then
-								y<=75;
+						when 8 => --      T3.wav
+							if y = 0 and done = '1' then
+								y <= 75;
 							end if;
-							if y=75 then
-								data<="      T3.wav";
-								font_start<='1';
+							if y = 75 then
+								data <= "      T3.wav";
+								font_start <= '1';
 							end if;
-							if draw_done='1' then
-								font_start<='0';
-								y<=100;
-								lcd_count<=9;
+							if draw_done = '1' then
+								font_start <= '0';
+								y <= 100;
+								lcd_count <= 9;
 							end if;
-						when 9  =>-- Vol. :05
-							if y=0 and done='1' then
-								y<=100;
+						when 9 => -- Vol. :05
+							if y = 0 and done = '1' then
+								y <= 100;
 							end if;
-							if y=100 then
-								data<=" Vol. :05   ";
-								font_start<='1';
+							if y = 100 then
+								data <= " Vol. :05   ";
+								font_start <= '1';
 							end if;
-							if draw_done='1' then
-								font_start<='0';
-								y<=120;
-								lcd_count<=10;
+							if draw_done = '1' then
+								font_start <= '0';
+								y <= 120;
+								lcd_count <= 10;
 							end if;
-						when 10 =>-- Time
-							if y=0 and done='1' then
-								y<=120;
+						when 10 => -- Time
+							if y = 0 and done = '1' then
+								y <= 120;
 							end if;
-							if y=120 then
-								data<=" T    :"&to_string(mins,mins'high,10,2)&":"&to_string(secs,secs'high,10,2);
-								font_start<='1';
+							if y = 120 then
+								data <= " T    :" & to_string(mins, mins'high, 10, 2) & ":" & to_string(secs, secs'high, 10, 2);
+								font_start <= '1';
 							end if;
-							if draw_done='1' then
-								data<="            ";
-								y<=0;
-								font_start<='0';
-								lcd_count<=1;
+							if draw_done = '1' then
+								data <= "            ";
+								y <= 0;
+								font_start <= '0';
+								lcd_count <= 1;
 							end if;
-						when others=>	
+						when others =>
 					end case;
-						case tts_count is
-							when 0=>
-								case tts_mode is
-									when idle=>
-										if pressed='1' and key=15 then
-											tts_mode<=tts_play;
+					case tts_count is
+						when 0 =>
+							case tts_mode is
+								when idle =>
+									if pressed = '1' and key = 15 then
+										tts_mode <= tts_play;
+									end if;
+								when tts_play =>
+									tts_ena <= '1';
+									if tts_func_count = 2 then
+										len <= 8;
+										txt(0 to 7) <= tts_setup;
+									end if;
+									if tts_done = '1' then
+										tts_ena <= '0';
+										tts_mode <= stop;
+									end if;
+								when stop =>
+									if tts_busy = '0' then
+										tts_count <= 1;
+										tts_mode <= idle;
+									end if;
+							end case;
+						when 1 =>
+							case tts_mode is
+								when idle =>
+									if pressed = '1' and key = 10 then
+										tts_mode <= tts_play;
+									end if;
+								when tts_play =>
+									tts_ena <= '1';
+									len <= 6;
+									if tts_play_count = 1 then
+										txt(0 to 5) <= play_music1;
+									elsif tts_play_count = 2 then
+										txt(0 to 5) <= play_music2;
+									elsif tts_play_count = 3 then
+										txt(0 to 5) <= Play_music3;
+									end if;
+									if tts_done = '1' then
+										tts_ena <= '0';
+										tts_mode <= stop;
+									end if;
+								when stop =>
+									if tts_busy = '0' then
+										tts_count <= 2;
+										tts_mode <= idle;
+									end if;
+							end case;
+						when 2 =>
+							case tts_mode is
+								when idle =>
+									tts_mode <= tts_play;
+								when tts_play =>
+									tts_ena <= '1';
+									if key = 10 then
+										len <= 5;
+										if tts_play_count = 1 then
+											txt(0 to 4) <= tts_play_file & star;
+										elsif tts_play_count = 2 then
+											txt(0 to 4) <= tts_play_file & tiger;
+										elsif tts_play_count = 3 then
+											txt(0 to 4) <= tts_play_file & bee;
 										end if;
-									when tts_play=>
-										tts_ena<='1';
-										if tts_func_count=2 then
-											len<=8;
-											txt(0 to 7)<=tts_setup;
+									end if;
+									if tts_done = '1' then
+										tts_ena <= '0';
+										tts_mode <= stop;
+									end if;
+								when stop =>
+									if tts_busy = '0' then
+										tts_mode <= idle;
+										tts_count <= 3;
+									end if;
+							end case;
+						when 3 =>
+							case tts_mode is
+								when idle =>
+									if pressed = '1' and (key = 10 or key = 15) then
+										tts_mode <= tts_play;
+									end if;
+								when tts_play =>
+									tts_ena <= '1';
+									if key = 10 then
+										len <= 5;
+										if tts_play_count = 1 then
+											txt(0 to 4) <= tts_play_file & star;
+										elsif tts_play_count = 2 then
+											txt(0 to 4) <= tts_play_file & tiger;
+										elsif tts_play_count = 3 then
+											txt(0 to 4) <= tts_play_file & bee;
 										end if;
-										if tts_done='1' then
-											tts_ena<='0';
-											tts_mode<=stop;
+									elsif key = 15 then
+										len <= 2;
+										if tts_func_count = 3 then
+											txt(0 to 1) <= tts_instant_pause;
+											tts_count <= 4;
+										else
+											txt(0 to 1) <= tts_instant_resume;
 										end if;
-									when stop=>
-										if tts_busy = '0' then
-											tts_count<=1;
-											tts_mode<= idle;
-										end if;
-								end case;
-							when 1=>
-								case tts_mode is
-									when idle=>
-										if pressed='1' and key=10 then
-											tts_mode<=tts_play;
-										end if;
-									when tts_play=>
-										tts_ena<='1';
-										len<=6;
-										if tts_play_count=1 then
-											txt(0 to 5)<=play_music1;
-										elsif tts_play_count=2 then
-											txt(0 to 5)<=play_music2;
-										elsif tts_play_count=3 then
-											txt(0 to 5)<=Play_music3;
-										end if;
-										if tts_done='1' then
-											tts_ena<='0';
-											tts_mode<=stop;
-										end if;
-									when stop=>
-										if tts_busy = '0' then
-											tts_count<=2;
-											tts_mode<= idle;
-										end if;
-								end case;
-							when 2=>
-								case tts_mode is
-									when idle=>
-										tts_mode<=tts_play;
-									when tts_play=>
-										tts_ena<='1';
-										if key=10 then
-											len<=5;
-											if tts_play_count=1 then
-												txt(0 to 4)<=tts_play_file & star;
-											elsif tts_play_count=2 then
-												txt(0 to 4)<=tts_play_file & tiger;
-											elsif tts_play_count=3 then
-												txt(0 to 4)<=tts_play_file & bee;
-											end if;
-										end if;
-										if tts_done='1' then
-											tts_ena<='0';
-											tts_mode<=stop;
-										end if;
-									when stop=>
-										if tts_busy = '0' then
-											tts_mode<= idle;
-											tts_count<=3;
-										end if;
-								end case;
-							when 3=>
-								case tts_mode is
-									when idle=>
-										if pressed='1' and ( key=10 or key=15 ) then
-											tts_mode<=tts_play;
-										end if;
-									when tts_play=>
-										tts_ena<='1';
-										if key=10 then
-											len<=5;
-											if tts_play_count=1 then
-												txt(0 to 4)<=tts_play_file & star;
-											elsif tts_play_count=2 then
-												txt(0 to 4)<=tts_play_file & tiger;
-											elsif tts_play_count=3 then
-												txt(0 to 4)<=tts_play_file & bee;
-											end if;
-										elsif key=15 then
-											len<=2;
-											if tts_func_count=3 then
-												txt(0 to 1)<=tts_instant_pause;
-												tts_count<=4;
-											else
-												txt(0 to 1)<=tts_instant_resume;
-											end if;
-										end if;
-										if tts_done='1' then
-											tts_ena<='0';
-											tts_mode<=stop;
-										end if;
-									when stop=>
-										if tts_busy = '0' then
-											tts_mode<= idle;
-											tts_count<=3;
-										end if;
-								end case;	
-							when 4=>
-								case tts_mode is
-									when idle=>
-										tts_mode<=tts_play;
-									when tts_play=>
-										tts_ena<='1';
-										len<=2;
-										txt(0 to 1)<=tts_instant_skip;
-										if tts_done='1' then
-											tts_ena<='0';
-											tts_mode<=stop;
-										end if;
-									when stop=>
-										if tts_busy = '0' then
-											tts_mode<= idle;
-											tts_count<=5;
-										end if;
-								end case;
-							when 5=>
-								case tts_mode is
-									when idle=>
-										tts_mode<=tts_play;
-									when tts_play=>
-										tts_ena<='1';
-										len<=12;
-										txt(0 to 11)<=tts_pause;
-										if tts_done='1' then
-											tts_ena<='0';
-											tts_mode<=stop;
-										end if;
-									when stop=>
-										if tts_busy = '0' then
-											tts_mode<= idle;
-											tts_count<=6;
-										end if;
-								end case;
-							when 6=>
-								case tts_mode is
-									when idle=>
-										if pressed='1' and key=15 then
-											tts_mode<=tts_play;
-										end if;
-									when tts_play=>
-										tts_ena<='1';
-										if tts_func_count=2 then
-											len<=12;
-											txt(0 to 11)<=tts_continue;
-										end if;
-										if tts_done='1' then
-											tts_ena<='0';
-											tts_mode<=stop;
-										end if;
-									when stop=>
-										if tts_busy = '0' then
-											tts_mode<= tts_play;
-											tts_count<=3;
-										end if;
-								end case;
-						when others=>
+									end if;
+									if tts_done = '1' then
+										tts_ena <= '0';
+										tts_mode <= stop;
+									end if;
+								when stop =>
+									if tts_busy = '0' then
+										tts_mode <= idle;
+										tts_count <= 3;
+									end if;
+							end case;
+						when 4 =>
+							case tts_mode is
+								when idle =>
+									tts_mode <= tts_play;
+								when tts_play =>
+									tts_ena <= '1';
+									len <= 2;
+									txt(0 to 1) <= tts_instant_skip;
+									if tts_done = '1' then
+										tts_ena <= '0';
+										tts_mode <= stop;
+									end if;
+								when stop =>
+									if tts_busy = '0' then
+										tts_mode <= idle;
+										tts_count <= 5;
+									end if;
+							end case;
+						when 5 =>
+							case tts_mode is
+								when idle =>
+									tts_mode <= tts_play;
+								when tts_play =>
+									tts_ena <= '1';
+									len <= 12;
+									txt(0 to 11) <= tts_pause;
+									if tts_done = '1' then
+										tts_ena <= '0';
+										tts_mode <= stop;
+									end if;
+								when stop =>
+									if tts_busy = '0' then
+										tts_mode <= idle;
+										tts_count <= 6;
+									end if;
+							end case;
+						when 6 =>
+							case tts_mode is
+								when idle =>
+									if pressed = '1' and key = 15 then
+										tts_mode <= tts_play;
+									end if;
+								when tts_play =>
+									tts_ena <= '1';
+									if tts_func_count = 2 then
+										len <= 12;
+										txt(0 to 11) <= tts_continue;
+									end if;
+									if tts_done = '1' then
+										tts_ena <= '0';
+										tts_mode <= stop;
+									end if;
+								when stop =>
+									if tts_busy = '0' then
+										tts_mode <= tts_play;
+										tts_count <= 3;
+									end if;
+							end case;
+						when others =>
 					end case;
 				when stop =>
-					if done='0' then
-						load<=msec;
-						time_ena<='0';
-						if tts_flag='1' and font_busy='0' then
-							y<=0;
-							lcd_count<=lcd_count;
+					if done = '0' then
+						load <= msec;
+						time_ena <= '0';
+						if tts_flag = '1' and font_busy = '0' then
+							y <= 0;
+							lcd_count <= lcd_count;
 						end if;
 					else
-						if tts_flag='1' and font_busy='0' then
-							lcd_count<=lcd_count+1;
+						if tts_flag = '1' and font_busy = '0' then
+							lcd_count <= lcd_count + 1;
 						end if;
-						time_ena<='1';
+						time_ena <= '1';
 					end if;
 			end case;
 		end if;
-
-		
 	end process;
 end architecture;

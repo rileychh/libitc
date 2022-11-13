@@ -16,8 +16,6 @@
 --
 -- 13.1.0 Build 162 10/23/2013 SJ Full Version
 -- ************************************************************
-
-
 --Copyright (C) 1991-2013 Altera Corporation
 --Your use of Altera Corporation's design tools, logic functions 
 --and other software and tools, and its AMPP partner logic 
@@ -31,8 +29,6 @@
 --programming logic devices manufactured by Altera and sold by 
 --Altera or its authorized distributors.  Please refer to the 
 --applicable agreement for further details.
-
-
 library ieee;
 use ieee.std_logic_1164.all;
 
@@ -40,48 +36,43 @@ library altera_mf;
 use altera_mf.altera_mf_components.all;
 
 entity icon is
-	port
-	(
-		address		: IN STD_LOGIC_VECTOR (9 DOWNTO 0);
-		clock		: IN STD_LOGIC  := '1';
-		q		: OUT STD_LOGIC_VECTOR (0 DOWNTO 0)
+	port (
+		address : in std_logic_vector (9 downto 0);
+		clock   : in std_logic := '1';
+		q       : out std_logic_vector (0 downto 0)
 	);
 end icon;
-
-
 architecture SYN of icon is
 
-	SIGNAL sub_wire0	: STD_LOGIC_VECTOR (0 DOWNTO 0);
+	signal sub_wire0 : std_logic_vector (0 downto 0);
 
-BEGIN
-	q    <= sub_wire0(0 DOWNTO 0);
+begin
+	q <= sub_wire0(0 downto 0);
 
 	altsyncram_component : altsyncram
-	GENERIC MAP (
-		address_aclr_a => "NONE",
-		clock_enable_input_a => "BYPASS",
-		clock_enable_output_a => "BYPASS",
-		init_file => "./tests/itc108_1/res/icon.mif",
+	generic map(
+		address_aclr_a         => "NONE",
+		clock_enable_input_a   => "BYPASS",
+		clock_enable_output_a  => "BYPASS",
+		init_file              => "./src/itc108_1/ip/icon.mif",
 		intended_device_family => "Cyclone III",
-		lpm_hint => "ENABLE_RUNTIME_MOD=NO",
-		lpm_type => "altsyncram",
-		numwords_a => 1024,
-		operation_mode => "ROM",
-		outdata_aclr_a => "NONE",
-		outdata_reg_a => "UNREGISTERED",
-		widthad_a => 10,
-		width_a => 1,
-		width_byteena_a => 1
+		lpm_hint               => "ENABLE_RUNTIME_MOD=NO",
+		lpm_type               => "altsyncram",
+		numwords_a             => 1024,
+		operation_mode         => "ROM",
+		outdata_aclr_a         => "NONE",
+		outdata_reg_a          => "UNREGISTERED",
+		widthad_a              => 10,
+		width_a                => 1,
+		width_byteena_a        => 1
 	)
-	PORT MAP (
+	port map(
 		address_a => address,
-		clock0 => clock,
-		q_a => sub_wire0
+		clock0    => clock,
+		q_a       => sub_wire0
 	);
 
-
-
-END SYN;
+end SYN;
 
 -- ============================================================
 -- CNX file retrieval info
