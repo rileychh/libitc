@@ -26,8 +26,6 @@
 	"vhdl.enableStutterComments": true,
 	"vhdl.enableStutterDelimiters": true,
 	"vhdl.enableStutterBrackets": true,
-	// Python
-	"python.pythonPath": "tools/env/bin/python",
 	// Markdown
 	"[markdown]": {
 		"editor.defaultFormatter": "yzhang.markdown-all-in-one"
@@ -43,8 +41,6 @@
 	},
 	"prettier.tabWidth": 4,
 	"prettier.useTabs": true,
-	// Spell checker
-	"cSpell.enableFiletypes": ["vhdl"],
 	"cSpell.words": [
 		"LEDs",
 		"abcdefgp",

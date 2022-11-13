@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "software"
+name = "libitc"
 version = "0.1.0"
 description = ""
 authors = ["Dora <smallyo2000@gmail.com>"]
@@ -9,6 +9,10 @@ readme = "README.md"
 python = "^3.9"
 pyserial = "^3.5"
 pyqt5 = "^5.15.7"
+autopep8 = "^2.0.0"
+pillow = "^9.3.0"
+pyperclip = "^1.8.2"
+toml = "^0.10.2"
 
 [build-system]
 requires = ["poetry-core"]
