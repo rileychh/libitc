@@ -50,7 +50,7 @@ package itc is
 	--------------------------------------------------------------------------------
 
 	constant seg_deg : character := character'val(0);
-	constant percent : character := character'val(1);
+	constant seg_percent : character := character'val(1);
 
 	--------------------------------------------------------------------------------
 	-- tts command constants

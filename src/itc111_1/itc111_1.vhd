@@ -469,7 +469,7 @@ begin
 						when 1 => --F1
 							seg_data <= "F1  " & to_string(temp_int, temp_int'high, 10, 2) & seg_deg & 'C';
 						when 2 => --F2
-							seg_data <= "F2 " & to_string(hum_int, hum_int'high, 10, 2) & seg_deg & percent & 'o';
+							seg_data <= "F2 " & to_string(hum_int, hum_int'high, 10, 2) & seg_deg & seg_percent & 'o';
 						when 3 => --F3
 							seg_data <= "F3 FUnC1";
 						when 4 => --F4
