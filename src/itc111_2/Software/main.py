@@ -6,7 +6,6 @@ from PyQt5.QtWidgets import QMainWindow
 from ui import Ui_MainWindow
 
 
-
 class Main(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
@@ -30,12 +29,23 @@ class Main(QMainWindow, Ui_MainWindow):
         if cmd == "clear":
             self.value = ""
             self.label_output.setText(self.value)
-        if cmd == "send":
+        if cmd == "send" and self.value != "":
             self.value += '\r'
             ser.write(self.value.encode(encoding="utf-8"))
             print((self.value.encode(encoding="utf-8")))
             self.value = ""
             self.label_output.setText(self.value)
+            self.label_inputnumber.setText("FAIL")
+            a = 1
+            while a:
+                data = ser.read()
+                print(data)
+                if data == b'\x00':
+                    self.label_output.setText("FAIL")
+                    a=0
+                if data == b'\x01':
+                    self.label_output.setText("TRUE")
+                    a=0
         if(cmd == "back"):
             self.value = self.value[:-1]
             self.label_output.setText(self.value)
