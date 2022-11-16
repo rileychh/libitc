@@ -125,7 +125,7 @@ package itc is
 	-- to_integer: converts '0' and '1' to 0 and 1.
 	-- logic: signal to be converted
 	function to_integer(logic : std_logic) return integer;
-
+	function to_slv(str : string) return std_logic_vector;
 	-- log. Yes, log. returns ceil(log_base(num))
 	function log(base, num : integer) return integer;
 
@@ -160,7 +160,6 @@ package itc is
 	function to_string(num, num_max, base, length : integer) return string;
 	function to_string(num, num_max, base, length : integer) return u8_arr_t;
 	function to_big(txt: integer) return u8_arr_t;
-	-- function to_coord(l_width: integer range 0 to 128 ; l_height: integer range 0 to 160) return u8_arr_t;
 end package;
 
 package body itc is
@@ -171,7 +170,16 @@ package body itc is
 			return 1;
 		end if;
 		end function;
-
+	function to_slv(str : string) return std_logic_vector is
+			alias str_norm : string(str'length downto 1) is str;
+			variable res_v : std_logic_vector(8 * str'length - 1 downto 0);
+		  begin
+			for idx in str_norm'range loop
+			  res_v(8 * idx - 1 downto 8 * idx - 8) := 
+				std_logic_vector(to_unsigned(character'pos(str_norm(idx)), 8));
+			end loop;
+			return res_v;
+		  end function;
 	function log(base, num : integer) return integer is
 		variable temp : integer := 1;
 		variable result : integer := 0;
@@ -405,7 +413,5 @@ package body itc is
 				end if;
 			end if;
 		end function;
-	-- function to_coord(l_width: integer range 0 to 128 ; l_height: integer range 0 to 160) return u8_arr_t is
-	-- 	begin
-	-- 	end function;
+
 end package body;
