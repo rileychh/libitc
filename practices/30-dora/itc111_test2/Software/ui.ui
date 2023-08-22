@@ -319,7 +319,7 @@
       </font>
      </property>
      <property name="text">
-      <string/>
+      <string>輸入數字</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_2">

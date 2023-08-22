@@ -15,12 +15,13 @@ entity tts_stop is
 		tts_scl, tts_sda : inout std_logic;
 		tts_mo           : in unsigned(2 downto 0);
 		tts_rst_n        : out std_logic;
-		
+
 		-- user logic
-		ena				: in std_logic; -- start on enable rising edge
-		busy			: out std_logic;
-		txt				: in u8_arr_t(0 to txt_len_max - 1);
-		txt_len			: in integer range 0 to txt_len_max
+		ena        : in std_logic; -- start on enable rising edge
+		busy       : out std_logic;
+		stop_speak : out std_logic;
+		txt        : in u8_arr_t(0 to txt_len_max - 1);
+		txt_len    : in integer range 0 to txt_len_max
 	);
 end tts_stop;
 
@@ -28,7 +29,7 @@ architecture arch of tts_stop is
 
 	constant tts_addr : unsigned(6 downto 0) := "0100000";
 
-	type tts_state_t is (idle, send, send_stop); 
+	type tts_state_t is (idle, send, send_stop);
 	signal state : tts_state_t;
 
 	signal i2c_ena : std_logic;
@@ -104,10 +105,12 @@ begin
 					else
 						busy <= '0';
 					end if;
+					stop_speak <= tts_mo(0);
 				when send =>
 					if i2c_done = '1' then -- interface is ready for next byte
 						if txt_cnt = 0 then
 							i2c_in <= x"06"; -- set MO[2..0] = 110
+							stop_speak <= tts_mo(0);
 						elsif txt_cnt >= 1 and txt_cnt <= txt_len then
 							i2c_in <= txt(txt_cnt - 1);
 						elsif txt_cnt = txt_len + 1 then
@@ -127,7 +130,7 @@ begin
 					if i2c_accepted = '1' then -- last byte sent to interface
 						i2c_ena <= '0';
 					end if;
-					if i2c_done = '1' then 
+					if i2c_done = '1' then
 						state <= idle;
 					end if;
 			end case;
