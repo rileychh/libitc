@@ -7,6 +7,7 @@ tools/env/
 docs/ref
 dist/
 __pycache__/
+greybox_tmp/
 *.qsf
 *.qws
 *.alc
