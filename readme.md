@@ -45,12 +45,4 @@ Under `tools/` there are scripts that help with the writing of the code.
 
 大部分的工具都是用 Python 寫的。我們用 [Poetry](https://python-poetry.org/) 管理相依套件和工作環境。
 
-在安裝完 Python、pip 和 Poetry 後，需要一些設定才能使用工具。
-
-```sh
-poetry config virtualenvs.in-project true
-poetry install
-poetry shell
-```
-
-三項指令都成功執行後，試著執行任一工具來檢查環境是否正確。
+在安裝完 Python、pip 和 Poetry 後，需要執行 `poetry install` 才能使用工具。成功執行後，試著執行任一工具來檢查環境是否正確。
