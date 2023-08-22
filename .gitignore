@@ -1,14 +1,21 @@
+# Quartus
 db/
 incremental_db/
 output_files/
 simulation/
-tools/venv/
-tools/env/
-docs/ref
-dist/
-__pycache__/
 greybox_tmp/
 *.cmp
 *.qsf
 *.qws
 *.alc
+
+# Python
+__pycache__/
+
+# Preprocessed (pp.py)
+dist/
+
+# Images
+*.jpg
+!/tests/lcd/res/**/*.jpg
+!/src/**/*.jpg
