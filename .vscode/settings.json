@@ -39,7 +39,6 @@
 	"[jsonc]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},
-	"prettier.tabWidth": 4,
 	"prettier.useTabs": true,
 	"cSpell.words": [
 		"LEDs",
@@ -95,14 +94,12 @@
 	"cSpell.ignoreRegExpList": [
 		".*'.*" // VHDL attributes, e.g. "key_row'range"
 	],
-	// Todo tree
-	"todo-tree.regex.regex": "((//|#|<!--|;|/\\*|^|--)\\s*($TAGS)|^\\s*- \\[ \\])",
-	"filewatcher.commands": [
-		{
-			"match": "(lib|src|tests)\\\\.*\\.vhd",
-			"isAsync": true,
-			"cmd": "C:\\Program Files\\Git\\bin\\bash.exe -c \"cd '${workspaceRoot}'; shopt -s globstar; for f in {src,tests}/**/*.vhd; do tools/pp.py $f dist/$(basename $f .vhd).pp.vhd & done\"",
-			"event": "onFileChange"
+	"[python]": {
+		"editor.defaultFormatter": "ms-python.black-formatter",
+		"editor.formatOnSave": true,
+		"editor.codeActionsOnSave": {
+			"source.organizeImports": true
 		}
-	]
+	},
+	"isort.args": ["--profile", "black"]
 }
