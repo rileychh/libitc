@@ -1,9 +1,10 @@
+import sys
+
+import serial
+import serial.tools.list_ports
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMainWindow
 from ui import Ui_MainWindow
-import sys
-import serial
-import serial.tools.list_ports
 
 
 class Main(QMainWindow, Ui_MainWindow):
