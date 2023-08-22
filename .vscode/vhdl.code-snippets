@@ -1,0 +1,186 @@
+{
+	// Place your libitc 工作區 snippets here. Each snippet is defined under a snippet name and has a scope, prefix, body and
+	// description. Add comma separated ids of the languages where the snippet is applicable in the scope field. If scope
+	// is left empty or omitted, the snippet gets applied to all languages. The prefix is what is
+	// used to trigger the snippet and the body will be expanded and inserted. Possible variables are:
+	// $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders.
+	// Placeholders with the same ids are connected.
+	// Example:
+	// "Print to console": {
+	// 	"scope": "javascript,typescript",
+	// 	"prefix": "log",
+	// 	"body": [
+	// 		"console.log('$1');",
+	// 		"$2"
+	// 	],
+	// 	"description": "Log output to console"
+	// }
+	// Structures
+	"Initialize": {
+		"prefix": "vhdl",
+		"body": [
+			"library ieee;",
+			"use ieee.std_logic_1164.all;",
+			"use ieee.numeric_std.all;",
+			"",
+			"entity ${1:ent} is",
+			"\tport (",
+			"\t\t$0",
+			"\t);",
+			"end $1;",
+			"",
+			"architecture ${2:arch} of $1 is",
+			"\t",
+			"begin",
+			"\t",
+			"end $2;"
+		]
+	},
+	"Package": {
+		"prefix": "pkg",
+		"body": [
+			"library ieee;",
+			"use ieee.std_logic_1164.all;",
+			"use ieee.numeric_std.all;",
+			"",
+			"package ${1:name} is",
+			"\t$0",
+			"end package;"
+		]
+	},
+	// Blocks
+	"Entity": {
+		"prefix": "ent",
+		"body": "entity ${1:name} is\n\nport(\n\t$0\n);\n\nend $1;"
+	},
+	"Component": {
+		"prefix": "comp",
+		"body": "component ${1:name}\n\t$0\nend component;"
+	},
+	"Generic": {
+		"prefix": "gen",
+		"body": "generic (\n\t$0\n);"
+	},
+	// Sequential
+	"Process": {
+		"prefix": "pro",
+		"body": "process (${1:clk}) begin\n\t$0\nend process;"
+	},
+	"Quick process": {
+		"prefix": "qpro",
+		"body": "process (${1:clk}) begin\n\tif rising_edge($1) then\n\t\t$0\n\tend if;\nend process;"
+	},
+	"Quick process with reset": {
+		"prefix": "qpror",
+		"body": "process (${1:clk}, ${2:rst_n}) begin\n\tif $2 = '0' then\n\t\t$3\n\telsif rising_edge($1) then\n\t\t$0\n\tend if;\nend process;"
+	},
+	"If": {
+		"prefix": "if",
+		"body": "if $1 then\n\t$0\nend if;"
+	},
+	"Elsif": {
+		"prefix": "elsif",
+		"body": "elsif $1 then\n\t$0"
+	},
+	"Case": {
+		"prefix": "case",
+		"body": "case ${1:sig} is\nwhen ${2:0} =>$0\nwhen others =>\nend case;"
+	},
+	"For loop": {
+		"prefix": "for",
+		"body": "for ${1:i} in ${2:0} to ${3:7} loop\n\t$0\nend loop;"
+	},
+	"While loop": {
+		"prefix": "while",
+		"body": "while ${1:condition} loop\n\t$0\nend loop;"
+	},
+	// Cocurrent
+	"For generate": {
+		"prefix": "forg",
+		"body": "${1:label} : for ${2:i} in ${3:range} generate\n\t$0\nend generate $1;"
+	},
+	"If generate": {
+		"prefix": "ifg",
+		"body": "${1:label} : if ${2:i = 0} generate\n\t$0\nend generate $1;"
+	},
+	"With select": {
+		"prefix": "with",
+		"body": "with ${1:case_reg} select ${2:assign_reg} <=\n\t${3:assign_val} when ${4:case_val},$0;"
+	},
+	// Decoration
+	"signal": {
+		"prefix": "sig",
+		"body": "signal ${1:name} : ${2:std_logic};"
+	},
+	"variable": {
+		"prefix": "var",
+		"body": "variable ${1:name} : ${2:std_logic};"
+	},
+	"constant": {
+		"prefix": "const",
+		"body": "constant ${1:price} : ${2:integer} := ${3:6000};"
+	},
+	"function": {
+		"prefix": "fn",
+		"body": "function ${1:name}(${2:params}) return ${3:integer} is begin\n\treturn;\nend function;"
+	},
+	// Types
+	"integer": {
+		"prefix": "int",
+		"body": "integer"
+	},
+	"integer to": {
+		"prefix": "intt",
+		"body": "integer range 0 to ${1:5999};"
+	},
+	"integer downto": {
+		"prefix": "intd",
+		"body": "integer range ${1:5999} downto 0;"
+	},
+	"unsigned": {
+		"prefix": "un",
+		"body": "unsigned"
+	},
+	"unsigned to": {
+		"prefix": "unt",
+		"body": "unsigned range 0 to ${1:7};"
+	},
+	"unsigned downto": {
+		"prefix": "und",
+		"body": "unsigned range ${1:7} downto 0;"
+	},
+	"slv": {
+		"prefix": "slv",
+		"body": "std_logic_vector"
+	},
+	"slv to": {
+		"prefix": "intt",
+		"body": "std_logic_vector range 0 to ${1:15};"
+	},
+	"slv downto": {
+		"prefix": "intd",
+		"body": "std_logic_vector range ${1:15} downto 0;"
+	},
+	// Functions
+	"to_unsigned": {
+		"prefix": "tou",
+		"body": "to_unsigned"
+	},
+	"to_integer": {
+		"prefix": "toi",
+		"body": "to_integer"
+	},
+	"to_string": {
+		"prefix": "tos",
+		"body": "to_string(${1:sig}, $1'high, ${2:radix}, ${3:length})"
+	},
+	// Common structures
+	"Counter increase": {
+		"prefix": "cnti",
+		"body": "if ${1:cnt} < $1'high then\n\t$1 $2= $1 + 1;\nelse\n\t$1 ${2:<}= 0;\nend if;"
+	},
+	"Counter decrease": {
+		"prefix": "cntd",
+		"body": "if ${1:cnt} > 0 then\n\t$1 $2= $1 - 1;\nelse\n\t$1 ${2:<}= $1'high;\nend if;"
+	}
+}
