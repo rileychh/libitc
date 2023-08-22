@@ -8,6 +8,7 @@ greybox_tmp/
 *.qsf
 *.qws
 *.alc
+*.qdf
 
 # Python
 /.venv/
