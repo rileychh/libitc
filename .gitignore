@@ -10,6 +10,7 @@ greybox_tmp/
 *.alc
 
 # Python
+/.venv/
 __pycache__/
 
 # Preprocessed (pp.py)

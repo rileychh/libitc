@@ -2,17 +2,21 @@
 name = "libitc"
 version = "0.1.0"
 description = ""
-authors = ["Dora <smallyo2000@gmail.com>"]
+authors = [
+  "Chenghsuan Ho <chengxuanjhe@gmail.com>",
+  "Chan Yan <a5710168@gmail.com>",
+  "Dora <smallyo2000@gmail.com>",
+]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
 pyserial = "^3.5"
 pyqt5 = "^5.15.7"
-autopep8 = "^2.0.0"
 pyperclip = "^1.8.2"
 toml = "^0.10.2"
 pillow = "^10.0.0"
+black = "^23.7.0"
 
 [build-system]
 requires = ["poetry-core"]
