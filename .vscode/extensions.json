@@ -1,0 +1,15 @@
+{
+	"recommendations": [
+		"streetsidesoftware.code-spell-checker",
+		"ms-python.black-formatter",
+		"ms-python.isort",
+		"davidanson.vscode-markdownlint",
+		"yzhang.markdown-all-in-one",
+		"rjyoung.vscode-modern-vhdl-support",
+		"ms-python.python",
+		"rashwell.tcl",
+		"vinrobot.vhdl-formatter",
+		"vhdl-tool.vhdl-tool",
+		"redhat.vscode-yaml"
+	]
+}
