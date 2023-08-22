@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
+import re
 from pathlib import Path
 from sys import stdout
-import re
-
 
 enable = False
 minify_mode = set()

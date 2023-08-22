@@ -4,10 +4,9 @@ from argparse import ArgumentParser, FileType
 from io import BytesIO
 from sys import stdin, stdout
 from typing import Union
+
 from PIL import Image
 from PIL.ImageColor import getrgb
-
-frame_size = (128, 160)
 
 
 def fill(im: Image.Image, size: tuple[int, int]) -> Image.Image:
@@ -47,6 +46,7 @@ mode_group.add_argument('-f', '--fit', metavar='COLOR', default='', type=str)
 parser.add_argument('-b', '--bicolor', action='store_true', default=False)
 parser.add_argument('-t', '--tiny', action='store_true', default=False)
 parser.add_argument('-s', '--small', action='store_true', default=False)
+parser.add_argument('-z', '--size',type=int, nargs=2, default=(128,160))
 args = parser.parse_args()
 
 buffer = BytesIO()
@@ -57,9 +57,9 @@ else:
 im = Image.open(buffer).convert('RGB')
 
 if args.fit:
-    im = fit(im, frame_size, getrgb(args.fit))
+    im = fit(im, args.size, getrgb(args.fit))
 elif not args.icon:
-    im = fill(im, frame_size)
+    im = fill(im, args.size)
 
 if args.bicolor:
     im = im.convert('1')

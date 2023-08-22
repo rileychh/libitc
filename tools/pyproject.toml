@@ -6,13 +6,13 @@ authors = ["Dora <smallyo2000@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.11"
 pyserial = "^3.5"
 pyqt5 = "^5.15.7"
 autopep8 = "^2.0.0"
-pillow = "^9.3.0"
 pyperclip = "^1.8.2"
 toml = "^0.10.2"
+pillow = "^10.0.0"
 
 [build-system]
 requires = ["poetry-core"]

@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
-import pyperclip
 from textwrap import *
+
+import pyperclip
 
 txt_type = 'u8_arr_t'
 txt_signal_name = 'tts_data'
