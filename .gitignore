@@ -8,6 +8,7 @@ docs/ref
 dist/
 __pycache__/
 greybox_tmp/
+*.cmp
 *.qsf
 *.qws
 *.alc
