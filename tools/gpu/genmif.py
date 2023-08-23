@@ -1,12 +1,54 @@
 #!/usr/bin/env python
 
 from argparse import ArgumentParser, FileType
-from io import BytesIO
-from sys import stdin, stdout
 from typing import Union
 
 from PIL import Image
 from PIL.ImageColor import getrgb
+
+
+def load_args():
+    parser = ArgumentParser()
+
+    parser.add_argument(
+        "-s",
+        "--size",
+        type=int,
+        nargs=2,
+        metavar=("WIDTH", "HEIGHT"),
+        default=(128, 160),
+        help="size of the MIF file, default is 128x160",
+    )
+    parser.add_argument(
+        "-d",
+        "--depth",
+        type=int,
+        choices=[1, 3, 8, 24],
+        default=24,
+        help="color depth, default is 24",
+    )
+    parser.add_argument(
+        "-c",
+        "--crop",
+        choices=["none", "fill", "fit"],
+        default="fill",
+        help="crop mode, default is fill",
+    )
+    parser.add_argument(
+        "-b",
+        "--background",
+        metavar="COLOR",
+        help='background color when crop mode is "fit", default is black ("#000")',
+    )
+    parser.add_argument("image", type=FileType("rb"), help="input path to image file")
+    parser.add_argument("mif", type=FileType("w"), help="output path to MIF file")
+    args = parser.parse_args()
+
+    if args.crop != "fit" and args.background is not None:
+        parser.error("background color is only used when crop mode is fit")
+    elif args.crop == "fit" and args.background is None:
+        args.background = "#000"
+    return args
 
 
 def fill(im: Image.Image, size: tuple[int, int]) -> Image.Image:
@@ -27,84 +69,58 @@ def fill(im: Image.Image, size: tuple[int, int]) -> Image.Image:
     return im.crop(new_box).resize(size)
 
 
-def fit(im: Image.Image, size: tuple[int, int], fill_color: tuple[int, int, int]) -> Image.Image:
+def fit(
+    im: Image.Image, size: tuple[int, int], fill_color: tuple[int, int, int]
+) -> Image.Image:
     resized = im.copy()
     resized.thumbnail(size)
-    res = Image.new('RGB', size, fill_color)
-    res.paste(resized, ((size[0] - resized.width) //
-                        2, (size[1] - resized.height) // 2))
+    res = Image.new("RGB", size, fill_color)
+    res.paste(
+        resized, ((size[0] - resized.width) // 2, (size[1] - resized.height) // 2)
+    )
     return res
 
 
-parser = ArgumentParser()
-parser.add_argument('input_file', nargs='?', default='-')
-parser.add_argument('output_file', nargs='?',
-                    type=FileType('w'), default=stdout)
-mode_group = parser.add_mutually_exclusive_group()
-mode_group.add_argument('-i', '--icon', action='store_true')
-mode_group.add_argument('-f', '--fit', metavar='COLOR', default='', type=str)
-parser.add_argument('-b', '--bicolor', action='store_true', default=False)
-parser.add_argument('-t', '--tiny', action='store_true', default=False)
-parser.add_argument('-s', '--small', action='store_true', default=False)
-parser.add_argument('-z', '--size',type=int, nargs=2, default=(128,160))
-args = parser.parse_args()
+def format_pixel(pixel: Union[tuple[int, int, int], int]) -> str:
+    if args.depth == 1:
+        return "1" if pixel else "0"
+    elif args.depth == 3:
+        r, g, b = pixel
+        return "{:x}".format((r >> 7) << 2 | (g >> 7) << 1 | b >> 7)
+    elif args.depth == 8:
+        r, g, b = pixel
+        return "{:x}".format((r >> 5) << 5 | (g >> 5) << 2 | (b >> 6))
+    else:
+        r, g, b = pixel
+        return "{:x}".format(r << 16 | g << 8 | b)
 
-buffer = BytesIO()
-if args.input_file == '-':
-    buffer.write(stdin.buffer.read())
-else:
-    buffer.write(open(args.input_file, 'rb').read())
-im = Image.open(buffer).convert('RGB')
 
-if args.fit:
-    im = fit(im, args.size, getrgb(args.fit))
-elif not args.icon:
+args = load_args()
+im = Image.open(args.image).convert("RGB")
+
+if args.crop == "fit":
+    im = fit(im, args.size, getrgb(args.background))
+elif args.crop == "fill":
     im = fill(im, args.size)
 
-if args.bicolor:
-    im = im.convert('1')
+if args.depth == 1:
+    im = im.convert("1")
 
 pixels = list(im.getdata())
 
-
-def format_pixel(pixel: Union[tuple[int, int, int], int]) -> str:
-    if args.bicolor:
-        return '1' if pixel else '0'
-    elif args.tiny:
-        r, g, b = pixel
-        return '{:x}'.format((r >> 7) << 2 | (g >> 7) << 1 | b >> 7)
-    elif args.small:
-        r, g, b = pixel
-        return '{:x}'.format((r >> 5) << 5 | (g >> 5) << 2 | (b >> 6))
-    else:
-        r, g, b = pixel
-        return '{:x}'.format(r << 16 | g << 8 | b)
-
-
-if args.bicolor:
-    width = 1
-elif args.tiny:
-    width = 3
-elif args.small:
-    width = 8
-else:
-    width = 24
-
-mif_header = f'''\
-WIDTH={str(width)};
+mif_header = f"""\
+WIDTH={str(args.depth)};
 DEPTH={len(pixels)};
 
 ADDRESS_RADIX=UNS;
 DATA_RADIX=HEX;
 
 CONTENT BEGIN
-'''
+"""
 
-mif_footer = '''\
+mif_footer = """\
 END;
-'''
+"""
 
-mif_data = ''.join(
-    f'\t{i}: {format_pixel(p)};\n' for i, p in enumerate(pixels))
-
-args.output_file.write(mif_header + mif_data + mif_footer)
+mif_data = "".join(f"\t{i}: {format_pixel(p)};\n" for i, p in enumerate(pixels))
+args.mif.write(mif_header + mif_data + mif_footer)
