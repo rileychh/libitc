@@ -102,7 +102,11 @@
 		}
 	},
 	"isort.args": ["--profile", "black"],
+	"terminal.integrated.defaultProfile.windows": "Git Bash",
 	"terminal.integrated.env.linux": {
 		"PATH": "${workspaceFolder}/tools:${env:PATH}"
+	},
+	"terminal.integrated.env.windows": {
+		"PATH": "${workspaceFolder}/tools;${env:PATH}"
 	}
 }
