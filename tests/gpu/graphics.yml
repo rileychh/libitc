@@ -1,0 +1,31 @@
+constants:
+  black: 0x000000
+  white: 0xffffff
+  temp: 0x696969
+  middle: 64 80
+
+images:
+  bongo:
+    path: tests/lcd/res/color/bongo.jpg
+    # mode: fill
+    # width: 128
+    # height: 160
+  loading:
+    path: src/itc108_1/res/arrow_circle.bmp
+    mode: none
+    width: 32
+    height: 32
+    
+
+screens:
+  hello_world:
+    - fill 0 0 128 160 0x0000ff
+    - text @a @b $white "Hello World"
+  clear_screen:
+    - fill 0 0 128 160 $white
+  put_cat_picture:
+    - image 0 0 $bongo
+  invert_black_and_white:
+    - replace $black $temp
+    - replace $white $black
+    - replace $temp $white
