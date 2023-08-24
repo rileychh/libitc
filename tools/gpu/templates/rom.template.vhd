@@ -1,8 +1,6 @@
 <%
 from math import ceil, log2
-def width(n):
-		return int(ceil(log2(n)))
-addr_width = width(mif_depth)
+addr_width = int(ceil(log2(mif_depth)))
 %>\
 library ieee;
 use ieee.std_logic_1164.all;
