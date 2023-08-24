@@ -1,14 +1,18 @@
 {
 	"[vhdl]": {
 		"editor.fontLigatures": false,
-		"editor.insertSpaces": false
+		"editor.insertSpaces": false,
+		"editor.formatOnType": true,
+		"editor.defaultFormatter": "Vinrobot.vhdl-formatter"
 	},
+
 	// File explorer
 	"files.exclude": {
 		"db/": true,
 		"incremental_db/": true,
 		"simulation/": true
 	},
+
 	// VHDL formatter
 	"vhdl.formatter.align.function": true,
 	"vhdl.formatter.align.generic": true,
@@ -20,12 +24,14 @@
 	"vhdl.formatter.newline.port": "NoNewLine",
 	"vhdl.formatter.newline.else": "None",
 	"vhdl.formatter.insertFinalNewline": true,
+
 	// Modern VHDL
 	"editor.formatOnType": true,
 	"vhdl.suggestLibraryCase": "lower",
 	"vhdl.enableStutterComments": true,
 	"vhdl.enableStutterDelimiters": true,
 	"vhdl.enableStutterBrackets": true,
+
 	// Markdown
 	"[markdown]": {
 		"editor.defaultFormatter": "yzhang.markdown-all-in-one"
@@ -35,13 +41,15 @@
 		"MD024": false, // no-duplicate-heading
 		"MD033": false // no-inline-html
 	},
+
 	// JSON
 	"[jsonc]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},
 	"prettier.useTabs": true,
+
+	// spell checker
 	"cSpell.words": [
-		"LEDs",
 		"abcdefgp",
 		"altera",
 		"bruh",
@@ -65,6 +73,8 @@
 		"frmctr",
 		"gamctrn",
 		"gamctrp",
+		"genmif",
+		"getdata",
 		"getrgb",
 		"gmctrn",
 		"gmctrp",
@@ -74,9 +84,11 @@
 		"inout",
 		"integ",
 		"lcd",
+		"LEDs",
 		"libitc",
 		"madctl",
 		"mosi",
+		"POSIX",
 		"pwctr",
 		"pyperclip",
 		"quartus",
@@ -88,12 +100,15 @@
 		"testbench",
 		"uart",
 		"vhdl",
+		"vhdltool",
 		"vmctr",
 		"wraddress"
 	],
 	"cSpell.ignoreRegExpList": [
 		".*'.*" // VHDL attributes, e.g. "key_row'range"
 	],
+
+	// Python
 	"[python]": {
 		"editor.defaultFormatter": "ms-python.black-formatter",
 		"editor.formatOnSave": true,
