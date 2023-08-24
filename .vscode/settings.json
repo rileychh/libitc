@@ -123,5 +123,10 @@
 	},
 	"terminal.integrated.env.windows": {
 		"PATH": "${workspaceFolder}/tools/bin;${env:PATH}"
+	},
+
+	// Templates
+	"files.associations": {
+		"*.template.*": "mako"
 	}
 }
