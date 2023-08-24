@@ -3,6 +3,7 @@
 import argparse
 import re
 from os import getcwd, path
+from typing import Optional
 
 import yaml
 from image import Image
@@ -31,7 +32,7 @@ def load_args():
     return parser.parse_args()
 
 
-def load_config(project_path: str) -> tuple[dict[str, str], list[Image]]:
+def load_config(project_path: str) -> tuple[Optional[dict[str, str]], Optional[list[Image]]]:
     graphics_yaml_path = path.join(project_path, default_filename)
 
     if not path.isfile(graphics_yaml_path):
@@ -40,7 +41,7 @@ def load_config(project_path: str) -> tuple[dict[str, str], list[Image]]:
     with open(graphics_yaml_path, "r") as graphics_yaml:
         graphics = yaml.load(graphics_yaml, Loader=yaml.Loader)
 
-    constants = graphics["constants"]
+    constants = graphics["constants"] if "constants" in graphics else None
 
     def resolve(value: str):
         if type(value) is not str:
@@ -53,10 +54,12 @@ def load_config(project_path: str) -> tuple[dict[str, str], list[Image]]:
 
         return re.sub(pattern, replace, value)
 
-    images = []
-    for name, properties in graphics["images"].items():
-        resolved_properties = {k: resolve(v) for k, v in properties.items()}
-        images.append(Image(name, resolved_properties, project_path))
+    images = None
+    if "images" in graphics:
+        images = []
+        for name, properties in graphics["images"].items():
+            resolved_properties = {k: resolve(v) for k, v in properties.items()}
+            images.append(Image(name, resolved_properties, project_path))
 
     return (constants, images)
 
