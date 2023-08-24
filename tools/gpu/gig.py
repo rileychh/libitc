@@ -7,9 +7,11 @@ from typing import Optional
 
 import yaml
 from image import Image
-from mako.template import Template
 
 default_filename = "graphics.yml"
+
+Constants = dict[str, str]
+Images = list[Image]
 
 
 def load_args():
@@ -32,7 +34,9 @@ def load_args():
     return parser.parse_args()
 
 
-def load_config(project_path: str) -> tuple[Optional[dict[str, str]], Optional[list[Image]]]:
+def load_config(
+    project_path: str,
+) -> tuple[Optional[Constants], Optional[Images]]:
     graphics_yaml_path = path.join(project_path, default_filename)
 
     if not path.isfile(graphics_yaml_path):
@@ -74,22 +78,6 @@ if args.verbose:
 for image in images:
     here = path.dirname(__file__)
     working_dir = getcwd()
-    mif_path = path.join(args.project, f"{image.name}.mif")
-    qip_path = path.join(args.project, f"{image.name}.qip")
-    vhd_path = path.join(args.project, f"{image.name}.vhd")
-    image.generate(mif_path)
-
-    qip_template = Template(filename=path.join(here, "templates/rom.template.qip"))
-    with open(qip_path, "w") as qip:
-        qip.write(qip_template.render(name=image.name))
-
-    vhd_template = Template(filename=path.join(here, "templates/rom.template.vhd"))
-    with open(vhd_path, "w") as vhd:
-        vhd.write(
-            vhd_template.render(
-                name=image.name,
-                mif_path=path.relpath(mif_path, working_dir).replace("\\", "/"),
-                mif_depth=image.width * image.height,
-                mif_width=image.color_depth.value,
-            )
-        )
+    image.generate_mif()
+    image.generate_qip()
+    image.generate_vhd()
