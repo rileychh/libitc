@@ -2,10 +2,11 @@
 
 import argparse
 import re
-from os import path
+from os import getcwd, path
 
 import yaml
 from image import Image
+from mako.template import Template
 
 default_filename = "graphics.yml"
 
@@ -68,4 +69,24 @@ if args.verbose:
     print(*images, sep="\n")
 
 for image in images:
-    image.generate(path.join(args.project, f"{image.name}.mif"))
+    here = path.dirname(__file__)
+    working_dir = getcwd()
+    mif_path = path.join(args.project, f"{image.name}.mif")
+    qip_path = path.join(args.project, f"{image.name}.qip")
+    vhd_path = path.join(args.project, f"{image.name}.vhd")
+    image.generate(mif_path)
+
+    qip_template = Template(filename=path.join(here, "templates/rom.template.qip"))
+    with open(qip_path, "w") as qip:
+        qip.write(qip_template.render(name=image.name))
+
+    vhd_template = Template(filename=path.join(here, "templates/rom.template.vhd"))
+    with open(vhd_path, "w") as vhd:
+        vhd.write(
+            vhd_template.render(
+                name=image.name,
+                mif_path=path.relpath(mif_path, working_dir),
+                mif_depth=image.width * image.height,
+                mif_width=image.color_depth.value,
+            )
+        )

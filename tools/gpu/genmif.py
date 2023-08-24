@@ -74,8 +74,8 @@ def generate(
 
     pixels = list(im.getdata())
 
-    script_path = path.dirname(__file__)
-    template = Template(filename=path.join(script_path, "templates/image.template.mif"))
+    here = path.dirname(__file__)
+    template = Template(filename=path.join(here, "templates/image.template.mif"))
     mif.write(
         template.render(
             width=depth.value,
