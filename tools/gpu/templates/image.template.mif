@@ -20,6 +20,6 @@ DATA_RADIX=HEX;
 
 CONTENT BEGIN
 % for p in pixels:
-  ${loop.index}: ${format_pixel(width, p)}
+  ${loop.index}: ${format_pixel(width, p)};
 % endfor
 END;

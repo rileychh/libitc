@@ -6,6 +6,7 @@ addr_width = width(mif_depth)
 %>\
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 library altera_mf;
 use altera_mf.altera_mf_components.all;
@@ -20,12 +21,10 @@ end ${name};
 
 architecture arch of ${name} is
 
-	signal addr_i : std_logic_vector(${addr_width - 1} downto 0);
 	signal data_i : std_logic_vector(${mif_width - 1} downto 0);
 
 begin
 
-	addr <= unsigned(addr_i);
 	data <= unsigned(data_i);
 
 	altsyncram_component : altsyncram
@@ -47,7 +46,7 @@ begin
 	)
 	port map(
 		clock0    => clk,
-		address_a => addr_i,
+		address_a => std_logic_vector(addr),
 		q_a       => data_i
 	);
 
