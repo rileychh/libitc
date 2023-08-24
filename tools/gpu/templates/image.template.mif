@@ -11,8 +11,7 @@ def format_pixel(depth, pixel):
     else:
         r, g, b = pixel
         return "{:x}".format(r << 16 | g << 8 | b)
-%>
-
+%>\
 WIDTH=${width};
 DEPTH=${depth};
 
