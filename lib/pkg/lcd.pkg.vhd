@@ -22,6 +22,10 @@ package itc_lcd is
 	-- packed pixel type: an address concatenated with a pixel (39 downto 24 => addr, 23 downto 0 => data)
 	subtype l_pack_t is unsigned(log(2, l_px_cnt) + l_depth - 1 downto 0);
 
+	-- GPU program memory types
+	subtype p_addr_t is u8_t; -- program address, up to 256 instructions
+	subtype p_inst_t is unsigned(63 downto 0); -- program instruction
+
 	--------------------------------------------------------------------------------
 	-- color constants
 	--------------------------------------------------------------------------------

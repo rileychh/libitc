@@ -1,22 +1,30 @@
+# must be strings, access with $key
 constants:
-  black: 0x000000
-  white: 0xffffff
-  temp: 0x696969
+  black: "#000000"
+  white: "#ffffff"
+  temp: "#696969"
   middle: 64 80
 
 images:
   bongo:
-    path: tests/lcd/res/color/bongo.jpg
-    # mode: fill
+    path: tests/lcd/res/color/bongo.jpg # required, relative to working directory (not this file)
     # width: 128
     # height: 160
+    # color_depth: 24 (or 1, 3, 8)
+    # crop: fill (or none, fit)
+    # fit_background: #000 (or any CSS legal color values)
   loading:
     path: src/itc108_1/res/arrow_circle.bmp
-    mode: none
+    crop: none
     width: 32
     height: 32
-    
+    color_depth: 1
+  weed:
+    path: tests/lcd/res/color/weed.jpg
+    crop: fit
+    fit_background: $white
 
+# see docs/gpu.md for more details
 screens:
   hello_world:
     - fill 0 0 128 160 0x0000ff
@@ -24,7 +32,7 @@ screens:
   clear_screen:
     - fill 0 0 128 160 $white
   put_cat_picture:
-    - image 0 0 $bongo
+    - image 0 0 bongo
   invert_black_and_white:
     - replace $black $temp
     - replace $white $black

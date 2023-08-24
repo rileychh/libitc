@@ -1,7 +1,9 @@
-from enum import Enum
+from os import getcwd, path
 
-from genmif import CropMode
+from genmif import ColorDepth, CropMode
+from genmif import generate as gen_mif
 
+working_directory = getcwd()
 
 # represent images in graphics.yml
 class Image:
@@ -10,10 +12,29 @@ class Image:
             return properties[key] if key in properties else fallback
 
         self.name = name
-        self.path = properties["path"]
-        self.crop = CropMode.from_str(with_fallback(properties, "mode", "fill"))
+        self.path = path.join(working_directory, properties["path"])
         self.width = with_fallback(properties, "width", 128)
         self.height = with_fallback(properties, "height", 160)
+        self.color_depth = ColorDepth(with_fallback(properties, "color_depth", 24))
+        self.crop = CropMode(with_fallback(properties, "crop", "fill"))
+        self.fit_background = with_fallback(properties, "fit_background", (0, 0, 0))
 
     def __str__(self):
-        return f"{self.name}: {self.path} {self.crop} {self.width}x{self.height}"
+        crop_verb = "in"
+        if self.crop == CropMode.FILL:
+            crop_verb = "fills"
+        elif self.crop == CropMode.FIT:
+            crop_verb = "fits"
+
+        return f"{self.name}: {self.path} {crop_verb} {self.width}x{self.height} with {self.color_depth.value}-bit color"
+
+    def generate(self, mif_path: str):
+        with open(self.path, "rb") as image, open(mif_path, "w") as mif:
+            gen_mif(
+                size=(self.width, self.height),
+                depth=self.color_depth,
+                crop=self.crop,
+                image=image,
+                mif=mif,
+                fit_background=self.fit_background,
+            )

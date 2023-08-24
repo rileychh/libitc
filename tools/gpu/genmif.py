@@ -3,10 +3,23 @@
 from argparse import ArgumentParser, FileType
 from enum import Enum
 from io import BufferedIOBase, TextIOBase
-from typing import Union
+from typing import Optional, Union
 
 from PIL import Image
 from PIL.ImageColor import getrgb
+
+
+class CropMode(Enum):
+    NONE = "none"
+    FILL = "fill"
+    FIT = "fit"
+
+
+class ColorDepth(Enum):
+    BINARY = 1
+    BASIC = 3  # 1 bit of R, G, and B
+    COMPACT = 8  # 3 bits of R and G, 2 bits of B
+    TRUE_COLOR = 24  # 8 bits of R, G, and B
 
 
 def fill(im: Image.Image, size: tuple[int, int]) -> Image.Image:
@@ -28,24 +41,24 @@ def fill(im: Image.Image, size: tuple[int, int]) -> Image.Image:
 
 
 def fit(
-    im: Image.Image, size: tuple[int, int], fill_color: tuple[int, int, int]
+    im: Image.Image, size: tuple[int, int], background: tuple[int, int, int] = None
 ) -> Image.Image:
     resized = im.copy()
     resized.thumbnail(size)
-    res = Image.new("RGB", size, fill_color)
+    res = Image.new("RGB", size, background if background is not None else (0, 0, 0))
     res.paste(
         resized, ((size[0] - resized.width) // 2, (size[1] - resized.height) // 2)
     )
     return res
 
 
-def format_pixel(depth: int, pixel: Union[tuple[int, int, int], int]) -> str:
-    if depth == 1:
+def format_pixel(depth: ColorDepth, pixel: Union[tuple[int, int, int], int]) -> str:
+    if depth == ColorDepth.BINARY:
         return "1" if pixel else "0"
-    elif depth == 3:
+    elif depth == ColorDepth.BASIC:
         r, g, b = pixel
         return "{:x}".format((r >> 7) << 2 | (g >> 7) << 1 | b >> 7)
-    elif depth == 8:
+    elif depth == ColorDepth.COMPACT:
         r, g, b = pixel
         return "{:x}".format((r >> 5) << 5 | (g >> 5) << 2 | (b >> 6))
     else:
@@ -53,52 +66,28 @@ def format_pixel(depth: int, pixel: Union[tuple[int, int, int], int]) -> str:
         return "{:x}".format(r << 16 | g << 8 | b)
 
 
-class CropMode(Enum):
-    NONE = 0
-    FILL = 1
-    FIT = 2
-
-    def __str__(self):
-        if self == CropMode.NONE:
-            return "in"
-        elif self == CropMode.FILL:
-            return "fills"
-        elif self == CropMode.FIT:
-            return "fits"
-
-    def from_str(mode: str):
-        if mode == "none":
-            return CropMode.NONE
-        elif mode == "fill":
-            return CropMode.FILL
-        elif mode == "fit":
-            return CropMode.FIT
-        else:
-            raise ValueError(f"Invalid mode: {mode}")
-
-
 def generate(
     size: tuple[int, int],
-    depth: int,
+    depth: ColorDepth,
     crop: CropMode,
-    background: tuple[int, int, int],
     image: BufferedIOBase,
     mif: TextIOBase,
+    fit_background: Optional[tuple[int, int, int]] = None,
 ):
     im = Image.open(image).convert("RGB")
 
     if crop == CropMode.FIT:
-        im = fit(im, size, background)
+        im = fit(im, size, fit_background)
     elif crop == CropMode.FILL:
         im = fill(im, size)
 
-    if depth == 1:
+    if depth == ColorDepth.BINARY:
         im = im.convert("1")
 
     pixels = list(im.getdata())
 
     mif_header = f"""\
-WIDTH={str(depth)};
+WIDTH={depth.value};
 DEPTH={len(pixels)};
 
 ADDRESS_RADIX=UNS;
@@ -111,10 +100,12 @@ CONTENT BEGIN
 END;
 """
 
-    mif_data = "".join(
-        f"\t{i}: {format_pixel(depth, p)};\n" for i, p in enumerate(pixels)
-    )
-    mif.write(mif_header + mif_data + mif_footer)
+    mif_content = []
+    for i, p in enumerate(pixels):
+        mif_content.append(f"\t{i}: {format_pixel(depth, p)};\n")
+    mif_content = "".join(mif_content)
+
+    mif.write(mif_header + mif_content + mif_footer)
 
 
 if __name__ == "__main__":
@@ -156,14 +147,12 @@ if __name__ == "__main__":
 
     if args.crop != "fit" and args.background is not None:
         parser.error("background color is only used when crop mode is fit")
-    elif args.background is None:
-        args.background = "#000"
 
     generate(
         size=args.size,
-        depth=args.depth,
-        crop=CropMode.from_str(args.crop),
-        background=getrgb(args.background),
+        depth=ColorDepth(args.depth),
+        crop=CropMode(args.crop),
         image=args.image,
         mif=args.mif,
+        fit_background=getrgb(args.background) if args.background is not None else None,
     )
