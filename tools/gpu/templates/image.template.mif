@@ -1,0 +1,26 @@
+<%
+def format_pixel(depth, pixel):
+    if depth == 1:
+        return "1" if pixel else "0"
+    elif depth == 3:
+        r, g, b = pixel
+        return "{:x}".format((r >> 7) << 2 | (g >> 7) << 1 | b >> 7)
+    elif depth == 8:
+        r, g, b = pixel
+        return "{:x}".format((r >> 5) << 5 | (g >> 5) << 2 | (b >> 6))
+    else:
+        r, g, b = pixel
+        return "{:x}".format(r << 16 | g << 8 | b)
+%>
+
+WIDTH=${width};
+DEPTH=${depth};
+
+ADDRESS_RADIX=UNS;
+DATA_RADIX=HEX;
+
+CONTENT BEGIN
+% for p in pixels:
+  ${loop.index}: ${format_pixel(width, p)}
+% endfor
+END;

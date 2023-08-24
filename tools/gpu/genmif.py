@@ -3,8 +3,10 @@
 from argparse import ArgumentParser, FileType
 from enum import Enum
 from io import BufferedIOBase, TextIOBase
-from typing import Optional, Union
+from os import path
+from typing import Optional
 
+from mako.template import Template
 from PIL import Image
 from PIL.ImageColor import getrgb
 
@@ -52,20 +54,6 @@ def fit(
     return res
 
 
-def format_pixel(depth: ColorDepth, pixel: Union[tuple[int, int, int], int]) -> str:
-    if depth == ColorDepth.BINARY:
-        return "1" if pixel else "0"
-    elif depth == ColorDepth.BASIC:
-        r, g, b = pixel
-        return "{:x}".format((r >> 7) << 2 | (g >> 7) << 1 | b >> 7)
-    elif depth == ColorDepth.COMPACT:
-        r, g, b = pixel
-        return "{:x}".format((r >> 5) << 5 | (g >> 5) << 2 | (b >> 6))
-    else:
-        r, g, b = pixel
-        return "{:x}".format(r << 16 | g << 8 | b)
-
-
 def generate(
     size: tuple[int, int],
     depth: ColorDepth,
@@ -86,26 +74,15 @@ def generate(
 
     pixels = list(im.getdata())
 
-    mif_header = f"""\
-WIDTH={depth.value};
-DEPTH={len(pixels)};
-
-ADDRESS_RADIX=UNS;
-DATA_RADIX=HEX;
-
-CONTENT BEGIN
-"""
-
-    mif_footer = """\
-END;
-"""
-
-    mif_content = []
-    for i, p in enumerate(pixels):
-        mif_content.append(f"\t{i}: {format_pixel(depth, p)};\n")
-    mif_content = "".join(mif_content)
-
-    mif.write(mif_header + mif_content + mif_footer)
+    script_path = path.dirname(__file__)
+    template = Template(filename=path.join(script_path, "templates/image.template.mif"))
+    mif.write(
+        template.render(
+            width=depth.value,
+            depth=len(pixels),
+            pixels=pixels,
+        )
+    )
 
 
 if __name__ == "__main__":

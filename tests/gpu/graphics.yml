@@ -23,6 +23,7 @@ images:
     path: tests/lcd/res/color/weed.jpg
     crop: fit
     fit_background: $white
+    color_depth: 8
 
 # see docs/gpu.md for more details
 screens:
