@@ -24,6 +24,9 @@ def load_args():
     parser.add_argument(
         "-o", "--overwrite", action="store_true", help="allow overwrite existing files"
     )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="print additional information"
+    )
     return parser.parse_args()
 
 
@@ -41,6 +44,7 @@ def load_config(graphics_yaml_path: str) -> tuple[dict[str, str], list[Image]]:
             return value
 
         pattern = r"\$(\w*)"  # words starting with $
+
         def replace(match: re.Match):
             return constants[match.group(1)]
 
@@ -58,7 +62,9 @@ args = load_args()
 graphics_yaml_path = path.join(args.project, default_filename)
 constants, images = load_config(graphics_yaml_path)
 
-print(constants, *images, sep="\n")
+if args.verbose:
+    print(constants)
+    print(*images, sep="\n")
 
 for image in images:
     image.generate(path.join(args.project, f"{image.name}.mif"))
