@@ -85,7 +85,7 @@ for image in images:
         vhd.write(
             vhd_template.render(
                 name=image.name,
-                mif_path=path.relpath(mif_path, working_dir),
+                mif_path=path.relpath(mif_path, working_dir).replace("\\", "/"),
                 mif_depth=image.width * image.height,
                 mif_width=image.color_depth.value,
             )
