@@ -1,18 +1,17 @@
-from os import getcwd, path
+from os import path
 
 from genmif import ColorDepth, CropMode
 from genmif import generate as gen_mif
 
-working_directory = getcwd()
 
 # represent images in graphics.yml
 class Image:
-    def __init__(self, name: str, properties: dict):
+    def __init__(self, name: str, properties: dict, project_path: str):
         def with_fallback(properties: dict, key, fallback):
             return properties[key] if key in properties else fallback
 
         self.name = name
-        self.path = path.join(working_directory, properties["path"])
+        self.path = path.normpath(path.join(project_path, properties["path"]))
         self.width = with_fallback(properties, "width", 128)
         self.height = with_fallback(properties, "height", 160)
         self.color_depth = ColorDepth(with_fallback(properties, "color_depth", 24))

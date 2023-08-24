@@ -30,9 +30,11 @@ def load_args():
     return parser.parse_args()
 
 
-def load_config(graphics_yaml_path: str) -> tuple[dict[str, str], list[Image]]:
+def load_config(project_path: str) -> tuple[dict[str, str], list[Image]]:
+    graphics_yaml_path = path.join(project_path, default_filename)
+
     if not path.isfile(graphics_yaml_path):
-        raise FileNotFoundError(f"{default_filename} not found in {args.project}.")
+        raise FileNotFoundError(f"{default_filename} not found in {project_path}.")
 
     with open(graphics_yaml_path, "r") as graphics_yaml:
         graphics = yaml.load(graphics_yaml, Loader=yaml.Loader)
@@ -53,14 +55,13 @@ def load_config(graphics_yaml_path: str) -> tuple[dict[str, str], list[Image]]:
     images = []
     for name, properties in graphics["images"].items():
         resolved_properties = {k: resolve(v) for k, v in properties.items()}
-        images.append(Image(name, resolved_properties))
+        images.append(Image(name, resolved_properties, project_path))
 
     return (constants, images)
 
 
 args = load_args()
-graphics_yaml_path = path.join(args.project, default_filename)
-constants, images = load_config(graphics_yaml_path)
+constants, images = load_config(args.project)
 
 if args.verbose:
     print(constants)
