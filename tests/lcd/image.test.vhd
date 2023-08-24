@@ -18,7 +18,6 @@ architecture arch of lcd_image_test is
 
 	signal wr_ena : std_logic;
 	signal l_addr : l_addr_t;
-	signal l_data_i : std_logic_vector(23 downto 0);
 	signal l_data : l_px_t;
 
 begin
@@ -39,13 +38,12 @@ begin
 			data       => l_data
 		);
 
-	image_inst : entity work.image(syn)
+	image_inst : entity work.image(arch)
 		port map(
-			address => std_logic_vector(to_unsigned(l_addr, 15)),
-			clock   => clk,
-			q       => l_data_i
+			clk  => clk,
+			addr => to_unsigned(l_addr, 15),
+			data => l_data
 		);
-	l_data <= unsigned(l_data_i);
 
 	process (clk, rst_n) begin
 		if rst_n = '0' then

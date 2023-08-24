@@ -18,7 +18,7 @@ architecture arch of lcd_image_test_bicolor is
 
 	signal wr_ena : std_logic;
 	signal l_addr : l_addr_t;
-	signal l_data_i : std_logic_vector(0 downto 0);
+	signal l_data_i : unsigned(0 downto 0);
 	signal l_data : l_px_t;
 
 begin
@@ -39,11 +39,11 @@ begin
 			data       => l_data
 		);
 
-	image_bicolor_inst : entity work.image_bicolor(syn)
+	image_bicolor_inst : entity work.image_bicolor(arch)
 		port map(
-			address => std_logic_vector(to_unsigned(l_addr, 15)),
-			clock   => clk,
-			q       => l_data_i -- {{ i => inner }}
+			clk  => clk,
+			addr => to_unsigned(l_addr, 15),
+			data => l_data_i
 		);
 	l_data <= x"000000" when l_data_i = "0" else x"ffffff";
 

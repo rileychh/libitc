@@ -1,0 +1,10 @@
+constants:
+
+images:
+  image:
+    path: ../res/color/bongo.jpg
+  image_bicolor:
+    path: ../res/bw/button.png
+    crop: fit
+    fit_background: "#000"
+    color_depth: 1
