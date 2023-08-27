@@ -8,7 +8,7 @@ here = path.dirname(__file__)
 working_dir = getcwd()
 
 
-# represent images in graphics.yml
+# represent images in graphics.yaml
 class Image:
     def __init__(self, name: str, properties: dict, project_path: str):
         def with_fallback(properties: dict, key, fallback):

@@ -2,7 +2,7 @@
 
 ## GIG 指令編譯器
 
-讀取資料夾中的 `graphics.yml` 並產生：
+讀取資料夾中的 `graphics.yaml` 並產生：
 
 - VHDL 檔案，包含一個帶有常數的 `package`
 - `graphics.mif` 指令 ROM MIF

@@ -8,7 +8,7 @@ from typing import Optional
 import yaml
 from image import Image
 
-default_filename = "graphics.yml"
+default_filename = "graphics.yaml"
 
 Constants = dict[str, str]
 Images = list[Image]
