@@ -78,7 +78,7 @@ begin
 		if rst_n = '0' then
 		elsif rising_edge(clk) then
 			-- l_data <= l_paste_txt(l_addr, white, "testtesttest", (50, 30));
-			pic_data_o <= to_data(l_paste(l_addr, white, p_data, (1, 9), 32, 32));
+			pic_data_o <= to_data(l_paste(l_addr, white, green, (1, 9), 32, 32));
 			-- if l_addr < l_px_cnt - 1 then
 			-- 	if wr_ena = '0' then
 			-- 		wr_ena <= '1';

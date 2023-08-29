@@ -81,7 +81,7 @@ begin
 			addr       => l_addr,
 			data       => l_data
 		);
-	font_inst : entity work.Font(SYN)
+	Font_inst : entity work.Font(syn)
 		port map(
 			address => std_logic_vector(to_unsigned(l_addr_p, 15)),
 			clock   => clk,
