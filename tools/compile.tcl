@@ -53,73 +53,15 @@ if {$make_assignments} {
 
 	# Source files
 	set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
-	set_global_assignment -name TOP_LEVEL_ENTITY underline
+	set_global_assignment -name TOP_LEVEL_ENTITY test
 
 	## Unit tests
-	# set_global_assignment -name VHDL_FILE tests/dht_test.vhd
-	# set_global_assignment -name VHDL_FILE tests/dot_test.vhd
-	# set_global_assignment -name VHDL_FILE tests/key_test.vhd
-	# set_global_assignment -name VHDL_FILE tests/lcd_colors_test.vhd
-	# set_global_assignment -name VHDL_FILE tests/lcd_image_test.vhd
-	# set_global_assignment -name VHDL_FILE tests/lcd_image_test_bicolor.vhd
-	# set_global_assignment -name VHDL_FILE tests/mot_test.vhd
-	# set_global_assignment -name VHDL_FILE tests/rgb_test.vhd
-	# set_global_assignment -name VHDL_FILE tests/seg_test.vhd
-	# set_global_assignment -name VHDL_FILE tests/tsl_test.vhd
-	# set_global_assignment -name VHDL_FILE tests/tts_test.vhd
-	# set_global_assignment -name VHDL_FILE tests/uart_dino_test.vhd
-	# set_global_assignment -name VHDL_FILE tests/uart_echo_test.vhd
-	# set_global_assignment -name QIP_FILE tests/lcd/ip/image.qip
-	# set_global_assignment -name MIF_FILE tests/lcd/ip/image.mif
-	# set_global_assignment -name QIP_FILE tests/lcd/ip/image_bicolor.qip
-	# set_global_assignment -name MIF_FILE tests/lcd/ip/image_bicolor.mif
-
-
-	# set_global_assignment -name VHDL_FILE dist/itc108_1.pp.vhd
-	# set_global_assignment -name QIP_FILE src/itc108_1/ip/icon.qip
-	# set_global_assignment -name MIF_FILE src/itc108_1/ip/icon.mif
-
-	# set_global_assignment -name VHDL_FILE dist/itc108_2.pp.vhd
-
-	# set_global_assignment -name VHDL_FILE dist/itc108_2_1124.pp.vhd
-
-	# set_global_assignment -name VHDL_FILE dist/itc109_2.pp.vhd
-
-	# set_global_assignment -name VHDL_FILE dist/itc109_1.pp.vhd
-	# set_global_assignment -name QIP_FILE src/itc109_1/ip/digit_0.qip
-	# set_global_assignment -name MIF_FILE src/itc109_1/ip/digit_0.mif
-	# set_global_assignment -name QIP_FILE src/itc109_1/ip/digit_1.qip
-	# set_global_assignment -name MIF_FILE src/itc109_1/ip/digit_1.mif
-	# set_global_assignment -name QIP_FILE src/itc109_1/ip/digit_2.qip
-	# set_global_assignment -name MIF_FILE src/itc109_1/ip/digit_2.mif
-	# set_global_assignment -name QIP_FILE src/itc109_1/ip/digit_3.qip
-	# set_global_assignment -name MIF_FILE src/itc109_1/ip/digit_3.mif
-	# set_global_assignment -name QIP_FILE src/itc109_1/ip/digit_4.qip
-	# set_global_assignment -name MIF_FILE src/itc109_1/ip/digit_4.mif
-	# set_global_assignment -name QIP_FILE src/itc109_1/ip/digit_5.qip
-	# set_global_assignment -name MIF_FILE src/itc109_1/ip/digit_5.mif
-	# set_global_assignment -name QIP_FILE src/itc109_1/ip/digit_6.qip
-	# set_global_assignment -name MIF_FILE src/itc109_1/ip/digit_6.mif
-	# set_global_assignment -name QIP_FILE src/itc109_1/ip/digit_7.qip
-	# set_global_assignment -name MIF_FILE src/itc109_1/ip/digit_7.mif
-	# set_global_assignment -name QIP_FILE src/itc109_1/ip/digit_8.qip
-	# set_global_assignment -name MIF_FILE src/itc109_1/ip/digit_8.mif
-	# set_global_assignment -name QIP_FILE src/itc109_1/ip/digit_9.qip
-	# set_global_assignment -name MIF_FILE src/itc109_1/ip/digit_9.mif
-	# set_global_assignment -name QIP_FILE src/itc109_1/ip/sensor_bg.qip
-	# set_global_assignment -name MIF_FILE src/itc109_1/ip/sensor_bg.mif
-
-	set_global_assignment -name VHDL_FILE tests/HW/buz_test/F1_underline.vhd
-	set_global_assignment -name QIP_FILE tests/HW/buz_test/F1_underline.qip
-	set_global_assignment -name MIF_FILE tests/HW/buz_test/F1_underline.mif
-	set_global_assignment -name VHDL_FILE tests/HW/buz_test/underline.vhd
-
-	# set_global_assignment -name VHDL_FILE tests/itc111_1/itc111_1.vhd
-	# set_global_assignment -name VHDL_FILE tests/itc111_1/itc111_2.vhd
 	
 
 	## Components
-
+	set_global_assignment -name VHDL_FILE lib/lcd_mix.vhd
+	set_global_assignment -name VHDL_FILE lib/font/Font.vhd
+	set_global_assignment -name QIP_FILE lib/font/Font.qip
 	set_global_assignment -name VHDL_FILE lib/dht.vhd
 	set_global_assignment -name VHDL_FILE lib/dot.vhd
 	set_global_assignment -name VHDL_FILE lib/key.vhd
