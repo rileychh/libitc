@@ -221,7 +221,7 @@ begin
 			rising  => draw_start,
 			falling => draw_done
 		);
-	lcd_draw : entity work.gen_font(arch)
+	gen_font_inst : entity work.gen_font(arch)
 		port map(
 			clk              => clk,
 			rst_n            => rst_n,
