@@ -7,24 +7,26 @@ use work.itc_lcd.all;
 
 entity lcd_mix is
 	port (
-		clk, rst_n                                              : in std_logic;
-		x                                                       : in integer range -127 to 127;
-		y                                                       : in integer range -159 to 159;
-		font_start                                              : in std_logic;
-		font_busy                                               : out std_logic;
-		text_size                                               : in integer range 1 to 12;
-		text_data                                               : in string(1 to 12);
-		text_count                                              : out integer range 1 to 12;
-		addr                                                    : out l_addr_t;
-		text_color                                              : in l_px_t;
-		bg_color                                                : in l_px_t;
-		text_color_array                                        : in l_px_arr_t(1 to 12);
-		clear                                                   : in std_logic;
-		lcd_sclk, lcd_mosi, lcd_ss_n, lcd_dc, lcd_bl, lcd_rst_n : out std_logic;
-		con                                                     : in std_logic;
-
-		pic_addr : out l_addr_t;
-		pic_data : in l_px_t
+		-- system
+		clk, rst_n : in std_logic;
+		-- user
+		x                : in integer range -127 to 127;
+		y                : in integer range -159 to 159;
+		font_start       : in std_logic;
+		font_busy        : out std_logic;
+		text_size        : in integer range 1 to 12;
+		text_data        : in string(1 to 12);
+		text_count       : out integer range 1 to 12;
+		addr             : out l_addr_t;
+		text_color       : in l_px_t;
+		bg_color         : in l_px_t;
+		text_color_array : in l_px_arr_t(1 to 12);
+		clear            : in std_logic;
+		con              : in std_logic;
+		pic_addr         : out l_addr_t;
+		pic_data         : in l_px_t;
+		-- lcd
+		lcd_sclk, lcd_mosi, lcd_ss_n, lcd_dc, lcd_bl, lcd_rst_n : out std_logic
 	);
 end lcd_mix;
 
