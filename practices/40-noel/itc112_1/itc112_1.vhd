@@ -38,6 +38,10 @@ architecture arch of itc112_1 is
 	signal mode_t : mode;
 	type seg_mod is (xy_set, col_set);
 	signal seg_mod_t : seg_mod;
+	type tts_mode_t is (idle, send, stop, key_stop);
+	signal tts_mode : tts_mode_t;
+	signal tts_stop_mode : integer range 0 to 2;
+	signal key_stop_flag : std_logic;
 
 	--seg
 	signal seg_data : string(1 to 8);
@@ -85,7 +89,7 @@ architecture arch of itc112_1 is
 	-- 速度為
 	constant tts3_color : u8_arr_t(0 to 13) := (x"af", x"c5", x"a5", x"42", x"b2", x"be", x"b0", x"ca", x"a4", x"e8", x"b6", x"f4", x"ac", x"b0");
 	-- 級且移動方塊為
-	constant tts_pause2 : u8_arr_t(0 to 7) := (x"b4", x"fa", x"b8", x"d5", x"bc", x"c8", x"b0", x"b1");
+	constant tts_pause : u8_arr_t(0 to 7) := (x"b4", x"fa", x"b8", x"d5", x"bc", x"c8", x"b0", x"b1");
 	-- 測試暫停
 	constant tts_continue : u8_arr_t(0 to 7) := (x"b4", x"fa", x"b8", x"d5", x"c4", x"7e", x"c4", x"f2");
 	-- 測試繼續
@@ -99,9 +103,9 @@ architecture arch of itc112_1 is
 	-- 紅色
 	constant tts_blue : u8_arr_t(0 to 3) := (x"c2", x"c5", x"a6", x"e2");
 	-- 藍色
-	constant tts_pause1 : u8_arr_t(0 to 2) := (x"40", x"8f", x"00");
+	-- constant tts_pause1 : u8_arr_t(0 to 2) := (x"40", x"8f", x"00");
 	--(語音即時暫停)
-	constant tts_resume : u8_arr_t(0 to 2) := (x"40", x"8f", x"01");
+	-- constant tts_resume : u8_arr_t(0 to 2) := (x"40", x"8f", x"01");
 	--(語音即時取消暫停)
 
 	--timer
@@ -163,21 +167,38 @@ begin
 			pic_addr         => l_addr,
 			pic_data         => pic_data_o
 		);
-	tts_inst : entity work.tts(arch)
+	-- tts_inst : entity work.tts(arch)
+	-- 	generic map(
+	-- 		txt_len_max => 50
+	-- 	)
+	-- 	port map(
+	-- 		clk       => clk,
+	-- 		rst_n     => rst_n,
+	-- 		tts_scl   => tts_scl,
+	-- 		tts_sda   => tts_sda,
+	-- 		tts_mo    => tts_mo,
+	-- 		tts_rst_n => tts_rst_n,
+	-- 		ena       => tts_ena,
+	-- 		busy      => tts_busy,
+	-- 		txt       => tts_data,
+	-- 		txt_len   => tts_len
+	-- 	);
+	tts_stop_inst : entity work.tts_stop(arch)
 		generic map(
 			txt_len_max => 50
 		)
 		port map(
-			clk       => clk,
-			rst_n     => rst_n,
-			tts_scl   => tts_scl,
-			tts_sda   => tts_sda,
-			tts_mo    => tts_mo,
-			tts_rst_n => tts_rst_n,
-			ena       => tts_ena,
-			busy      => tts_busy,
-			txt       => tts_data,
-			txt_len   => tts_len
+			clk        => clk,
+			rst_n      => rst_n,
+			tts_scl    => tts_scl,
+			tts_sda    => tts_sda,
+			tts_mo     => tts_mo,
+			tts_rst_n  => tts_rst_n,
+			ena        => tts_ena,
+			busy       => tts_busy,
+			stop_speak => open,
+			txt        => tts_data,
+			txt_len    => tts_len
 		);
 	edge_inst_tts_busy : entity work.edge(arch)
 		port map(
@@ -274,6 +295,7 @@ begin
 	process (clk, rst_n)
 	begin
 		if rst_n = '0' then
+			key_stop_flag <= '0';
 			color_change_flag <= '0';
 			x_change_flag <= '0';
 			y_change_flag <= '0';
@@ -307,7 +329,6 @@ begin
 			stop_flag <= '0';
 		elsif rising_edge(clk) then
 			if key_pressed = '1' and sw(6 to 7) = "00" and key_data = 0 then -- mod00
-				tts_count <= 9;
 				l_x <= l_x_m1;
 				l_y <= l_y_m1;
 				stop_flag <= '0';
@@ -315,6 +336,7 @@ begin
 				col_setup <= '0';
 				lcd_clear <= '1';
 				mode_t <= mod0;
+				tts_mode <= stop;
 			elsif key_pressed = '1' and sw(6 to 7) = "01" then -- mod01
 				if key_data = 2 then
 					if x_set_flag = '0' then
@@ -346,7 +368,7 @@ begin
 				col_setup <= '0';
 				lcd_count <= 0;
 				mode_t <= mod2;
-				tts_count <= 9;
+				tts_mode <= stop;
 			elsif key_pressed = '1' and sw(6 to 7) = "11" and key_data = 0 then -- mod11
 				stop_flag <= '0';
 				tts_count <= 0;
@@ -354,6 +376,7 @@ begin
 				lcd_clear <= '1';
 				mode_t <= mod0;
 				mix_mod <= '1';
+				tts_mode <= idle;
 			end if;
 			case mode_t is
 				when res => --rst_n
@@ -372,6 +395,7 @@ begin
 					seg_dot <= "00000000";
 				when mod0 =>
 					if key_pressed = '1' and key_data = 1 then -- start/pause
+						key_stop_flag <= '1';
 						stop_flag <= not stop_flag;
 					end if;
 					case test_speed is -- speed mux
@@ -421,100 +445,130 @@ begin
 							end if;
 						end if;
 					end if;
-					-- if mix_mod = '1' then
-					case tts_count is
-						when 0 =>
-							tts_ena <= '1';
-							tts_data(0 to 16) <= tts_start;
-							tts_len <= 17;
-							if tts_busy = '1' then
-								tts_ena <= '0';
-								tts_count <= 1;
-							end if;
-						when 1 =>
-							if tts_done = '1' then
-								tts_ena <= '1';
-								tts_data(0 to 39) <= tts2_1 & to_big(l_x_m1) & to_big(l_y_m1) & tts2_2;
-								tts_len <= 40;
-								tts_count <= 2;
-							end if;
-						when 2 =>
-							if tts_busy = '1' then
-								tts_ena <= '0';
-								tts_count <= 3;
-							end if;
-						when 3 =>
-							if tts_done = '1' then
-								tts_ena <= '1';
-								if flash_mod = '0' then
-									if col_mod = 0 then
-										tts_data(0 to 43) <= tts3_mod & tts_normal & tts3_speed & to_big(test_speed) & tts3_color & tts_green;
-									elsif col_mod = 1 then
-										tts_data(0 to 43) <= tts3_mod & tts_normal & tts3_speed & to_big(test_speed) & tts3_color & tts_red;
-									elsif col_mod = 2 then
-										tts_data(0 to 43) <= tts3_mod & tts_normal & tts3_speed & to_big(test_speed) & tts3_color & tts_blue;
-									end if;
-								else
-									if col_mod = 0 then
-										tts_data(0 to 43) <= tts3_mod & tts_flash & tts3_speed & to_big(test_speed) & tts3_color & tts_green;
-									elsif col_mod = 1 then
-										tts_data(0 to 43) <= tts3_mod & tts_flash & tts3_speed & to_big(test_speed) & tts3_color & tts_red;
-									elsif col_mod = 2 then
-										tts_data(0 to 43) <= tts3_mod & tts_flash & tts3_speed & to_big(test_speed) & tts3_color & tts_blue;
-									end if;
-								end if;
-								tts_len <= 44;
-								tts_count <= 4;
-							elsif stop_flag = '1' then
-								tts_count <= 4;
-							end if;
-						when 4 =>
-							if tts_busy = '1' then
-								tts_ena <= '0';
-								if stop_flag = '0' then
-									tts_count <= 3;
-								else
-									tts_count <= 5;
-									tts_len <= 3;
-									tts_data(0 to 2) <= tts_pause1; --(即時暫停)
-								end if;
-							end if;
-						when 5 =>
-							tts_ena <= '1';
+					if mix_mod = '1' then
 
-							tts_count <= 6;
-						when 6 =>
-							if tts_busy = '1' then
+					end if;
+
+					case tts_mode is
+						when idle =>
+							seg_data <= "00000000";
+							if mix_mod = '1' and tts_busy = '0' then
+								tts_mode <= send;
 								tts_ena <= '0';
-								tts_count <= 7;
 							end if;
-						when 7 =>
+						when send =>
+							seg_data <= "        ";
+							if stop_flag = '1' then
+								tts_data(0 to 1) <= tts_instant_pause;
+								tts_len <= 2;
+								tts_ena <= '1';
+								-- tts_mode <= key_stop;
+							else
+								tts_data(0 to 1) <= tts_instant_resume;
+								tts_len <= 2;
+								tts_ena <= '1';
+								case tts_count is
+									when 0 =>
+										tts_data(0 to 16) <= tts_start;
+										tts_len <= 17;
+									when 1 =>
+										tts_data(0 to 39) <= tts2_1 & to_big(l_x_m1) & to_big(l_y_m1) & tts2_2;
+										tts_len <= 40;
+									when 2 =>
+										if flash_mod = '0' then
+											if col_mod = 0 then
+												tts_data(0 to 43) <= tts3_mod & tts_normal & tts3_speed & to_big(test_speed) & tts3_color & tts_green;
+											elsif col_mod = 1 then
+												tts_data(0 to 43) <= tts3_mod & tts_normal & tts3_speed & to_big(test_speed) & tts3_color & tts_red;
+											elsif col_mod = 2 then
+												tts_data(0 to 43) <= tts3_mod & tts_normal & tts3_speed & to_big(test_speed) & tts3_color & tts_blue;
+											end if;
+											tts_len <= 44;
+										elsif flash_mod = '1' then
+											if col_mod = 0 then
+												tts_data(0 to 43) <= tts3_mod & tts_flash & tts3_speed & to_big(test_speed) & tts3_color & tts_green;
+											elsif col_mod = 1 then
+												tts_data(0 to 43) <= tts3_mod & tts_flash & tts3_speed & to_big(test_speed) & tts3_color & tts_red;
+											elsif col_mod = 2 then
+												tts_data(0 to 43) <= tts3_mod & tts_flash & tts3_speed & to_big(test_speed) & tts3_color & tts_blue;
+											end if;
+											tts_len <= 44;
+										end if;
+									when 3 =>
+										tts_data(0 to 1) <= tts_instant_resume;
+										tts_len <= 2;
+										tts_ena <= '1';
+										tts_mode <= stop;
+									when 4 =>
+										tts_data(0 to 7) <= tts_pause;
+										tts_len <= 8;
+										tts_ena <= '1';
+										tts_mode <= key_stop;
+									when 5 =>
+									when 6 =>
+									when 7 =>
+									when 8 =>
+									when 9 =>
+									when 10 =>
+									when others =>
+								end case;
+							end if;
+							tts_ena <= '1';
 							if tts_done = '1' then
 								tts_ena <= '1';
-								tts_data(0 to 7) <= tts_pause2;
-								tts_len <= 8;
-								tts_count <= 8;
+								if tts_count < 2 then
+									tts_count <= tts_count + 1;
+									-- tts_mode <= idle;
+								elsif tts_count = 2 then
+									tts_count <= tts_count;
+									-- tts_mode <= idle;
+								end if;
+								tts_mode <= stop;
 							end if;
-						when 8 =>
-							if tts_busy = '1' then
-								tts_ena <= '0';
+						when stop =>
+							key_stop_flag <= '0';
+							seg_data <= "11111111";
+							if tts_busy = '0' then
+								tts_ena <= '1';
+								tts_mode <= idle;
 							end if;
-							if key_pressed = '1' and key_data = 1 then
-								tts_count <= 9;
-							end if;
-						when 9 =>
-							tts_data(0 to 7) <= tts_continue;
-							tts_len <= 8;
-							tts_ena <= '1';
-							tts_count <= 10;
-						when 10 =>
-							if tts_busy = '1' then
-								tts_ena <= '0';
+							-- if stop_flag = '1' then
+							-- 	tts_data(0 to 1) <= tts_instant_resume;
+							-- 	tts_len <= 2;
+							-- else
+							-- tts_ena <= '0';
+							-- if tts_count = 2 then
+							-- 	tts_count <= tts_count;
+							-- tts_mode <= idle;
+							-- elsif tts_count < 2 then
+							-- 	tts_count <= tts_count + 1;
+							-- 	tts_mode <= idle;
+							-- else
+							-- 	tts_count <= tts_count;
+							-- 	tts_mode <= idle;
+							-- end if;
+							-- elsif stop_flag = '0' and tts_count = 2 then
+							-- 	tts_count <= tts_count;
+							-- 	tts_mode <= idle;
+							-- elsif stop_flag = '0' and tts_count < 2 then
+							-- 	tts_count <= tts_count + 1;
+							-- 	tts_mode <= idle;
+							-- end if;
+						when key_stop =>
+							seg_data <= "22222222";
+							tts_ena <= '0';
+							-- if tts_busy = '0' then
+
+							if tts_count = 4 then
 								tts_count <= 3;
+								tts_mode <= send;
+							else
+								tts_count <= 4;
+								tts_mode <= send;
 							end if;
-						when others =>
+							-- end if;
+						when others => null;
 					end case;
-					-- end if;
 				when mod1 =>
 					lcd_con <= '0';
 					lcd_clear <= '1';
