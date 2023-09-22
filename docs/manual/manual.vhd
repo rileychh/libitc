@@ -340,6 +340,7 @@ begin
 		-- 軟體介面設計:
 		-- 點開 Qt Designer => 畫圖 => 存檔為 "name".ui
 		-- 於所儲存的資料夾上方輸入 cmd 呼叫終端機 
+		-- 先輸入 poetry shell
 		-- 於終端機輸入 pyuic5 -x "name".ui -o "name".py
 		-- 
 		-- tts參考狀態機
