@@ -28,14 +28,14 @@ class Main(QMainWindow, Ui_MainWindow):
     def onNumberClick(self, num: int):
         print(f"Clicked {num}")
         self.value += str(num)
-        self.label_inputnumber.setText("輸入密碼")
+        self.label_inputnumber.setText("輸入數字")
         self.label_output.setText(self.value)
 
     def onButtonClick(self, cmd: str):
         if cmd == "clear":
             self.value = ""
             self.label_output.setText(self.value)
-            self.label_inputnumber.setText("輸入密碼")
+            self.label_inputnumber.setText("輸入數字")
 
         if cmd == "send" and self.value != "":
             self.value += "\r"
@@ -45,7 +45,7 @@ class Main(QMainWindow, Ui_MainWindow):
             self.label_output.setText(self.value)
         if cmd == "back":
             self.value = self.value[:-1]
-            self.label_inputnumber.setText("輸入密碼")
+            self.label_inputnumber.setText("輸入數字")
             self.label_output.setText(self.value)
         print(f"Clicked {cmd}")
 

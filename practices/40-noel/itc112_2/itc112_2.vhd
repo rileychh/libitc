@@ -39,18 +39,28 @@ end itc112_2;
 
 architecture arch of itc112_2 is
 	-- system
-	signal inter_rst : std_logic;
-	signal count : integer range 0 to 50;
-	signal pass : u8_arr_t(0 to 3);
+	type mode_t is (res, idle, produce, take_store, bonus);
+	signal mode : mode_t;
+	type produce_mode_t is (sun, water, fan, all_done);
+	signal produce_mode : produce_mode_t;
+
+	signal inter_rst : std_logic; --keypad reset
+	signal count : integer range 0 to 50; --pass count
+	signal pass : u8_arr_t(0 to 3); --pass
+	signal can_use_energy, store_energy : integer; -- energy
+	signal buz_flag : std_logic; -- buz
+	signal value, sun_value, water_value, fan_value : integer range 0 to 9; --machine amount
+	signal sun_flag, water_flag, fan_flag : std_logic; -- setup flag
+
 	-- key
 	signal pressed, key_pressed : std_logic;
 	signal key_data : i4_t;
 	-- dot
 	signal data_r, data_g : u8r_arr_t(0 to 7);
 	-- lcd
-	signal l_x : integer range -127 to 127;
-	signal l_y : integer range -159 to 159;
-	signal font_start, font_busy, font_done : std_logic;
+	signal x : integer range -127 to 127;
+	signal y : integer range -159 to 159;
+	signal font_start, font_busy, draw_done : std_logic;
 	signal text_data : string(1 to 12);
 	signal text_color : l_px_arr_t(1 to 12);
 	signal lcd_clear : std_logic;
@@ -58,6 +68,7 @@ architecture arch of itc112_2 is
 	signal lcd_con : std_logic;
 	signal pic_addr : l_addr_t;
 	signal pic_data : l_px_t;
+	signal lcd_count : integer range 0 to 5;
 	-- seg
 	signal seg_data : string(1 to 8);
 	signal seg_dot : u8r_t;
@@ -70,6 +81,11 @@ architecture arch of itc112_2 is
 	signal tx_data, rx_data : u8_t := x"00";
 	signal rx_start, rx_done : std_logic;
 	signal tx_ena, tx_busy, rx_busy, rx_err : std_logic;
+	-- timer
+	signal timer_ena : std_logic;
+	signal load, msec : i32_t;
+	-- lcd text color
+	constant all_green : l_px_arr_t(1 to 12) := (green, green, green, green, green, green, green, green, green, green, green, green);
 begin
 	key_inst : entity work.key(arch)
 		port map(
@@ -97,8 +113,8 @@ begin
 		port map(
 			clk              => clk,
 			rst_n            => rst_n,
-			x                => l_x,
-			y                => l_y,
+			x                => x,
+			y                => y,
 			font_start       => font_start,
 			font_busy        => font_busy,
 			text_size        => 1,
@@ -131,13 +147,6 @@ begin
 			data    => seg_data,
 			dot     => seg_dot
 		);
-	-- rgb_inst : entity work.rgb(arch)
-	-- 	port map(
-	-- 		clk   => clk,
-	-- 		rst_n => rst_n,
-	-- 		rgb   => rgb,
-	-- 		color => rgb_color
-	-- 	);
 	mot_inst : entity work.mot(arch)
 		port map(
 			clk     => clk,
@@ -177,7 +186,7 @@ begin
 			rst_n   => rst_n,
 			sig_in  => font_busy,
 			rising  => open,
-			falling => font_done
+			falling => draw_done
 		);
 	edge_uart_rx_inst : entity work.edge(arch)
 		port map(
@@ -187,32 +196,225 @@ begin
 			rising  => rx_start,
 			falling => rx_done
 		);
-
-	inter_rst <= '0' when (key_data = 3) and (key_pressed = '1') else '1';
+	timer_inst : entity work.timer(arch)
+		port map(
+			clk   => clk,
+			rst_n => rst_n,
+			ena   => timer_ena,
+			load  => load,
+			msec  => msec
+		);
+	inter_rst <= '0' when (key_data = 7) and (key_pressed = '1') else '1';
 	process (clk, rst_n)
 	begin
 		if rst_n = '0' or inter_rst = '0' then
-			seg_data <= "        ";
-			seg_dot <= "00000000";
-			bg_color <= white;
-			font_start <= '0';
-			lcd_clear <= '1';
-			rgb <= "100";
-			tx_ena <= '0';
+			lcd_count <= 0;
+			buz_flag <= '0';
+			buz <= '0';
+			store_energy <= 1000;
+			can_use_energy <= 0;
+			led_g <= '0';
+			led_r <= '0';
+			led_y <= '0';
+			mode <= res;
 		elsif rising_edge(clk) then
-			if rx_done = '1' then --接收軟體資料
-				if to_integer(rx_data) = 13 then
-					tx_ena <= '0';
-					count <= 0;
-					-- lcd_count <= 0;
-					-- exchange <= chack;
-				else
-					tx_ena <= '0';
-					pass(count) <= rx_data;
-					count <= count + 1;
-				end if;
-			end if;
-			seg_data <= "    " & to_string(to_integer(pass(0)) - 48, 9, 10, 1) & to_string(to_integer(pass(1)) - 48, 9, 10, 1) & to_string(to_integer(pass(2)) - 48, 9, 10, 1) & to_string(to_integer(pass(3)) - 48, 9, 10, 1);
+			case mode is
+				when res =>
+					lcd_con <= '0';
+					lcd_clear <= '1';
+					bg_color <= white;
+					if y < y'high then
+						if font_busy = '0' then
+							font_start <= '1';
+						end if;
+						if draw_done = '1' then
+							font_start <= '0';
+							y <= y + 1;
+						end if;
+					else
+						if y >= y'high then
+							lcd_clear <= '1';
+							text_color <= all_green;
+						end if;
+					end if;
+					seg_data <= "        ";
+					timer_ena <= '1';
+					load <= 0;
+					if msec <= 500 then
+						rgb <= "100";
+					elsif msec <= 1000 then
+						rgb <= "000";
+					elsif msec <= 1500 then
+						rgb <= "010";
+					elsif msec <= 2000 then
+						rgb <= "000";
+					elsif msec <= 2500 then
+						rgb <= "001";
+					elsif msec <= 3000 then
+						rgb <= "000";
+					else
+						mode <= idle;
+					end if;
+				when idle =>
+					timer_ena <= '0';
+					if key_pressed = '1' and key_data = 14 then
+						seg_data <= to_string(can_use_energy, 9999, 10, 4) & "    ";
+						if sw(0 to 2) = "100" then
+							sun_flag <= '0';
+							water_flag <= '0';
+							fan_flag <= '0';
+							lcd_count <= 0;
+							value <= 0;
+							buz_flag <= '1';
+							produce_mode <= sun;
+							mode <= produce;
+						elsif sw(0 to 2) = "010" then
+							mode <= take_store;
+						elsif sw(0 to 2) = "001" then
+							mode <= bonus;
+						end if;
+					else
+						if sw(0 to 2) = "100" then
+							seg_data <= to_string(can_use_energy, 9999, 10, 4) & "prod";
+						elsif sw(0 to 2) = "010" then
+							seg_data <= to_string(can_use_energy, 9999, 10, 4) & "take";
+						elsif sw(0 to 2) = "001" then
+							seg_data <= to_string(can_use_energy, 9999, 10, 4) & "bonu";
+						else
+							seg_data <= to_string(can_use_energy, 9999, 10, 4) & "    ";
+						end if;
+					end if;
+				when produce =>
+					if buz_flag = '1' then
+						if msec <= 1000 then
+							timer_ena <= '1';
+							buz <= '1';
+						else
+							buz_flag <= '0';
+							timer_ena <= '0';
+							buz <= '0';
+						end if;
+					else
+						case produce_mode is
+							when sun =>
+								if key_pressed = '1' and key_data = 14 then
+									sun_flag <= '1';
+									sun_value <= value;
+									value <= 0;
+									produce_mode <= water;
+								end if;
+							when water =>
+								if key_pressed = '1' and key_data = 14 then
+									water_flag <= '1';
+									water_value <= value;
+									value <= 0;
+									produce_mode <= fan;
+								end if;
+							when fan =>
+								if key_pressed = '1' and key_data = 14 then
+									fan_flag <= '1';
+									fan_value <= value;
+									value <= 0;
+									produce_mode <= all_done;
+								end if;
+							when all_done =>
+						end case;
+						if key_pressed = '1' and key_data /= 14 then
+							if key_data = 8 then
+								value <= 1;
+							elsif key_data = 9 then
+								value <= 2;
+							elsif key_data = 10 then
+								value <= 3;
+							elsif key_data = 4 then
+								value <= 4;
+							elsif key_data = 5 then
+								value <= 5;
+							elsif key_data = 6 then
+								value <= 6;
+							elsif key_data = 0 then
+								value <= 7;
+							elsif key_data = 1 then
+								value <= 8;
+							elsif key_data = 2 then
+								value <= 9;
+							elsif key_data = 3 then
+								value <= 0;
+							end if;
+						end if;
+					end if;
+					case lcd_count is
+						when 0 => -- white
+							x <= 5;
+							lcd_con <= '0';
+							lcd_clear <= '1';
+							bg_color <= white;
+							if y < y'high then
+								if font_busy = '0' then
+									font_start <= '1';
+								end if;
+								if draw_done = '1' then
+									font_start <= '0';
+									y <= y + 1;
+								end if;
+							else
+								if y >= y'high then
+									y <= 10;
+									lcd_clear <= '1';
+									text_color <= all_green;
+									lcd_count <= 1;
+								end if;
+							end if;
+						when 1 =>
+							bg_color <= white;
+							lcd_clear <= '0';
+							if y = 10 then
+								if sun_flag = '1' then
+									text_data <= to_string(sun_value, sun_value'high, 10, 1) & "           ";
+								else
+									text_data <= "            ";
+								end if;
+								font_start <= '1';
+							end if;
+							if draw_done = '1' then
+								y <= 30;
+								font_start <= '0';
+								lcd_count <= 2;
+							end if;
+						when 2 =>
+							if y = 30 then
+								if water_flag = '1' then
+									text_data <= to_string(water_value, water_value'high, 10, 1) & "           ";
+								else
+									text_data <= "            ";
+								end if;
+								font_start <= '1';
+							end if;
+							if draw_done = '1' then
+								y <= 50;
+								font_start <= '0';
+								lcd_count <= 3;
+							end if;
+						when 3 =>
+							if y = 50 then
+								if fan_flag = '1' then
+									text_data <= to_string(fan_value, fan_value'high, 10, 1) & "           ";
+								else
+									text_data <= "            ";
+								end if;
+								font_start <= '1';
+							end if;
+							if draw_done = '1' then
+								y <= 10;
+								font_start <= '0';
+								lcd_count <= 1;
+							end if;
+						when 4 =>
+						when 5 =>
+					end case;
+				when take_store =>
+				when bonus =>
+			end case;
 		end if;
 	end process;
 
