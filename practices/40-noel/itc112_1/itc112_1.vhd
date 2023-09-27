@@ -341,10 +341,11 @@ begin
 				if key_data = 2 then
 					if x_set_flag = '0' then
 						l_x_m2 <= l_x_m1;
-					elsif y_set_flag = '0' then
-						l_y_m2 <= l_y_m1;
 					elsif x_set_flag = '1' then
 						x_set_flag <= '0';
+					end if;
+					if y_set_flag = '0' then
+						l_y_m2 <= l_y_m1;
 					elsif y_set_flag = '1' then
 						y_set_flag <= '0';
 					end if;
@@ -370,6 +371,8 @@ begin
 				mode_t <= mod2;
 				tts_mode <= stop;
 			elsif key_pressed = '1' and sw(6 to 7) = "11" and key_data = 0 then -- mod11
+				l_x <= l_x_m1;
+				l_y <= l_y_m1;
 				stop_flag <= '0';
 				tts_count <= 0;
 				lcd_con <= '0';
@@ -576,7 +579,7 @@ begin
 						when xy_set =>
 							seg_dot <= "10001000";
 							seg_data <= "x" & to_string(l_x_m2, l_x_m2'high, 10, 3) & "y" & to_string(l_y_m2, l_y_m2'high, 10, 3);
-							if xy_set_mod = '0' then
+							if xy_set_mod = '0' and x_set_flag = '0' then
 								if key_pressed = '1' and key_data = 4 then
 									x_change_flag <= '1';
 									if l_x_m2 /= 113 then
@@ -596,7 +599,7 @@ begin
 									xy_set_mod <= '1';
 									l_x_m1 <= l_x_m2;
 								end if;
-							else
+							elsif xy_set_mod = '1' and y_set_flag = '0' then
 								if key_pressed = '1' and key_data = 4 then
 									y_change_flag <= '1';
 									if l_y_m2 /= 145 then
