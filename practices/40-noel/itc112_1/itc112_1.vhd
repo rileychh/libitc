@@ -21,7 +21,10 @@ entity itc112_1 is
 		--tts
 		tts_scl, tts_sda : inout std_logic;
 		tts_mo           : in unsigned(2 downto 0);
-		tts_rst_n        : out std_logic
+		tts_rst_n        : out std_logic;
+		-- mot
+		mot_ch  : out u2r_t;
+		mot_ena : out std_logic
 	);
 end itc112_1;
 
@@ -63,6 +66,7 @@ architecture arch of itc112_1 is
 	signal lcd_con : std_logic;
 	signal pic_addr, l_addr : l_addr_t;
 	signal pic_data_o : l_px_t;
+	signal p_data_i : std_logic_vector(23 downto 0);
 	signal lcd_count : integer range 0 to 4;
 	signal text_color : l_px_arr_t(1 to 12);
 	signal draw_done : std_logic;
@@ -115,7 +119,19 @@ architecture arch of itc112_1 is
 	--timer
 	signal timer_ena : std_logic;
 	signal timer_load, timer_msec : i32_t;
+
+	signal dir : std_logic;
+	signal speed : integer range 0 to 100;
 begin
+	mot_inst : entity work.mot(arch)
+		port map(
+			clk     => clk,
+			rst_n   => rst_n,
+			mot_ch  => mot_ch,
+			mot_ena => mot_ena,
+			dir     => dir,
+			speed   => speed
+		);
 	seg_inst : entity work.seg(arch)
 		generic map(
 			common_anode => '1'
@@ -296,6 +312,13 @@ begin
 			rising  => open,
 			falling => draw_done
 		);
+	tri3_inst : entity work.tri3(syn)
+		port map(
+			address => std_logic_vector(to_unsigned(pic_addr, 8)),
+			clock   => clk,
+			q       => p_data_i
+		);
+	pic_data <= unsigned(pic_data_i);
 	process (clk, rst_n)
 	begin
 		if rst_n = '0' then
