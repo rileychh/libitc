@@ -9,7 +9,8 @@ use work.itc.all;
 
 entity pwm is
 	generic (
-		pwm_freq : integer := 100_000 -- PWM switching frequency in Hz
+		pwm_freq : integer := 500 -- PWM switching frequency in Hz 
+		-- !!PWM Frequency 5KHz Maximum!!
 	);
 
 	port (
