@@ -75,7 +75,7 @@ package itc_lcd is
 
 	function l_paste_txt(l_addr : integer; 
                        l_data : l_px_t; txt : string;
-                       txt_coord : l_coord_t) return l_px_t;
+                       txt_coord : l_coord_t; color : l_px_t) return l_px_t;
 
 	-- l_rotate: returns the rotated address of a picture
 	-- addr: the original address
@@ -352,7 +352,7 @@ package body itc_lcd is
 
 	function l_paste_txt(l_addr : integer; 
 						 l_data : l_px_t; txt : string;
-						 txt_coord : l_coord_t) return l_px_t is
+						 txt_coord : l_coord_t;color : l_px_t) return l_px_t is
 		constant txt_width : integer := txt'length * 5;
 		constant txt_height : integer := 7;
 		constant l_coord : l_coord_t := to_coord(l_addr);
@@ -365,7 +365,7 @@ package body itc_lcd is
 		if txt_coord(0) <= l_coord(0) and l_coord(0) <= txt_coord_end(0) and  -- check row
 		   txt_coord(1) <= l_coord(1) and l_coord(1) <= txt_coord_end(1) then -- check column
 			if l_font(character'pos(txt(char_cnt)))(char_row)(char_col) = '1' then
-				return black;
+				return color;
 			else
 				return white;
 			end if;
