@@ -23,8 +23,8 @@ entity lcd_mix is
 		text_color_array : in l_px_arr_t(1 to 12);
 		clear            : in std_logic;
 		con              : in std_logic;
-		-- pic_addr         : out l_addr_t;
-		pic_data : in l_px_t;
+		pic_addr         : out l_addr_t;
+		pic_data         : in l_px_t;
 		-- lcd
 		lcd_sclk, lcd_mosi, lcd_ss_n, lcd_dc, lcd_bl, lcd_rst_n : out std_logic
 	);
@@ -191,6 +191,7 @@ begin
 					else
 						wr_ena <= '1';
 					end if;
+
 				when clear_screen =>
 					font_busy <= '1';
 					if addr = addr'high then
