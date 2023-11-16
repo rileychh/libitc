@@ -56,9 +56,9 @@ architecture arch of itc112_1 is
 	--lcd
 	signal x, l_x, l_x_m1, l_x_m2 : integer range -127 to 127;
 	signal y, l_y, l_y_m1, l_y_m2 : integer range -159 to 159;
-	signal col_setup : std_logic; -- set sucess
+	signal col_setup : std_logic; -- set success
 	signal col_mod, col_mod_m, col_mod_m_lcd : integer range 0 to 2; -- 0 = green, 1 = red, 2 = blue
-	signal pic_col : l_px_t; -- can set pic clolor 
+	signal pic_col : l_px_t; -- can set pic color 
 	signal font_start, font_busy : std_logic;
 	signal text_data : string(1 to 12);
 	signal bg_color : l_px_t;
@@ -172,7 +172,7 @@ begin
 			text_size        => 1,
 			text_data        => text_data,
 			text_count       => open,
-			addr             => open,
+			addr             => l_addr,
 			text_color       => green,
 			bg_color         => bg_color,
 			text_color_array => text_color,
@@ -184,7 +184,6 @@ begin
 			lcd_bl           => lcd_bl,
 			lcd_rst_n        => lcd_rst_n,
 			con              => lcd_con,
-			pic_addr         => l_addr,
 			pic_data         => pic_data_o
 		);
 	-- tts_inst : entity work.tts(arch)
@@ -312,13 +311,6 @@ begin
 			rising  => open,
 			falling => draw_done
 		);
-	tri3_inst : entity work.tri3(syn)
-		port map(
-			address => std_logic_vector(to_unsigned(pic_addr, 8)),
-			clock   => clk,
-			q       => p_data_i
-		);
-	pic_data <= unsigned(pic_data_i);
 	process (clk, rst_n)
 	begin
 		if rst_n = '0' then
@@ -454,8 +446,8 @@ begin
 					seg_data <= "        ";
 					seg_dot <= "00000000";
 					lcd_clear <= '1';
-					lcd_con <= '1';
-					pic_data_o <= to_data(l_paste(l_addr, white, pic_col, (l_y, l_x), 16, 16));
+					lcd_con <= '0';
+					bg_color <= to_data(l_paste(l_addr, white, pic_col, (l_y, l_x), 16, 16));
 					pic_addr <= to_addr(l_paste(l_addr, white, pic_col, (l_y, l_x), 16, 16));
 					if flash_mod = '1' and clk_5hz = '1' then --flash
 						lcd_con <= '0';
@@ -683,16 +675,11 @@ begin
 						when 3 => test_clk <= clk_3hz;
 						when others => null;
 					end case;
-					-- seg_data <= "        ";
-					if tts_ena = '1' then
-						seg_data <= "       1";
-					else
-						seg_data <= "       0";
-					end if;
+					seg_data <= "        ";
 					seg_dot <= "00000000";
 					lcd_clear <= '1';
-					lcd_con <= '1';
-					pic_data_o <= to_data(l_paste(l_addr, white, pic_col, (l_y, l_x), 16, 16));
+					lcd_con <= '0';
+					bg_color <= to_data(l_paste(l_addr, white, pic_col, (l_y, l_x), 16, 16));
 					pic_addr <= to_addr(l_paste(l_addr, white, pic_col, (l_y, l_x), 16, 16));
 					if flash_mod = '1' and clk_5hz = '1' then --flash
 						lcd_con <= '0';
@@ -812,7 +799,6 @@ begin
 								tts_mode <= stop;
 							end if;
 						when stop =>
-							-- if tts_busy = '0' then
 							if tts_count = 0 and stop_flag = '0' and reset_flag = '0' then -- tts1 end go to tts2
 								tts_count <= 1;
 							elsif tts_count = 1 and stop_flag = '0' and reset_flag = '0' then -- tts2 end go to tts3
@@ -842,7 +828,6 @@ begin
 							end if;
 							tts_ena <= '0';
 							tts_mode <= idle;
-							-- end if;
 					end case;
 			end case;
 		end if;
