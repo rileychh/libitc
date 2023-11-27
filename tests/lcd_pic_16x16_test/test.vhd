@@ -57,7 +57,7 @@ begin
 			text_size        => 1,
 			text_data        => "text_data   ",
 			text_count       => open,
-			addr             => open,
+			addr             => l_addr,
 			text_color       => green,
 			bg_color         => white,
 			text_color_array => (green, green, green, green, green, green, green, green, green, green, green, green),
@@ -69,7 +69,6 @@ begin
 			lcd_bl           => lcd_bl,
 			lcd_rst_n        => lcd_rst_n,
 			con              => '1',
-			pic_addr         => l_addr,
 			pic_data         => pic_data_o
 		);
 
