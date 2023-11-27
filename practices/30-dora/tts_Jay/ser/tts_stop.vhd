@@ -49,7 +49,7 @@ begin
 
 	i2c_inst : entity work.i2c(arch)
 		generic map(
-			bus_freq => 100_000
+			bus_freq => 1_000
 		)
 		port map(
 			clk      => clk,
