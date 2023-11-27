@@ -35,6 +35,9 @@ begin
 		);
 
 	seg_inst : entity work.seg(arch)
+		generic map(
+			common_anode => '1'
+		)
 		port map(
 			clk     => clk,
 			rst_n   => rst_n,
