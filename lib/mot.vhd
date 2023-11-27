@@ -40,7 +40,7 @@ begin
 
 	pwm_inst : entity work.pwm(arch)
 		generic map(
-			pwm_freq => 100 --PWM Frequency 5KHz Maximum
+			pwm_freq => 1000 --PWM Frequency 5KHz Maximum
 		)
 		port map(
 			clk     => clk,
